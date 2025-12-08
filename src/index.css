@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: #a1c798;
+}
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Google Fonts Custom Classes */
+.dancing-script { font-family: 'Dancing Script', cursive; }
+.pacifico { font-family: 'Pacifico', cursive; }
+.great-vibes { font-family: 'Great Vibes', cursive; }
+.satisfy { font-family: 'Satisfy', cursive; }
+.amatic-sc { font-family: 'Amatic SC', cursive; }
+.indie-flower { font-family: 'Indie Flower', cursive; }
+.caveat { font-family: 'Caveat', cursive; }
+.courgette { font-family: 'Courgette', cursive; }
+.cookie { font-family: 'Cookie', cursive; }
+.allura { font-family: 'Allura', cursive; }
+.kaushan-script { font-family: 'Kaushan Script', cursive; }
+.lobster { font-family: 'Lobster', cursive; }
+.righteous { font-family: 'Righteous', cursive; }
+.permanent-marker { font-family: 'Permanent Marker', cursive; }
+.shadows-into-light { font-family: 'Shadows Into Light', cursive; }
+.pathway-gothic-one { font-family: 'Pathway Gothic One', sans-serif; }
+.abril-fatface { font-family: 'Abril Fatface', cursive; }
+.playfair-display { font-family: 'Playfair Display', serif; }
+.cinzel { font-family: 'Cinzel', serif; }
