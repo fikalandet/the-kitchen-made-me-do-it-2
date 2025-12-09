@@ -18,6 +18,7 @@ export interface HeroCardData {
     bold?: boolean;
     textColor?: string;
     backgroundColor?: string;
+    backgroundOpacity?: number;
     lineHeight?: string;
     textAlign?: 'left' | 'center' | 'right';
   };
@@ -27,10 +28,13 @@ export interface HeroCardData {
     bold?: boolean;
     textColor?: string;
     backgroundColor?: string;
+    backgroundOpacity?: number;
     lineHeight?: string;
     textAlign?: 'left' | 'center' | 'right';
   };
-  position?: 'left' | 'center' | 'right';
+  horizontalPosition?: 'left' | 'center' | 'right';
+  verticalPosition?: 'top' | 'center' | 'bottom';
+  headingTextSpacing?: number;
   ctaLabel?: string;
   ctaLinkType?: 'internal' | 'external';
   ctaUrl?: string;
@@ -39,6 +43,7 @@ export interface HeroCardData {
     fontSize?: string;
     textColor?: string;
     backgroundColor?: string;
+    backgroundOpacity?: number;
     hoverBackgroundColor?: string;
     borderRadius?: string;
   };

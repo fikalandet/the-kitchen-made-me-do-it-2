@@ -6,6 +6,7 @@ import { HeroSettings, HeroCardData } from './HeroEditor';
 import CollapsibleCard from './CollapsibleCard';
 import HeroCardText from './HeroCardText';
 import HeroCardButton from './HeroCardButton';
+import { colors } from '../../../theme/tokens';
 
 interface HeroCardsProps {
   settings: HeroSettings;
@@ -21,6 +22,8 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
   const [uploadingCardId, setUploadingCardId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (totalCards <= 0) return;
+
     const currentCardCount = cards.length;
     if (currentCardCount < totalCards) {
       const newCards = [...cards];
@@ -35,7 +38,7 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
         onCardSelect(trimmedCards[0]?.id || '');
       }
     }
-  }, [totalCards]);
+  }, [totalCards, settings.cards?.length]);
 
   const createNewCard = (): HeroCardData => {
     return {
@@ -51,6 +54,7 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
         bold: true,
         textColor: '#000000',
         backgroundColor: 'transparent',
+        backgroundOpacity: 100,
         lineHeight: '1.5',
         textAlign: 'left'
       },
@@ -60,10 +64,13 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
         bold: false,
         textColor: '#000000',
         backgroundColor: 'transparent',
+        backgroundOpacity: 100,
         lineHeight: '1.5',
         textAlign: 'left'
       },
-      position: 'left',
+      horizontalPosition: 'left',
+      verticalPosition: 'center',
+      headingTextSpacing: 8,
       ctaLabel: '',
       ctaLinkType: 'internal',
       ctaUrl: '',
@@ -72,6 +79,7 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
         fontSize: 'md',
         textColor: '#ffffff',
         backgroundColor: '#56c5c5',
+        backgroundOpacity: 100,
         hoverBackgroundColor: '#45b4b4',
         borderRadius: '8px'
       }
@@ -138,6 +146,20 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
     return fonts[font || 'default'] || fonts.default;
   };
 
+  const hexToRgba = (hex: string, opacity: number = 100) => {
+    if (hex === 'transparent') return 'transparent';
+
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (!result) return hex;
+
+    const r = parseInt(result[1], 16);
+    const g = parseInt(result[2], 16);
+    const b = parseInt(result[3], 16);
+    const alpha = opacity / 100;
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   const renderCardColumn = (card: HeroCardData, index: number) => {
     const updateCardById = (updates: Partial<HeroCardData>) => {
       const updatedCards = cards.map(c =>
@@ -151,10 +173,13 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
     const ctaStyle = card.ctaStyle || {};
 
     const getTextPositionStyle = () => {
-      const position = card.position || 'left';
-      if (position === 'center') return { justifyContent: 'center', textAlign: 'center' as const };
-      if (position === 'right') return { justifyContent: 'flex-end', textAlign: 'right' as const };
-      return { justifyContent: 'flex-start', textAlign: 'left' as const };
+      const horizontalPos = card.horizontalPosition || 'left';
+      const verticalPos = card.verticalPosition || 'center';
+
+      const horizontal = horizontalPos === 'center' ? 'center' : horizontalPos === 'right' ? 'flex-end' : 'flex-start';
+      const vertical = verticalPos === 'top' ? 'flex-start' : verticalPos === 'bottom' ? 'flex-end' : 'center';
+
+      return { justifyContent: horizontal, alignItems: vertical };
     };
 
     return (
@@ -211,10 +236,9 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
             >
               {card.heading && (
                 <div
-                  className="mb-2"
                   style={{
                     backgroundColor: headingStyle.backgroundColor && headingStyle.backgroundColor !== 'transparent'
-                      ? headingStyle.backgroundColor
+                      ? hexToRgba(headingStyle.backgroundColor, headingStyle.backgroundOpacity || 100)
                       : 'transparent',
                     color: headingStyle.textColor || '#000000',
                     fontWeight: headingStyle.bold ? '700' : '400',
@@ -227,7 +251,8 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
                     padding: headingStyle.backgroundColor && headingStyle.backgroundColor !== 'transparent' ? '0.5rem 0.75rem' : '0',
                     display: 'inline-block',
                     width: headingStyle.textAlign === 'center' ? 'auto' : '100%',
-                    whiteSpace: headingStyle.textAlign === 'center' ? 'pre-line' : 'normal'
+                    whiteSpace: headingStyle.textAlign === 'center' ? 'pre-line' : 'normal',
+                    marginBottom: `${card.headingTextSpacing || 8}px`
                   }}
                 >
                   {card.heading}
@@ -239,7 +264,7 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
                   className="mb-2"
                   style={{
                     backgroundColor: textStyle.backgroundColor && textStyle.backgroundColor !== 'transparent'
-                      ? textStyle.backgroundColor
+                      ? hexToRgba(textStyle.backgroundColor, textStyle.backgroundOpacity || 100)
                       : 'transparent',
                     color: textStyle.textColor || '#000000',
                     fontWeight: textStyle.bold ? '700' : '400',
@@ -263,7 +288,7 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
                 <button
                   className="rounded transition-colors mt-auto"
                   style={{
-                    backgroundColor: ctaStyle.backgroundColor || '#56c5c5',
+                    backgroundColor: hexToRgba(ctaStyle.backgroundColor || '#56c5c5', ctaStyle.backgroundOpacity || 100),
                     color: ctaStyle.textColor || '#ffffff',
                     fontSize: ctaStyle.fontSize === 'sm' ? '0.875rem' :
                              ctaStyle.fontSize === 'lg' ? '1.125rem' :
@@ -271,7 +296,7 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
                     padding: '0.625rem 1.5rem',
                     fontFamily: getFontFamily(ctaStyle.fontFamily),
                     borderRadius: ctaStyle.borderRadius || '8px',
-                    alignSelf: card.position === 'center' ? 'center' : card.position === 'right' ? 'flex-end' : 'flex-start',
+                    alignSelf: card.horizontalPosition === 'center' ? 'center' : card.horizontalPosition === 'right' ? 'flex-end' : 'flex-start',
                     display: 'inline-block'
                   }}
                 >
@@ -282,7 +307,21 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Rubrik</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-700">Rubrik</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id={`heading-bold-${card.id}`}
+                  checked={headingStyle.bold || false}
+                  onChange={(e) => updateCardById({ headingStyle: { ...headingStyle, bold: e.target.checked } })}
+                  className="w-4 h-4 text-[#56c5c5] border-gray-300 rounded focus:ring-[#56c5c5]"
+                />
+                <label htmlFor={`heading-bold-${card.id}`} className="text-sm text-gray-600">
+                  Fet stil
+                </label>
+              </div>
+            </div>
             <input
               type="text"
               value={card.heading}
@@ -293,7 +332,21 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
           </div>
 
           <div className="mt-3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Brödtext</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-700">Brödtext</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id={`text-bold-${card.id}`}
+                  checked={textStyle.bold || false}
+                  onChange={(e) => updateCardById({ textStyle: { ...textStyle, bold: e.target.checked } })}
+                  className="w-4 h-4 text-[#56c5c5] border-gray-300 rounded focus:ring-[#56c5c5]"
+                />
+                <label htmlFor={`text-bold-${card.id}`} className="text-sm text-gray-600">
+                  Fet stil
+                </label>
+              </div>
+            </div>
             <textarea
               value={card.text}
               onChange={(e) => updateCard(card.id, { text: e.target.value })}
@@ -303,51 +356,79 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
             />
           </div>
 
-          <div className="mt-3 space-y-3">
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id={`heading-bold-${card.id}`}
-                checked={headingStyle.bold || false}
-                onChange={(e) => updateCardById({ headingStyle: { ...headingStyle, bold: e.target.checked } })}
-                className="w-4 h-4 text-[#56c5c5] border-gray-300 rounded focus:ring-[#56c5c5]"
-              />
-              <label htmlFor={`heading-bold-${card.id}`} className="text-sm font-medium text-gray-700">
-                Fet stil - rubrik
-              </label>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                id={`text-bold-${card.id}`}
-                checked={textStyle.bold || false}
-                onChange={(e) => updateCardById({ textStyle: { ...textStyle, bold: e.target.checked } })}
-                className="w-4 h-4 text-[#56c5c5] border-gray-300 rounded focus:ring-[#56c5c5]"
-              />
-              <label htmlFor={`text-bold-${card.id}`} className="text-sm font-medium text-gray-700">
-                Fet stil - brödtext
-              </label>
-            </div>
-          </div>
-
           <div className="mt-3">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Justering av textposition
             </label>
-            <select
-              value={card.position || 'left'}
-              onChange={(e) => updateCardById({ position: e.target.value as 'left' | 'center' | 'right' })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#56c5c5]"
-            >
-              <option value="left">Vänster</option>
-              <option value="center">Centrerad</option>
-              <option value="right">Höger</option>
-            </select>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Horisontell position</label>
+                <select
+                  value={card.horizontalPosition || 'left'}
+                  onChange={(e) => updateCardById({ horizontalPosition: e.target.value as 'left' | 'center' | 'right' })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#56c5c5]"
+                >
+                  <option value="left">Vänster</option>
+                  <option value="center">Mitten</option>
+                  <option value="right">Höger</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Vertikal position</label>
+                <select
+                  value={card.verticalPosition || 'center'}
+                  onChange={(e) => updateCardById({ verticalPosition: e.target.value as 'top' | 'center' | 'bottom' })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#56c5c5]"
+                >
+                  <option value="top">Uppe</option>
+                  <option value="center">Mitten</option>
+                  <option value="bottom">Nere</option>
+                </select>
+              </div>
+            </div>
           </div>
 
           <div className="mt-3">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bakgrundsfärg för hero-kort</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Mellanrum mellan rubrik och brödtext
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min="0"
+                max="40"
+                step="2"
+                value={card.headingTextSpacing || 8}
+                onChange={(e) => updateCardById({ headingTextSpacing: parseInt(e.target.value) })}
+                className="flex-1"
+              />
+              <span className="text-sm text-gray-600 w-12 text-right">{card.headingTextSpacing || 8}px</span>
+            </div>
+          </div>
+
+          <div className="mt-3">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Bakgrundsfärg för hero-kort</label>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {[
+                { name: 'Vit', color: colors.primary.white },
+                { name: 'Svart', color: colors.primary.black },
+                { name: 'Kitchen Grön', color: colors.primary.green },
+                { name: 'Kitchen Cyan', color: colors.primary.cyan },
+                { name: 'Ljusgrön', color: colors.background.lightGreen },
+                { name: 'Ljusgrå', color: colors.background.lightGray },
+                { name: 'Gul', color: colors.status.soon }
+              ].map((preset) => (
+                <button
+                  key={preset.color}
+                  onClick={() => updateCard(card.id, { cardBackgroundColor: preset.color })}
+                  className={`w-10 h-10 rounded border-2 transition-all ${
+                    card.cardBackgroundColor === preset.color ? 'border-[#56c5c5] scale-110' : 'border-gray-300'
+                  }`}
+                  style={{ backgroundColor: preset.color }}
+                  title={preset.name}
+                />
+              ))}
+            </div>
             <input
               type="color"
               value={card.cardBackgroundColor || '#ffffff'}

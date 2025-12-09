@@ -134,12 +134,28 @@ export default function HeroCardText({ card, onCardUpdate }: HeroCardTextProps) 
           </div>
 
           {headingStyle.backgroundColor !== 'transparent' && (
-            <ColorPicker
-              label="Bakgrundsfärg bakom rubriken"
-              value={headingStyle.backgroundColor}
-              onChange={(color) => updateHeadingStyle('backgroundColor', color)}
-              presets={PRESET_COLORS}
-            />
+            <>
+              <ColorPicker
+                label="Bakgrundsfärg bakom rubriken"
+                value={headingStyle.backgroundColor}
+                onChange={(color) => updateHeadingStyle('backgroundColor', color)}
+                presets={PRESET_COLORS}
+              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Opacity på bakgrund ({headingStyle.backgroundOpacity || 100}%)
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={headingStyle.backgroundOpacity || 100}
+                  onChange={(e) => updateHeadingStyle('backgroundOpacity', parseInt(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -233,12 +249,28 @@ export default function HeroCardText({ card, onCardUpdate }: HeroCardTextProps) 
           </div>
 
           {textStyle.backgroundColor !== 'transparent' && (
-            <ColorPicker
-              label="Bakgrundsfärg bakom brödtexten"
-              value={textStyle.backgroundColor}
-              onChange={(color) => updateTextStyle('backgroundColor', color)}
-              presets={PRESET_COLORS}
-            />
+            <>
+              <ColorPicker
+                label="Bakgrundsfärg bakom brödtexten"
+                value={textStyle.backgroundColor}
+                onChange={(color) => updateTextStyle('backgroundColor', color)}
+                presets={PRESET_COLORS}
+              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Opacity på bakgrund ({textStyle.backgroundOpacity || 100}%)
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="5"
+                  value={textStyle.backgroundOpacity || 100}
+                  onChange={(e) => updateTextStyle('backgroundOpacity', parseInt(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -15,6 +15,7 @@ interface HeroCardData {
     bold?: boolean;
     textColor?: string;
     backgroundColor?: string;
+    backgroundOpacity?: number;
     lineHeight?: string;
     textAlign?: 'left' | 'center' | 'right';
   };
@@ -24,10 +25,13 @@ interface HeroCardData {
     bold?: boolean;
     textColor?: string;
     backgroundColor?: string;
+    backgroundOpacity?: number;
     lineHeight?: string;
     textAlign?: 'left' | 'center' | 'right';
   };
-  position?: 'left' | 'center' | 'right';
+  horizontalPosition?: 'left' | 'center' | 'right';
+  verticalPosition?: 'top' | 'center' | 'bottom';
+  headingTextSpacing?: number;
   ctaLabel?: string;
   ctaLinkType?: 'internal' | 'external';
   ctaUrl?: string;
@@ -36,6 +40,7 @@ interface HeroCardData {
     fontSize?: string;
     textColor?: string;
     backgroundColor?: string;
+    backgroundOpacity?: number;
     hoverBackgroundColor?: string;
     borderRadius?: string;
   };
@@ -105,6 +110,20 @@ export const HeroSection = () => {
     return fonts[font || 'default'] || fonts.default;
   };
 
+  const hexToRgba = (hex: string, opacity: number = 100) => {
+    if (hex === 'transparent') return 'transparent';
+
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (!result) return hex;
+
+    const r = parseInt(result[1], 16);
+    const g = parseInt(result[2], 16);
+    const b = parseInt(result[3], 16);
+    const alpha = opacity / 100;
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   const getGridColumns = () => {
     const cols = settings.cardsPerRow || 3;
     if (cols === 1) return 'grid-cols-1';
@@ -113,10 +132,11 @@ export const HeroSection = () => {
     return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
   };
 
-  const getTextPositionStyle = (position?: string) => {
-    if (position === 'center') return { justifyContent: 'center', alignItems: 'center' };
-    if (position === 'right') return { justifyContent: 'flex-end', alignItems: 'flex-end' };
-    return { justifyContent: 'flex-start', alignItems: 'flex-start' };
+  const getTextPositionStyle = (horizontalPos?: string, verticalPos?: string) => {
+    const horizontal = horizontalPos === 'center' ? 'center' : horizontalPos === 'right' ? 'flex-end' : 'flex-start';
+    const vertical = verticalPos === 'top' ? 'flex-start' : verticalPos === 'bottom' ? 'flex-end' : 'center';
+
+    return { justifyContent: horizontal, alignItems: vertical };
   };
 
   const sectionStyle: React.CSSProperties = {
@@ -149,7 +169,7 @@ export const HeroSection = () => {
             const headingStyle = card.headingStyle || {};
             const textStyle = card.textStyle || {};
             const ctaStyle = card.ctaStyle || {};
-            const positionStyle = getTextPositionStyle(card.position);
+            const positionStyle = getTextPositionStyle(card.horizontalPosition, card.verticalPosition);
 
             return (
               <div
@@ -169,10 +189,9 @@ export const HeroSection = () => {
                 >
                   {card.heading && (
                     <div
-                      className="mb-2"
                       style={{
                         backgroundColor: headingStyle.backgroundColor && headingStyle.backgroundColor !== 'transparent'
-                          ? headingStyle.backgroundColor
+                          ? hexToRgba(headingStyle.backgroundColor, headingStyle.backgroundOpacity || 100)
                           : 'transparent',
                         color: headingStyle.textColor || '#000000',
                         fontWeight: headingStyle.bold ? '700' : '400',
@@ -185,7 +204,8 @@ export const HeroSection = () => {
                         padding: headingStyle.backgroundColor && headingStyle.backgroundColor !== 'transparent' ? '0.5rem 0.75rem' : '0',
                         display: 'inline-block',
                         width: headingStyle.textAlign === 'center' ? 'auto' : '100%',
-                        whiteSpace: headingStyle.textAlign === 'center' ? 'pre-line' : 'normal'
+                        whiteSpace: headingStyle.textAlign === 'center' ? 'pre-line' : 'normal',
+                        marginBottom: `${card.headingTextSpacing || 8}px`
                       }}
                     >
                       {card.heading}
@@ -197,7 +217,7 @@ export const HeroSection = () => {
                       className="mb-2"
                       style={{
                         backgroundColor: textStyle.backgroundColor && textStyle.backgroundColor !== 'transparent'
-                          ? textStyle.backgroundColor
+                          ? hexToRgba(textStyle.backgroundColor, textStyle.backgroundOpacity || 100)
                           : 'transparent',
                         color: textStyle.textColor || '#000000',
                         fontWeight: textStyle.bold ? '700' : '400',
@@ -224,7 +244,7 @@ export const HeroSection = () => {
                           to={card.ctaUrl}
                           className="rounded transition-colors inline-block"
                           style={{
-                            backgroundColor: ctaStyle.backgroundColor || '#56c5c5',
+                            backgroundColor: hexToRgba(ctaStyle.backgroundColor || '#56c5c5', ctaStyle.backgroundOpacity || 100),
                             color: ctaStyle.textColor || '#ffffff',
                             fontSize: ctaStyle.fontSize === 'sm' ? '0.875rem' :
                                      ctaStyle.fontSize === 'lg' ? '1.125rem' :
@@ -240,7 +260,7 @@ export const HeroSection = () => {
                             }
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = ctaStyle.backgroundColor || '#56c5c5';
+                            e.currentTarget.style.backgroundColor = hexToRgba(ctaStyle.backgroundColor || '#56c5c5', ctaStyle.backgroundOpacity || 100);
                           }}
                         >
                           {card.ctaLabel}
@@ -252,7 +272,7 @@ export const HeroSection = () => {
                           rel="noopener noreferrer"
                           className="rounded transition-colors inline-block"
                           style={{
-                            backgroundColor: ctaStyle.backgroundColor || '#56c5c5',
+                            backgroundColor: hexToRgba(ctaStyle.backgroundColor || '#56c5c5', ctaStyle.backgroundOpacity || 100),
                             color: ctaStyle.textColor || '#ffffff',
                             fontSize: ctaStyle.fontSize === 'sm' ? '0.875rem' :
                                      ctaStyle.fontSize === 'lg' ? '1.125rem' :
@@ -268,7 +288,7 @@ export const HeroSection = () => {
                             }
                           }}
                           onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = ctaStyle.backgroundColor || '#56c5c5';
+                            e.currentTarget.style.backgroundColor = hexToRgba(ctaStyle.backgroundColor || '#56c5c5', ctaStyle.backgroundOpacity || 100);
                           }}
                         >
                           {card.ctaLabel}

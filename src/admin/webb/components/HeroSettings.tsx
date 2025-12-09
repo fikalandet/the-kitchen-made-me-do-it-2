@@ -120,60 +120,55 @@ export default function HeroSettings({ settings, onSettingsChange }: HeroSetting
         </select>
       </div>
 
-      <ColorPicker
-        label="Bakgrundsfärg för hela sektionen"
-        value={settings.backgroundColor}
-        onChange={(color) => updateSetting('backgroundColor', color)}
-        presets={PRESET_COLORS}
-      />
+      <div className="grid grid-cols-2 gap-4">
+        <ColorPicker
+          label="Bakgrundsfärg för hela sektionen"
+          value={settings.backgroundColor}
+          onChange={(color) => updateSetting('backgroundColor', color)}
+          presets={PRESET_COLORS}
+        />
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Eller bakgrundsbild
-        </label>
-        <div className="flex gap-2">
-          <input
-            type="file"
-            id="hero-bg-upload"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleBgImageUpload(file);
-            }}
-            className="hidden"
-          />
-          <label
-            htmlFor="hero-bg-upload"
-            className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 ${
-              uploadingBg ? 'opacity-50' : ''
-            }`}
-          >
-            <Upload className="w-4 h-4" />
-            {uploadingBg ? 'Laddar upp...' : 'Ladda upp'}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Eller bakgrundsbild
           </label>
-          {settings.backgroundImageUrl && (
-            <>
-              <div className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-600 truncate">
-                {settings.backgroundImageUrl}
-              </div>
+          <div className="flex gap-2">
+            <input
+              type="file"
+              id="hero-bg-upload"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleBgImageUpload(file);
+              }}
+              className="hidden"
+            />
+            <label
+              htmlFor="hero-bg-upload"
+              className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 ${
+                uploadingBg ? 'opacity-50' : ''
+              }`}
+            >
+              <Upload className="w-4 h-4" />
+              {uploadingBg ? 'Laddar upp...' : 'Ladda upp'}
+            </label>
+            {settings.backgroundImageUrl && (
               <button
                 onClick={() => updateSetting('backgroundImageUrl', '')}
-                className="px-3 py-2 text-sm text-red-600 hover:text-red-700"
+                className="px-3 py-2 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-lg hover:bg-red-50"
               >
                 Ta bort
               </button>
-            </>
+            )}
+          </div>
+          {settings.backgroundImageUrl && (
+            <div className="mt-2">
+              <div className="px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-600 truncate">
+                {settings.backgroundImageUrl}
+              </div>
+            </div>
           )}
         </div>
-        {settings.backgroundImageUrl && (
-          <div className="mt-2">
-            <img
-              src={settings.backgroundImageUrl}
-              alt="Bakgrund"
-              className="w-full h-32 object-cover rounded-lg"
-            />
-          </div>
-        )}
       </div>
 
       <div>

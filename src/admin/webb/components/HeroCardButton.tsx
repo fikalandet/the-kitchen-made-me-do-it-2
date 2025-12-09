@@ -168,6 +168,21 @@ export default function HeroCardButton({ card, onCardUpdate }: HeroCardButtonPro
             presets={PRESET_COLORS}
           />
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Opacity på knappens bakgrund ({ctaStyle.backgroundOpacity || 100}%)
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              value={ctaStyle.backgroundOpacity || 100}
+              onChange={(e) => updateCtaStyle('backgroundOpacity', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
           <ColorPicker
             label="Hover-färg"
             value={ctaStyle.hoverBackgroundColor}

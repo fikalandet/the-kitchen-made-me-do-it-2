@@ -31,6 +31,20 @@ export default function HeroPreview({ settings }: HeroPreviewProps) {
     return fonts[font || 'default'] || fonts.default;
   };
 
+  const hexToRgba = (hex: string, opacity: number = 100) => {
+    if (hex === 'transparent') return 'transparent';
+
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (!result) return hex;
+
+    const r = parseInt(result[1], 16);
+    const g = parseInt(result[2], 16);
+    const b = parseInt(result[3], 16);
+    const alpha = opacity / 100;
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+
   const getGridColumns = () => {
     const cols = settings.cardsPerRow || 3;
     if (cols === 1) return 'grid-cols-1';
@@ -39,10 +53,11 @@ export default function HeroPreview({ settings }: HeroPreviewProps) {
     return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
   };
 
-  const getTextPositionStyle = (position?: string) => {
-    if (position === 'center') return { justifyContent: 'center', alignItems: 'center' };
-    if (position === 'right') return { justifyContent: 'flex-end', alignItems: 'flex-end' };
-    return { justifyContent: 'flex-start', alignItems: 'flex-start' };
+  const getTextPositionStyle = (horizontalPos?: string, verticalPos?: string) => {
+    const horizontal = horizontalPos === 'center' ? 'center' : horizontalPos === 'right' ? 'flex-end' : 'flex-start';
+    const vertical = verticalPos === 'top' ? 'flex-start' : verticalPos === 'bottom' ? 'flex-end' : 'center';
+
+    return { justifyContent: horizontal, alignItems: vertical };
   };
 
   const sectionStyle: React.CSSProperties = {
@@ -76,7 +91,7 @@ export default function HeroPreview({ settings }: HeroPreviewProps) {
               const headingStyle = card.headingStyle || {};
               const textStyle = card.textStyle || {};
               const ctaStyle = card.ctaStyle || {};
-              const positionStyle = getTextPositionStyle(card.position);
+              const positionStyle = getTextPositionStyle(card.horizontalPosition, card.verticalPosition);
 
               return (
                 <div
@@ -96,10 +111,9 @@ export default function HeroPreview({ settings }: HeroPreviewProps) {
                   >
                     {card.heading && (
                       <div
-                        className="mb-2"
                         style={{
                           backgroundColor: headingStyle.backgroundColor && headingStyle.backgroundColor !== 'transparent'
-                            ? headingStyle.backgroundColor
+                            ? hexToRgba(headingStyle.backgroundColor, headingStyle.backgroundOpacity || 100)
                             : 'transparent',
                           color: headingStyle.textColor || '#000000',
                           fontWeight: headingStyle.bold ? '700' : '400',
@@ -112,7 +126,8 @@ export default function HeroPreview({ settings }: HeroPreviewProps) {
                           padding: headingStyle.backgroundColor && headingStyle.backgroundColor !== 'transparent' ? '0.5rem 0.75rem' : '0',
                           display: 'inline-block',
                           width: headingStyle.textAlign === 'center' ? 'auto' : '100%',
-                          whiteSpace: headingStyle.textAlign === 'center' ? 'pre-line' : 'normal'
+                          whiteSpace: headingStyle.textAlign === 'center' ? 'pre-line' : 'normal',
+                          marginBottom: `${card.headingTextSpacing || 8}px`
                         }}
                       >
                         {card.heading}
@@ -124,7 +139,7 @@ export default function HeroPreview({ settings }: HeroPreviewProps) {
                         className="mb-2"
                         style={{
                           backgroundColor: textStyle.backgroundColor && textStyle.backgroundColor !== 'transparent'
-                            ? textStyle.backgroundColor
+                            ? hexToRgba(textStyle.backgroundColor, textStyle.backgroundOpacity || 100)
                             : 'transparent',
                           color: textStyle.textColor || '#000000',
                           fontWeight: textStyle.bold ? '700' : '400',
@@ -146,22 +161,61 @@ export default function HeroPreview({ settings }: HeroPreviewProps) {
 
                     {card.ctaLabel && card.ctaUrl && (
                       <div className="mt-auto" style={{ alignSelf: positionStyle.alignItems }}>
-                        <div
-                          className="rounded transition-colors inline-block cursor-pointer"
-                          style={{
-                            backgroundColor: ctaStyle.backgroundColor || '#56c5c5',
-                            color: ctaStyle.textColor || '#ffffff',
-                            fontSize: ctaStyle.fontSize === 'sm' ? '0.875rem' :
-                                     ctaStyle.fontSize === 'lg' ? '1.125rem' :
-                                     ctaStyle.fontSize === 'xl' ? '1.25rem' : '1rem',
-                            padding: '0.625rem 1.5rem',
-                            fontFamily: getFontFamily(ctaStyle.fontFamily),
-                            borderRadius: ctaStyle.borderRadius || '8px',
-                            textDecoration: 'none'
-                          }}
-                        >
-                          {card.ctaLabel}
-                        </div>
+                        {card.ctaLinkType === 'internal' ? (
+                          <Link
+                            to={card.ctaUrl}
+                            className="rounded transition-colors inline-block"
+                            style={{
+                              backgroundColor: hexToRgba(ctaStyle.backgroundColor || '#56c5c5', ctaStyle.backgroundOpacity || 100),
+                              color: ctaStyle.textColor || '#ffffff',
+                              fontSize: ctaStyle.fontSize === 'sm' ? '0.875rem' :
+                                       ctaStyle.fontSize === 'lg' ? '1.125rem' :
+                                       ctaStyle.fontSize === 'xl' ? '1.25rem' : '1rem',
+                              padding: '0.625rem 1.5rem',
+                              fontFamily: getFontFamily(ctaStyle.fontFamily),
+                              borderRadius: ctaStyle.borderRadius || '8px',
+                              textDecoration: 'none'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (ctaStyle.hoverBackgroundColor) {
+                                e.currentTarget.style.backgroundColor = ctaStyle.hoverBackgroundColor;
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = hexToRgba(ctaStyle.backgroundColor || '#56c5c5', ctaStyle.backgroundOpacity || 100);
+                            }}
+                          >
+                            {card.ctaLabel}
+                          </Link>
+                        ) : (
+                          <a
+                            href={card.ctaUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="rounded transition-colors inline-block"
+                            style={{
+                              backgroundColor: hexToRgba(ctaStyle.backgroundColor || '#56c5c5', ctaStyle.backgroundOpacity || 100),
+                              color: ctaStyle.textColor || '#ffffff',
+                              fontSize: ctaStyle.fontSize === 'sm' ? '0.875rem' :
+                                       ctaStyle.fontSize === 'lg' ? '1.125rem' :
+                                       ctaStyle.fontSize === 'xl' ? '1.25rem' : '1rem',
+                              padding: '0.625rem 1.5rem',
+                              fontFamily: getFontFamily(ctaStyle.fontFamily),
+                              borderRadius: ctaStyle.borderRadius || '8px',
+                              textDecoration: 'none'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (ctaStyle.hoverBackgroundColor) {
+                                e.currentTarget.style.backgroundColor = ctaStyle.hoverBackgroundColor;
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.backgroundColor = hexToRgba(ctaStyle.backgroundColor || '#56c5c5', ctaStyle.backgroundOpacity || 100);
+                            }}
+                          >
+                            {card.ctaLabel}
+                          </a>
+                        )}
                       </div>
                     )}
                   </div>
