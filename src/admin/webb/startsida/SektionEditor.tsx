@@ -45,6 +45,8 @@ export default function SektionEditor() {
 
       {sectionSlug === 'bildspel' ? (
         <SectionEditor slug="bildspel" displayName="Bildspel" />
+      ) : sectionSlug === 'hero' ? (
+        <SectionEditor slug="hero" displayName="Hero" />
       ) : (
         <>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Sektion: {sectionName}</h2>

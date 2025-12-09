@@ -3,6 +3,7 @@ import { supabase } from '../../../lib/supabase';
 import { AdminCard } from '../../components';
 import ColorPicker from './ColorPicker';
 import BildspelEditor from './BildspelEditor';
+import HeroEditor from './HeroEditor';
 import { Save, Loader } from 'lucide-react';
 
 interface SectionEditorProps {
@@ -49,8 +50,8 @@ const sectionConfigs: Record<string, SectionConfig> = {
     customPanels: [BildspelEditor],
   },
   hero: {
-    supportsStandardContent: true,
-    customPanels: [],
+    supportsStandardContent: false,
+    customPanels: [HeroEditor],
   },
 }
 
