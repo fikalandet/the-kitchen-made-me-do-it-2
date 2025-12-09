@@ -25,6 +25,7 @@ interface OnStoveNowSectionProps {
     subtitleTexts?: string[];
     subtitleRotationInterval?: number;
     cardsPerRow?: number;
+    showWeekAheadText?: boolean;
     dayButtons?: {
       defaultColor?: string;
       hoverColor?: string;
@@ -38,10 +39,12 @@ interface OnStoveNowSectionProps {
 export function OnStoveNowSection({ settings, liveDishes, liveChefs }: OnStoveNowSectionProps) {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
+  const [fadeIn, setFadeIn] = useState(true);
 
   const subtitleTexts = settings.subtitleTexts || ['Just nu i en stekpanna nära dig'];
-  const rotationInterval = (settings.subtitleRotationInterval || 5) * 1000;
+  const rotationInterval = settings.subtitleRotationInterval || 10000;
   const cardsPerRow = settings.cardsPerRow || 4;
+  const showWeekAheadText = settings.showWeekAheadText !== false;
   const dayButtons = settings.dayButtons || {
     defaultColor: '#ffffff',
     hoverColor: '#f3f4f6',
@@ -52,7 +55,11 @@ export function OnStoveNowSection({ settings, liveDishes, liveChefs }: OnStoveNo
     if (subtitleTexts.length <= 1) return;
 
     const interval = setInterval(() => {
-      setCurrentSubtitleIndex((prev) => (prev + 1) % subtitleTexts.length);
+      setFadeIn(false);
+      setTimeout(() => {
+        setCurrentSubtitleIndex((prev) => (prev + 1) % subtitleTexts.length);
+        setFadeIn(true);
+      }, 300);
     }, rotationInterval);
 
     return () => clearInterval(interval);
@@ -96,16 +103,23 @@ export function OnStoveNowSection({ settings, liveDishes, liveChefs }: OnStoveNo
             {subtitleTexts.length > 0 && subtitleTexts[currentSubtitleIndex] && (
               <>
                 <span className="text-gray-400 text-2xl">|</span>
-                <p className="text-gray-700">
-                  {subtitleTexts[currentSubtitleIndex]}
-                </p>
+                <div className="min-h-[24px] flex items-center">
+                  <p
+                    className="text-gray-700 transition-opacity duration-300"
+                    style={{ opacity: fadeIn ? 1 : 0 }}
+                  >
+                    {subtitleTexts[currentSubtitleIndex]}
+                  </p>
+                </div>
               </>
             )}
           </div>
         </div>
 
         <div className="mb-4 space-y-3">
-          <p className="text-sm text-gray-600">Visar max en vecka framåt</p>
+          {showWeekAheadText && (
+            <p className="text-sm text-gray-600">Visar max en vecka framåt</p>
+          )}
           <div className="flex flex-wrap gap-2 mb-3">
             {Array.from({ length: 7 }, (_, i) => {
               const date = new Date();

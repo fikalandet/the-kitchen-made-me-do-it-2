@@ -188,8 +188,6 @@ export default function AdminLayout() {
           <div className="mt-4 px-3">
             <Link
               to="/"
-              target="_blank"
-              rel="noopener noreferrer"
               className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-[#56c5c5] text-white hover:bg-[#45b4b4]"
             >
               <ExternalLink className="w-5 h-5" />

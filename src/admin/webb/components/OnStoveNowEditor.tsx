@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import CollapsibleCard from './CollapsibleCard';
 import ColorPicker from './ColorPicker';
@@ -25,6 +25,7 @@ interface OnStoveNowSettings {
   subtitleTexts?: string[];
   subtitleRotationInterval?: number;
   cardsPerRow?: number;
+  showWeekAheadText?: boolean;
   dayButtons?: {
     defaultColor?: string;
     hoverColor?: string;
@@ -39,10 +40,27 @@ interface OnStoveNowEditorProps {
 
 export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStoveNowEditorProps) {
   const [activeSubtitleIndex, setActiveSubtitleIndex] = useState(0);
+  const [fadeIn, setFadeIn] = useState(true);
 
   const updateSetting = (key: keyof OnStoveNowSettings, value: any) => {
     onSettingsChange({ ...settings, [key]: value });
   };
+
+  useEffect(() => {
+    const subtitleTexts = settings.subtitleTexts || [];
+    if (subtitleTexts.length <= 1) return;
+
+    const rotationInterval = settings.subtitleRotationInterval || 10000;
+    const interval = setInterval(() => {
+      setFadeIn(false);
+      setTimeout(() => {
+        setActiveSubtitleIndex((prev) => (prev + 1) % subtitleTexts.length);
+        setFadeIn(true);
+      }, 300);
+    }, rotationInterval);
+
+    return () => clearInterval(interval);
+  }, [settings.subtitleTexts, settings.subtitleRotationInterval]);
 
   const updateDayButtonColor = (key: 'defaultColor' | 'hoverColor' | 'activeColor', value: string) => {
     onSettingsChange({
@@ -192,7 +210,7 @@ export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStove
                   {subtitleTexts.length > 1 && (
                     <button
                       onClick={() => removeSubtitleText(index)}
-                      className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                      className="px-3 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -204,16 +222,19 @@ export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStove
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Intervall för textrad-rotation (sekunder)
+              Intervall för textrad-rotation
             </label>
-            <input
-              type="number"
-              min="1"
-              max="60"
-              value={settings.subtitleRotationInterval || 5}
-              onChange={(e) => updateSetting('subtitleRotationInterval', parseInt(e.target.value) || 5)}
+            <select
+              value={settings.subtitleRotationInterval || 10000}
+              onChange={(e) => updateSetting('subtitleRotationInterval', parseInt(e.target.value))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
-            />
+            >
+              <option value={10000}>10 sekunder</option>
+              <option value={60000}>1 minut</option>
+              <option value={3600000}>1 timme</option>
+              <option value={86400000}>1 dag</option>
+              <option value={604800000}>1 vecka</option>
+            </select>
           </div>
         </div>
       </CollapsibleCard>
@@ -343,6 +364,22 @@ export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStove
         </div>
       </CollapsibleCard>
 
+      <CollapsibleCard title="Vecka-information" defaultExpanded={true}>
+        <div>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={settings.showWeekAheadText !== false}
+              onChange={(e) => updateSetting('showWeekAheadText', e.target.checked)}
+              className="w-4 h-4 rounded"
+            />
+            <span className="text-sm font-medium text-gray-700">
+              Visa texten "Visar max en vecka framåt"
+            </span>
+          </label>
+        </div>
+      </CollapsibleCard>
+
       <CollapsibleCard title="Preview" defaultExpanded={true}>
         <div
           className="p-8 rounded-lg"
@@ -367,16 +404,23 @@ export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStove
               {subtitleTexts.length > 0 && subtitleTexts[0] && (
                 <>
                   <span className="text-gray-400 text-2xl">|</span>
-                  <p className="text-gray-700">
-                    {subtitleTexts[activeSubtitleIndex] || subtitleTexts[0]}
-                  </p>
+                  <div className="min-h-[24px] flex items-center">
+                    <p
+                      className="text-gray-700 transition-opacity duration-300"
+                      style={{ opacity: fadeIn ? 1 : 0 }}
+                    >
+                      {subtitleTexts[activeSubtitleIndex] || subtitleTexts[0]}
+                    </p>
+                  </div>
                 </>
               )}
             </div>
           </div>
 
           <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-3">Visar max en vecka framåt</p>
+            {(settings.showWeekAheadText !== false) && (
+              <p className="text-sm text-gray-600 mb-3">Visar max en vecka framåt</p>
+            )}
             <div className="flex flex-wrap gap-2">
               {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((day, index) => {
                 const hoverBgColor = dayButtons.hoverColor || '#f3f4f6';
