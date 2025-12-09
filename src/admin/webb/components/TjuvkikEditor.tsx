@@ -663,9 +663,15 @@ export default function TjuvkikEditor({ settings, onSettingsChange }: TjuvkikEdi
 
           <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${settings.cardsPerRow || 4}, 1fr)` }}>
             {[1, 2, 3, 4].slice(0, settings.cardsPerRow || 4).map((i) => (
-              <div key={i} className="bg-white rounded-lg p-4 shadow">
-                <div className="h-32 bg-gray-200 rounded mb-2"></div>
-                <p className="text-sm text-gray-600">Produktkort {i}</p>
+              <div key={i} className="bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl overflow-hidden" style={{ aspectRatio: '1 / 1' }}>
+                <div className="w-full h-full relative flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
+                    <div className="w-0 h-0 border-t-8 border-t-transparent border-l-12 border-l-black border-b-8 border-b-transparent ml-1"></div>
+                  </div>
+                  <div className="absolute bottom-3 left-3 right-3">
+                    <p className="text-white text-sm font-semibold">Reels-kort {i}</p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

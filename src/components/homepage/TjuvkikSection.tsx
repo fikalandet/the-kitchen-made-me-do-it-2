@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { LiveDishCard } from './LiveDishCard';
+import { ReelCard } from './ReelCard';
 import { EmptyState } from './EmptyState';
 
 interface TjuvkikSectionProps {
@@ -23,76 +23,53 @@ export function TjuvkikSection({ settings, dishes }: TjuvkikSectionProps) {
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
 
-  const mockLiveDishes = [
+  const mockReels = [
     {
-      id: 'live-mock-1',
-      name: 'Krämig risotto med svamp',
+      id: 'reel-mock-1',
+      title: 'Krämig risotto med svamp - från början till slut',
       chef_name: 'Maria Karlsson',
       chef_avatar: 'https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=200',
-      price: 149,
-      image_url: 'https://images.pexels.com/photos/1437267/pexels-photo-1437267.jpeg?auto=compress&cs=tinysrgb&w=800',
-      rating: 4.8,
-      cook_date: new Date().toISOString(),
-      cook_times: ['18:00', '19:00'],
-      portions_left: 3,
-      pickup_available: true,
-      delivery_available: true,
-      delivery_fee: 49
+      thumbnail_url: 'https://images.pexels.com/photos/1437267/pexels-photo-1437267.jpeg?auto=compress&cs=tinysrgb&w=800',
+      duration_seconds: 45,
+      views_count: 1200
     },
     {
-      id: 'live-mock-2',
-      name: 'Grillad lax med grönsaker',
+      id: 'reel-mock-2',
+      title: 'Grillad lax - mitt hemliga trick',
       chef_name: 'Erik Andersson',
       chef_avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=200',
-      price: 169,
-      image_url: 'https://images.pexels.com/photos/842142/pexels-photo-842142.jpeg?auto=compress&cs=tinysrgb&w=800',
-      rating: 4.9,
-      cook_date: new Date().toISOString(),
-      cook_times: ['17:30', '18:30'],
-      portions_left: 8,
-      pickup_available: true,
-      delivery_available: true,
-      delivery_fee: 49
+      thumbnail_url: 'https://images.pexels.com/photos/842142/pexels-photo-842142.jpeg?auto=compress&cs=tinysrgb&w=800',
+      duration_seconds: 38,
+      views_count: 850
     },
     {
-      id: 'live-mock-3',
-      name: 'Klassisk lasagne',
+      id: 'reel-mock-3',
+      title: 'Lasagne som farmor gjorde den',
       chef_name: 'Sofia Lindgren',
       chef_avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=200',
-      price: 139,
-      image_url: 'https://images.pexels.com/photos/4079520/pexels-photo-4079520.jpeg?auto=compress&cs=tinysrgb&w=800',
-      rating: 4.7,
-      cook_date: new Date().toISOString(),
-      cook_times: ['18:00'],
-      portions_left: 12,
-      pickup_available: true,
-      delivery_available: false
+      thumbnail_url: 'https://images.pexels.com/photos/4079520/pexels-photo-4079520.jpeg?auto=compress&cs=tinysrgb&w=800',
+      duration_seconds: 52,
+      views_count: 2100
     },
     {
-      id: 'live-mock-4',
-      name: 'Thailändsk currygryta',
+      id: 'reel-mock-4',
+      title: 'Thai curry på 5 minuter',
       chef_name: 'Johan Berg',
       chef_avatar: 'https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=200',
-      price: 129,
-      image_url: 'https://images.pexels.com/photos/2280549/pexels-photo-2280549.jpeg?auto=compress&cs=tinysrgb&w=800',
-      rating: 4.6,
-      cook_date: new Date().toISOString(),
-      cook_times: ['17:00', '18:00', '19:00'],
-      portions_left: 15,
-      pickup_available: true,
-      delivery_available: true,
-      delivery_fee: 39
+      thumbnail_url: 'https://images.pexels.com/photos/2280549/pexels-photo-2280549.jpeg?auto=compress&cs=tinysrgb&w=800',
+      duration_seconds: 60,
+      views_count: 3400
     }
   ];
 
-  const displayDishes = dishes && dishes.length > 0 ? dishes : mockLiveDishes;
+  const displayReels = dishes && dishes.length > 0 ? dishes : mockReels;
 
-  const dishesWithImages = displayDishes.filter(
-    dish => dish?.image_url && dish.image_url.trim() !== ''
+  const reelsWithThumbnails = displayReels.filter(
+    reel => reel?.thumbnail_url && reel.thumbnail_url.trim() !== ''
   );
 
   const isProduction = import.meta.env.MODE === 'production';
-  const showSection = dishesWithImages.length > 0 || !isProduction;
+  const showSection = reelsWithThumbnails.length > 0 || !isProduction;
 
   if (!showSection) {
     return null;
@@ -201,25 +178,18 @@ export function TjuvkikSection({ settings, dishes }: TjuvkikSectionProps) {
           )}
         </div>
 
-        {dishesWithImages.length > 0 ? (
+        {reelsWithThumbnails.length > 0 ? (
           <div className={`grid ${gridColsClass} gap-6`}>
-            {dishesWithImages.map((dish) => (
-              <LiveDishCard
-                key={dish.id}
-                id={dish.id}
-                name={dish.name}
-                chef_name={dish.chef_name}
-                chef_avatar={dish.chef_avatar}
-                price={dish.price}
-                image_url={dish.image_url}
-                rating={dish.rating}
-                cook_date={dish.cook_date}
-                cook_times={dish.cook_times}
-                portions_left={dish.portions_left}
-                subscription_seats_left={dish.subscription_seats_left}
-                pickup_available={dish.pickup_available}
-                delivery_available={dish.delivery_available}
-                delivery_fee={dish.delivery_fee}
+            {reelsWithThumbnails.map((reel) => (
+              <ReelCard
+                key={reel.id}
+                id={reel.id}
+                title={reel.title || reel.name}
+                thumbnailUrl={reel.thumbnail_url || reel.image_url}
+                chefName={reel.chef_name}
+                chefAvatar={reel.chef_avatar}
+                durationSeconds={reel.duration_seconds || 45}
+                viewsCount={reel.views_count}
               />
             ))}
           </div>

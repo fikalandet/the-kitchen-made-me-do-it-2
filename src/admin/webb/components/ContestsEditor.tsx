@@ -457,14 +457,52 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
             )}
           </div>
 
-          <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${settings.cardsPerRow || 4}, 1fr)` }}>
-            {[1, 2, 3, 4].slice(0, settings.cardsPerRow || 4).map((i) => (
-              <div key={i} className="bg-white rounded-lg p-4 shadow">
-                <div className="h-32 bg-gray-200 rounded mb-2"></div>
-                <p className="text-sm text-gray-600">Produktkort {i}</p>
+          {settings.layout === 'cards-only' || !settings.featuredImage ? (
+            <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${settings.cardsPerRow || 4}, 1fr)` }}>
+              {[1, 2, 3, 4].slice(0, settings.cardsPerRow || 4).map((i) => (
+                <div key={i} className="bg-white rounded-lg p-4 shadow">
+                  <div className="h-32 bg-gray-200 rounded mb-2"></div>
+                  <p className="text-sm text-gray-600">Tävlingskort {i}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={`flex flex-col lg:flex-row gap-6 ${settings.layout === 'image-third' ? 'lg:gap-8' : ''}`}>
+              <div
+                className={`rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 ${
+                  settings.layout === 'image-third' ? 'lg:w-1/3' : 'lg:w-1/2'
+                }`}
+                style={{ minHeight: '300px' }}
+              >
+                {settings.featuredImage ? (
+                  <img
+                    src={settings.featuredImage}
+                    alt="Featured"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-500">
+                    Featured bild
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+              <div className="flex-1">
+                <div
+                  className="grid gap-6"
+                  style={{
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))'
+                  }}
+                >
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="bg-white rounded-lg p-4 shadow">
+                      <div className="h-32 bg-gray-200 rounded mb-2"></div>
+                      <p className="text-sm text-gray-600">Tävlingskort {i}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </CollapsibleCard>
     </div>

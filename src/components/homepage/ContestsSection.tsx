@@ -187,23 +187,32 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
             </div>
           ) : (
             <div
-              className={`grid gap-6 ${
-                layout === 'image-third'
-                  ? 'grid-cols-1 lg:grid-cols-[1fr_2fr]'
-                  : 'grid-cols-1 lg:grid-cols-2'
+              className={`flex flex-col lg:flex-row gap-6 ${
+                layout === 'image-third' ? 'lg:gap-8' : ''
               }`}
             >
-              <div className="rounded-lg overflow-hidden">
+              <div
+                className={`rounded-lg overflow-hidden flex-shrink-0 ${
+                  layout === 'image-third' ? 'lg:w-1/3' : 'lg:w-1/2'
+                }`}
+              >
                 <img
                   src={featuredImage}
                   alt="Featured"
                   className="w-full h-full object-cover min-h-[300px]"
                 />
               </div>
-              <div className={`grid ${gridColsClass} gap-6`}>
-                {contestsWithImages.map((contest) => (
-                  <ContestCard key={contest.id} {...contest} />
-                ))}
+              <div className="flex-1">
+                <div
+                  className="grid gap-6"
+                  style={{
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))'
+                  }}
+                >
+                  {contestsWithImages.map((contest) => (
+                    <ContestCard key={contest.id} {...contest} />
+                  ))}
+                </div>
               </div>
             </div>
           )
