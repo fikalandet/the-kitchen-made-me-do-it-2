@@ -75,7 +75,7 @@ export function NewMenuSection({ settings, dishes }: NewMenuSectionProps) {
               >
                 {settings.heading || 'Nytt på menyn'}
               </h2>
-              {subtitleTexts.length > 0 && subtitleTexts[currentSubtitleIndex] && (
+              {subtitleTexts.length > 0 && subtitleTexts[0] && (
                 <>
                   <span className="text-gray-400 text-2xl">|</span>
                   <div className="min-h-[24px] flex items-center">
@@ -83,7 +83,7 @@ export function NewMenuSection({ settings, dishes }: NewMenuSectionProps) {
                       className="text-gray-700 transition-opacity duration-300"
                       style={{ opacity: fadeIn ? 1 : 0 }}
                     >
-                      {subtitleTexts[currentSubtitleIndex]}
+                      {subtitleTexts[currentSubtitleIndex] || subtitleTexts[0]}
                     </p>
                   </div>
                 </>
