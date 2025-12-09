@@ -8,6 +8,7 @@ import { OnStoveNowSection } from '../components/homepage/OnStoveNowSection';
 import { PopularSection } from '../components/homepage/PopularSection';
 import { NewMenuSection } from '../components/homepage/NewMenuSection';
 import { FridgeMenuSection } from '../components/homepage/FridgeMenuSection';
+import { WeeklyChefsSection } from '../components/homepage/WeeklyChefsSection';
 import { EmptyState } from '../components/homepage/EmptyState';
 import { MealKitsSection } from '../components/homepage/MealKitsSection';
 import { DealsSection } from '../components/homepage/DealsSection';
@@ -59,8 +60,10 @@ export const Home: React.FC = () => {
   const [popularSettings, setPopularSettings] = useState<any>({});
   const [newMenuSettings, setNewMenuSettings] = useState<any>({});
   const [fridgeMenuSettings, setFridgeMenuSettings] = useState<any>({});
+  const [weeklyChefsSettings, setWeeklyChefsSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
   const [fridgeMenuProducts, setFridgeMenuProducts] = useState<any[]>([]);
+  const [weeklyChefs, setWeeklyChefs] = useState<any[]>([]);
   const [liveChefs, setLiveChefs] = useState<{[key: string]: any}>({});
   const [popularDishes, setPopularDishes] = useState<Dish[]>([]);
   const [newDishes, setNewDishes] = useState<Dish[]>([]);
@@ -124,6 +127,16 @@ export const Home: React.FC = () => {
 
     if (fridgeMenuSection) {
       setFridgeMenuSettings(fridgeMenuSection.settings || {});
+    }
+
+    const { data: weeklyChefsSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'veckans-kockar')
+      .maybeSingle();
+
+    if (weeklyChefsSection) {
+      setWeeklyChefsSettings(weeklyChefsSection.settings || {});
     }
 
     const mockChef = {
@@ -375,6 +388,19 @@ export const Home: React.FC = () => {
     setPopularDishes(mockPopular);
     setNewDishes(mockNewDishes);
     setFeaturedChefs(mockChefs);
+    setWeeklyChefs(mockChefs);
+
+    const featuredChefIds = weeklyChefsSettings?.featuredChefs?.map((fc: any) => fc.chefId) || [];
+    if (featuredChefIds.length > 0) {
+      const { data: selectedChefs } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('id', featuredChefIds);
+
+      if (selectedChefs && selectedChefs.length > 0) {
+        setWeeklyChefs(selectedChefs);
+      }
+    }
 
     const { data: popular } = await supabase
       .from('products')
@@ -794,27 +820,10 @@ export const Home: React.FC = () => {
         products={fridgeMenuProducts}
       />
 
-      <SectionWrapper title="Veckans kockar" subtitle="Hetare än chili, och har fler följare än din grannes surdegsblogg">
-        {featuredChefs.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {featuredChefs.map((chefData) => {
-              const chef = transformChef(chefData);
-              return (
-                <ChefOfWeekCard
-                  key={chef.id}
-                  chef={chef}
-                  kitchenName={`${chef.name}s kök`}
-                  adminComment={chefData.bio || 'En fantastisk kock som skapar magi i köket!'}
-                  imageShape="round"
-                  onVisitKitchen={() => console.log('Visit kitchen:', chef.id)}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <EmptyState text="Inget här ännu" />
-        )}
-      </SectionWrapper>
+      <WeeklyChefsSection
+        settings={weeklyChefsSettings}
+        chefs={weeklyChefs}
+      />
 
       <DealsSection deals={deals} />
 

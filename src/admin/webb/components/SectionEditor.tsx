@@ -8,6 +8,7 @@ import OnStoveNowEditor from './OnStoveNowEditor';
 import PopularEditor from './PopularEditor';
 import NewMenuEditor from './NewMenuEditor';
 import FridgeMenuEditor from './FridgeMenuEditor';
+import WeeklyChefsEditor from './WeeklyChefsEditor';
 import { Save, Loader } from 'lucide-react';
 
 interface SectionEditorProps {
@@ -72,6 +73,10 @@ const sectionConfigs: Record<string, SectionConfig> = {
   'kylskapsmeny': {
     supportsStandardContent: false,
     customPanels: [FridgeMenuEditor],
+  },
+  'veckans-kockar': {
+    supportsStandardContent: false,
+    customPanels: [WeeklyChefsEditor],
   },
 }
 
