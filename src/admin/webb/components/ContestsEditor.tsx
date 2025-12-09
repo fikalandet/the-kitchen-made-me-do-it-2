@@ -19,6 +19,10 @@ interface ContestsSettings {
   cardsPerRow?: number;
   layout?: 'cards-only' | 'image-third' | 'image-half';
   featuredImage?: string;
+  featuredImageText?: string;
+  featuredImageTextColor?: string;
+  featuredImageTextHAlign?: 'left' | 'center' | 'right';
+  featuredImageTextVAlign?: 'top' | 'center' | 'bottom';
 }
 
 interface ContestsEditorProps {
@@ -365,6 +369,105 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
               )}
             </div>
           )}
+
+          {settings.layout !== 'cards-only' && settings.featuredImage && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Text på stora bilden
+                </label>
+                <input
+                  type="text"
+                  value={settings.featuredImageText || ''}
+                  onChange={(e) => updateSetting('featuredImageText', e.target.value)}
+                  placeholder="Ange text som visas på bilden..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+                />
+              </div>
+
+              <ColorPicker
+                label="Textfärg på stora bilden"
+                value={settings.featuredImageTextColor || '#ffffff'}
+                onChange={(color) => updateSetting('featuredImageTextColor', color)}
+              />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Horisontell placering av text
+                </label>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => updateSetting('featuredImageTextHAlign', 'left')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                      (settings.featuredImageTextHAlign || 'left') === 'left'
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    Vänster
+                  </button>
+                  <button
+                    onClick={() => updateSetting('featuredImageTextHAlign', 'center')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                      settings.featuredImageTextHAlign === 'center'
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    Centrerad
+                  </button>
+                  <button
+                    onClick={() => updateSetting('featuredImageTextHAlign', 'right')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                      settings.featuredImageTextHAlign === 'right'
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    Höger
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Vertikal placering av text
+                </label>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => updateSetting('featuredImageTextVAlign', 'top')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                      (settings.featuredImageTextVAlign || 'center') === 'top'
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    Uppe
+                  </button>
+                  <button
+                    onClick={() => updateSetting('featuredImageTextVAlign', 'center')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                      (settings.featuredImageTextVAlign || 'center') === 'center'
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    Mitten
+                  </button>
+                  <button
+                    onClick={() => updateSetting('featuredImageTextVAlign', 'bottom')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                      settings.featuredImageTextVAlign === 'bottom'
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    Nere
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </CollapsibleCard>
 
@@ -469,7 +572,7 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
           ) : (
             <div className={`flex flex-col lg:flex-row gap-6 ${settings.layout === 'image-third' ? 'lg:gap-8' : ''}`}>
               <div
-                className={`rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 ${
+                className={`rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 relative ${
                   settings.layout === 'image-third' ? 'lg:w-1/3' : 'lg:w-1/2'
                 }`}
                 style={{ minHeight: '300px' }}
@@ -483,6 +586,29 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-gray-500">
                     Featured bild
+                  </div>
+                )}
+                {settings.featuredImageText && (
+                  <div
+                    className={`absolute inset-0 flex ${
+                      settings.featuredImageTextHAlign === 'center' ? 'justify-center' :
+                      settings.featuredImageTextHAlign === 'right' ? 'justify-end' :
+                      'justify-start'
+                    } ${
+                      settings.featuredImageTextVAlign === 'top' ? 'items-start' :
+                      settings.featuredImageTextVAlign === 'bottom' ? 'items-end' :
+                      'items-center'
+                    } p-6`}
+                  >
+                    <p
+                      className="text-2xl font-bold"
+                      style={{
+                        color: settings.featuredImageTextColor || '#ffffff',
+                        textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+                      }}
+                    >
+                      {settings.featuredImageText}
+                    </p>
                   </div>
                 )}
               </div>

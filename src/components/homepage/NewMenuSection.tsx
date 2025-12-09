@@ -16,6 +16,8 @@ interface NewMenuSectionProps {
     subtitlePlacement?: 'inline' | 'below';
     subtitleColor?: string;
     cardsPerRow?: number;
+    layout?: 'cards-only' | 'image-left' | 'image-right';
+    featuredImage?: string;
   };
   dishes: any[];
 }
@@ -88,6 +90,8 @@ export function NewMenuSection({ settings, dishes }: NewMenuSectionProps) {
   const rotationInterval = settings.subtitleRotationInterval || 10000;
   const cardsPerRow = settings.cardsPerRow || 4;
   const subtitlePlacement = settings.subtitlePlacement || 'inline';
+  const layout = settings.layout || 'cards-only';
+  const featuredImage = settings.featuredImage;
 
   useEffect(() => {
     if (subtitleTexts.length <= 1) return;
@@ -188,19 +192,51 @@ export function NewMenuSection({ settings, dishes }: NewMenuSectionProps) {
         </div>
 
         {dishesWithImages.length > 0 ? (
-          <div className={`grid ${gridColsClass} gap-6`}>
-            {dishesWithImages.map((dish, idx) => {
-              const chef = transformChef({ id: dish.seller_id || 'mock-chef', display_name: 'Kock' });
-              const commonProps = createCommonProps(dish, chef, {
-                onShare: () => console.log('Share:', dish.id),
-                onFavToggle: () => console.log('Favorite toggle:', dish.id),
-                isFaved: false,
-                onInfo: () => console.log('Info:', dish.id),
-                onPrimary: () => console.log('Buy:', dish.id),
-              });
-              return <PopularNewMoodCard key={dish.id || idx} {...commonProps} variant="new" />;
-            })}
-          </div>
+          layout === 'cards-only' || !featuredImage ? (
+            <div className={`grid ${gridColsClass} gap-6`}>
+              {dishesWithImages.map((dish, idx) => {
+                const chef = transformChef({ id: dish.seller_id || 'mock-chef', display_name: 'Kock' });
+                const commonProps = createCommonProps(dish, chef, {
+                  onShare: () => console.log('Share:', dish.id),
+                  onFavToggle: () => console.log('Favorite toggle:', dish.id),
+                  isFaved: false,
+                  onInfo: () => console.log('Info:', dish.id),
+                  onPrimary: () => console.log('Buy:', dish.id),
+                });
+                return <PopularNewMoodCard key={dish.id || idx} {...commonProps} variant="new" />;
+              })}
+            </div>
+          ) : (
+            <div className={`flex flex-col lg:flex-row gap-6 ${layout === 'image-right' ? 'lg:flex-row-reverse' : ''}`}>
+              <div className="rounded-lg overflow-hidden flex-shrink-0 lg:w-1/2">
+                <img
+                  src={featuredImage}
+                  alt="Featured"
+                  className="w-full h-full object-cover min-h-[300px]"
+                />
+              </div>
+              <div className="flex-1">
+                <div
+                  className="grid gap-6"
+                  style={{
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))'
+                  }}
+                >
+                  {dishesWithImages.map((dish, idx) => {
+                    const chef = transformChef({ id: dish.seller_id || 'mock-chef', display_name: 'Kock' });
+                    const commonProps = createCommonProps(dish, chef, {
+                      onShare: () => console.log('Share:', dish.id),
+                      onFavToggle: () => console.log('Favorite toggle:', dish.id),
+                      isFaved: false,
+                      onInfo: () => console.log('Info:', dish.id),
+                      onPrimary: () => console.log('Buy:', dish.id),
+                    });
+                    return <PopularNewMoodCard key={dish.id || idx} {...commonProps} variant="new" />;
+                  })}
+                </div>
+              </div>
+            </div>
+          )
         ) : (
           <EmptyState text="Inget här ännu" />
         )}

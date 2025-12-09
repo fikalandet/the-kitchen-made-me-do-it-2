@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ContestCard } from './ContestCard';
 import { EmptyState } from './EmptyState';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ContestsSectionProps {
   settings?: {
@@ -17,6 +18,10 @@ interface ContestsSectionProps {
     cardsPerRow?: number;
     layout?: 'cards-only' | 'image-third' | 'image-half';
     featuredImage?: string;
+    featuredImageText?: string;
+    featuredImageTextColor?: string;
+    featuredImageTextHAlign?: 'left' | 'center' | 'right';
+    featuredImageTextVAlign?: 'top' | 'center' | 'bottom';
   };
   contests: any[];
 }
@@ -24,6 +29,7 @@ interface ContestsSectionProps {
 export function ContestsSection({ settings, contests }: ContestsSectionProps) {
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
 
   const mockContests = [
     {
@@ -192,7 +198,7 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
               }`}
             >
               <div
-                className={`rounded-lg overflow-hidden flex-shrink-0 ${
+                className={`rounded-lg overflow-hidden flex-shrink-0 relative ${
                   layout === 'image-third' ? 'lg:w-1/3' : 'lg:w-1/2'
                 }`}
               >
@@ -201,6 +207,29 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
                   alt="Featured"
                   className="w-full h-full object-cover min-h-[300px]"
                 />
+                {settings?.featuredImageText && (
+                  <div
+                    className={`absolute inset-0 flex ${
+                      settings.featuredImageTextHAlign === 'center' ? 'justify-center' :
+                      settings.featuredImageTextHAlign === 'right' ? 'justify-end' :
+                      'justify-start'
+                    } ${
+                      settings.featuredImageTextVAlign === 'top' ? 'items-start' :
+                      settings.featuredImageTextVAlign === 'bottom' ? 'items-end' :
+                      'items-center'
+                    } p-6`}
+                  >
+                    <p
+                      className="text-2xl font-bold"
+                      style={{
+                        color: settings.featuredImageTextColor || '#ffffff',
+                        textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+                      }}
+                    >
+                      {settings.featuredImageText}
+                    </p>
+                  </div>
+                )}
               </div>
               <div className="flex-1">
                 <div
@@ -209,10 +238,31 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
                     gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))'
                   }}
                 >
-                  {contestsWithImages.map((contest) => (
+                  {contestsWithImages.slice(currentPage * 4, (currentPage + 1) * 4).map((contest) => (
                     <ContestCard key={contest.id} {...contest} />
                   ))}
                 </div>
+                {contestsWithImages.length > 4 && (
+                  <div className="flex items-center justify-center gap-4 mt-6">
+                    <button
+                      onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
+                      disabled={currentPage === 0}
+                      className="p-2 rounded-full bg-white shadow hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      <ChevronLeft size={24} />
+                    </button>
+                    <span className="text-sm text-gray-600">
+                      {currentPage + 1} / {Math.ceil(contestsWithImages.length / 4)}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage(Math.min(Math.ceil(contestsWithImages.length / 4) - 1, currentPage + 1))}
+                      disabled={currentPage >= Math.ceil(contestsWithImages.length / 4) - 1}
+                      className="p-2 rounded-full bg-white shadow hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    >
+                      <ChevronRight size={24} />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )

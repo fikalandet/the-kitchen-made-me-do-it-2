@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Upload } from 'lucide-react';
 import CollapsibleCard from './CollapsibleCard';
 import ColorPicker from './ColorPicker';
 import { colors } from '../../../theme/tokens';
+import { supabase } from '../../../lib/supabase';
+import { useAuth } from '../../../contexts/AuthContext';
 
 interface NewMenuSettings {
   backgroundColor?: string;
@@ -16,6 +18,8 @@ interface NewMenuSettings {
   subtitlePlacement?: 'inline' | 'below';
   subtitleColor?: string;
   cardsPerRow?: number;
+  layout?: 'cards-only' | 'image-left' | 'image-right';
+  featuredImage?: string;
 }
 
 interface NewMenuEditorProps {
@@ -24,8 +28,10 @@ interface NewMenuEditorProps {
 }
 
 export default function NewMenuEditor({ settings, onSettingsChange }: NewMenuEditorProps) {
+  const { user } = useAuth();
   const [activeSubtitleIndex, setActiveSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const updateSetting = (key: keyof NewMenuSettings, value: any) => {
     onSettingsChange({ ...settings, [key]: value });
@@ -62,6 +68,38 @@ export default function NewMenuEditor({ settings, onSettingsChange }: NewMenuEdi
     const newTexts = [...subtitleTexts];
     newTexts[index] = value;
     updateSetting('subtitleTexts', newTexts);
+  };
+
+  const handleImageUpload = async (file: File) => {
+    if (!user) {
+      alert('Du måste vara inloggad för att ladda upp filer');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `newmenu-featured-${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/newmenu/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      updateSetting('featuredImage', data.publicUrl);
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      alert('Kunde inte ladda upp filen. Försök igen.');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const subtitleTexts = settings.subtitleTexts || [''];
@@ -253,6 +291,84 @@ export default function NewMenuEditor({ settings, onSettingsChange }: NewMenuEdi
         </div>
       </CollapsibleCard>
 
+      <CollapsibleCard title="Layout för sektionen" defaultExpanded={true}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Välj layout
+            </label>
+            <select
+              value={settings.layout || 'cards-only'}
+              onChange={(e) => updateSetting('layout', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+            >
+              <option value="cards-only">Endast produktkort</option>
+              <option value="image-left">Stor bild vänster, kort höger</option>
+              <option value="image-right">Stor bild höger, kort vänster</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Välj hur innehållet ska visas på sidan
+            </p>
+          </div>
+
+          {settings.layout !== 'cards-only' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Featured bild
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  id="newmenu-featured-upload"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleImageUpload(file);
+                  }}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="newmenu-featured-upload"
+                  className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 ${
+                    uploadingImage ? 'opacity-50' : ''
+                  }`}
+                >
+                  <Upload className="w-4 h-4" />
+                  {uploadingImage ? 'Laddar upp...' : 'Ladda upp bild'}
+                </label>
+                {settings.featuredImage && (
+                  <button
+                    onClick={() => updateSetting('featuredImage', '')}
+                    className="px-3 py-2 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-lg hover:bg-red-50"
+                  >
+                    Ta bort
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Ladda upp eller ange URL till bilden som visas i sektionen
+              </p>
+              <input
+                type="text"
+                value={settings.featuredImage || ''}
+                onChange={(e) => updateSetting('featuredImage', e.target.value)}
+                placeholder="Eller ange bild-URL..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent mt-2"
+              />
+              {settings.featuredImage && (
+                <div className="mt-3">
+                  <img
+                    src={settings.featuredImage}
+                    alt="Featured"
+                    className="w-full h-48 object-cover rounded-lg"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </CollapsibleCard>
+
       <CollapsibleCard title="Produktkort" defaultExpanded={true}>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -342,14 +458,47 @@ export default function NewMenuEditor({ settings, onSettingsChange }: NewMenuEdi
             )}
           </div>
 
-          <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${settings.cardsPerRow || 4}, 1fr)` }}>
-            {[1, 2, 3, 4].slice(0, settings.cardsPerRow || 4).map((i) => (
-              <div key={i} className="bg-white rounded-lg p-4 shadow">
-                <div className="h-32 bg-gray-200 rounded mb-2"></div>
-                <p className="text-sm text-gray-600">Produktkort {i}</p>
+          {settings.layout === 'cards-only' || !settings.featuredImage ? (
+            <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${settings.cardsPerRow || 4}, 1fr)` }}>
+              {[1, 2, 3, 4].slice(0, settings.cardsPerRow || 4).map((i) => (
+                <div key={i} className="bg-white rounded-lg p-4 shadow">
+                  <div className="h-32 bg-gray-200 rounded mb-2"></div>
+                  <p className="text-sm text-gray-600">Produktkort {i}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className={`flex flex-col lg:flex-row gap-6 ${settings.layout === 'image-right' ? 'lg:flex-row-reverse' : ''}`}>
+              <div className="rounded-lg overflow-hidden flex-shrink-0 bg-gray-200 lg:w-1/2" style={{ minHeight: '300px' }}>
+                {settings.featuredImage ? (
+                  <img
+                    src={settings.featuredImage}
+                    alt="Featured"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-500">
+                    Featured bild
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
+              <div className="flex-1">
+                <div
+                  className="grid gap-6"
+                  style={{
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))'
+                  }}
+                >
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="bg-white rounded-lg p-4 shadow">
+                      <div className="h-32 bg-gray-200 rounded mb-2"></div>
+                      <p className="text-sm text-gray-600">Produktkort {i}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </CollapsibleCard>
     </div>
