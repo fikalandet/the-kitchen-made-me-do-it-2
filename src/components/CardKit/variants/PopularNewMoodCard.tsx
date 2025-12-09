@@ -10,6 +10,10 @@ import { LogisticsRow } from '../atoms/LogisticsRow';
 import { CTAGroup } from '../atoms/CTAGroup';
 
 export function PopularNewMoodCard(props: AvailableDishProps) {
+  if (!props || !props.chef || !props.availability) {
+    return null;
+  }
+
   const showSubscribe = props.chef.membership === 'gold' && props.availability.subscribe;
 
   return (
@@ -47,8 +51,8 @@ export function PopularNewMoodCard(props: AvailableDishProps) {
         <CenteredSectionLabel label="Tillgänglig" />
 
         <AvailabilityBadges
-          frozenCount={props.availability.frozenCount}
-          preOrder={props.availability.preOrder}
+          frozenCount={props.availability.frozenCount ?? 0}
+          preOrder={props.availability.preOrder ?? false}
           subscribeAvailable={showSubscribe}
         />
 
