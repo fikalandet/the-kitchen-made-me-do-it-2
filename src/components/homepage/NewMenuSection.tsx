@@ -73,6 +73,17 @@ export function NewMenuSection({ settings, dishes }: NewMenuSectionProps) {
 
   const displayDishes = dishes && dishes.length > 0 ? dishes : mockNewDishes;
 
+  const dishesWithImages = displayDishes.filter(
+    dish => dish?.image_url && dish.image_url.trim() !== ''
+  );
+
+  const isProduction = import.meta.env.MODE === 'production';
+  const showSection = dishesWithImages.length > 0 || !isProduction;
+
+  if (!showSection) {
+    return null;
+  }
+
   const subtitleTexts = settings.subtitleTexts || ['Senaste tillskotten'];
   const rotationInterval = settings.subtitleRotationInterval || 10000;
   const cardsPerRow = settings.cardsPerRow || 4;
@@ -176,9 +187,9 @@ export function NewMenuSection({ settings, dishes }: NewMenuSectionProps) {
           )}
         </div>
 
-        {displayDishes.length > 0 ? (
+        {dishesWithImages.length > 0 ? (
           <div className={`grid ${gridColsClass} gap-6`}>
-            {displayDishes.map((dish, idx) => {
+            {dishesWithImages.map((dish, idx) => {
               const chef = transformChef({ id: dish.seller_id || 'mock-chef', display_name: 'Kock' });
               const commonProps = createCommonProps(dish, chef, {
                 onShare: () => console.log('Share:', dish.id),

@@ -71,6 +71,17 @@ export function OnStoveNowSection({ settings, liveDishes, liveChefs }: OnStoveNo
 
   const filteredDishes = liveDishes.filter(schedule => schedule.cook_date === selectedDate);
 
+  const dishesWithImages = filteredDishes.filter(
+    schedule => schedule.product?.image_url && schedule.product.image_url.trim() !== ''
+  );
+
+  const isProduction = import.meta.env.MODE === 'production';
+  const showSection = dishesWithImages.length > 0 || !isProduction;
+
+  if (!showSection) {
+    return null;
+  }
+
   const headingFontClass = settings.headingFont === 'lobster' ? 'font-lobster' : '';
   const headingFontFamily =
     settings.headingFont === 'serif' ? 'serif' :
@@ -201,9 +212,9 @@ export function OnStoveNowSection({ settings, liveDishes, liveChefs }: OnStoveNo
           </div>
         </div>
 
-        {filteredDishes.length > 0 ? (
+        {dishesWithImages.length > 0 ? (
           <div className={`grid ${gridColsClass} gap-6`}>
-            {filteredDishes.map((schedule) => {
+            {dishesWithImages.map((schedule) => {
               const chef = transformChef(liveChefs[schedule.product?.seller_id]);
               const props = transformToOnStoveNowProps(schedule, chef, {
                 onShare: () => console.log('Share:', schedule.product?.id),

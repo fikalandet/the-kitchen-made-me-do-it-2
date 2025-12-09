@@ -88,6 +88,17 @@ export function FridgeMenuSection({ settings, products }: FridgeMenuSectionProps
 
   const displayProducts = products && products.length > 0 ? products : mockFridgeProducts;
 
+  const productsWithImages = displayProducts.filter(
+    product => product?.image_url && product.image_url.trim() !== ''
+  );
+
+  const isProduction = import.meta.env.MODE === 'production';
+  const showSection = productsWithImages.length > 0 || !isProduction;
+
+  if (!showSection) {
+    return null;
+  }
+
   const subtitleTexts = settings.subtitleTexts || ['Matlådekassar, laga-själv-kit och prenumerationer'];
   const rotationInterval = settings.subtitleRotationInterval || 10000;
   const cardsPerRow = settings.cardsPerRow || 4;
@@ -192,10 +203,10 @@ export function FridgeMenuSection({ settings, products }: FridgeMenuSectionProps
           )}
         </div>
 
-        {displayProducts.length > 0 ? (
+        {productsWithImages.length > 0 ? (
           layout === 'grid' ? (
             <div className={`grid ${gridColsClass} gap-6`}>
-              {displayProducts.map((product, idx) => {
+              {productsWithImages.map((product, idx) => {
                 const chef = transformChef({ id: product.seller_id || 'mock-chef', display_name: 'Kock' });
                 const productType =
                   product.type === 'subscription' || (product.name || product.title || '').toLowerCase().includes('prenumeration')
@@ -241,7 +252,7 @@ export function FridgeMenuSection({ settings, products }: FridgeMenuSectionProps
             </div>
           ) : (
             <div className="flex gap-6 overflow-x-auto pb-4">
-              {displayProducts.map((product, idx) => {
+              {productsWithImages.map((product, idx) => {
                 const chef = transformChef({ id: product.seller_id || 'mock-chef', display_name: 'Kock' });
                 const productType =
                   product.type === 'subscription' || (product.name || product.title || '').toLowerCase().includes('prenumeration')
