@@ -23,6 +23,9 @@
     - subtitleColor: Subtitle text color
     - featuredChefs: Array of { chefId, comment } objects
     - cardsPerRow: Number of chef cards per row
+    - cardBackgroundColor: Background color for chef cards
+    - cardNameColor: Text color for chef names
+    - cardCommentColor: Text color for Kitchen comments
 */
 
 -- Insert Veckans kockar section if it doesn't exist
@@ -44,7 +47,10 @@ VALUES (
     "subtitlePlacement": "inline",
     "subtitleColor": "#374151",
     "featuredChefs": [],
-    "cardsPerRow": 3
+    "cardsPerRow": 3,
+    "cardBackgroundColor": "#ffffff",
+    "cardNameColor": "#111827",
+    "cardCommentColor": "#4b5563"
   }'::jsonb
 )
 ON CONFLICT (slug) DO NOTHING;

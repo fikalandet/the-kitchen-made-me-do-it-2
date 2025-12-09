@@ -16,6 +16,9 @@ interface WeeklyChefsSectionProps {
     subtitleColor?: string;
     featuredChefs?: Array<{ chefId: string; comment: string }>;
     cardsPerRow?: number;
+    cardBackgroundColor?: string;
+    cardNameColor?: string;
+    cardCommentColor?: string;
   };
   chefs: any[];
 }
@@ -158,6 +161,9 @@ export function WeeklyChefsSection({ settings, chefs }: WeeklyChefsSectionProps)
                   openStatus: chef.kitchen_open_status || 'closed',
                 }}
                 imageShape="round"
+                cardBackgroundColor={settings.cardBackgroundColor}
+                cardNameColor={settings.cardNameColor}
+                cardCommentColor={settings.cardCommentColor}
                 onVisitKitchen={() => console.log('Visit kitchen:', chef.id)}
               />
             ))}

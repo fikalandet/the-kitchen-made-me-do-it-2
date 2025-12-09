@@ -13,8 +13,9 @@ export function ChefOfWeekCard(props: ChefOfWeekProps) {
 
   return (
     <div
-      className="bg-white rounded-2xl overflow-hidden cursor-pointer p-6"
+      className="rounded-2xl overflow-hidden cursor-pointer p-6"
       style={{
+        backgroundColor: props.cardBackgroundColor || '#ffffff',
         boxShadow: shadows.card,
         transition: `transform ${transitions.fast}, box-shadow ${transitions.fast}`,
       }}
@@ -44,14 +45,27 @@ export function ChefOfWeekCard(props: ChefOfWeekProps) {
         <div className="text-center space-y-2">
           <h3
             className="font-semibold text-lg"
-            style={{ fontFamily: typography.fonts.body }}
+            style={{
+              fontFamily: typography.fonts.body,
+              color: props.cardNameColor || '#111827'
+            }}
           >
             {props.kitchenName}
           </h3>
 
-          <div className="text-sm text-gray-600">
-            <p className="font-medium">The Kitchen-kommentar:</p>
-            <p className="italic">{props.adminComment}</p>
+          <div className="text-sm">
+            <p
+              className="font-medium"
+              style={{ color: props.cardCommentColor || '#4b5563' }}
+            >
+              Kitchen-kommentar:
+            </p>
+            <p
+              className="italic"
+              style={{ color: props.cardCommentColor || '#4b5563' }}
+            >
+              {props.adminComment}
+            </p>
           </div>
         </div>
 

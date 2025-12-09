@@ -69,7 +69,7 @@ export default function WeeklyChefsEditor({ settings, onSettingsChange }: Weekly
       const { data, error } = await supabase
         .from('profiles')
         .select('id, display_name, avatar_url, city, kitchen_open_status')
-        .eq('role', 'chef')
+        .eq('role', 'seller')
         .order('display_name');
 
       if (error) throw error;
@@ -321,6 +321,28 @@ export default function WeeklyChefsEditor({ settings, onSettingsChange }: Weekly
         </div>
       </CollapsibleCard>
 
+      <CollapsibleCard title="Kockkort – färger" defaultExpanded={true}>
+        <div className="space-y-4">
+          <ColorPicker
+            label="Bakgrundsfärg för kockkort"
+            value={settings.cardBackgroundColor || '#ffffff'}
+            onChange={(color) => updateSetting('cardBackgroundColor', color)}
+          />
+
+          <ColorPicker
+            label="Textfärg – kockens namn"
+            value={settings.cardNameColor || '#111827'}
+            onChange={(color) => updateSetting('cardNameColor', color)}
+          />
+
+          <ColorPicker
+            label="Textfärg – Kitchen-kommentar"
+            value={settings.cardCommentColor || '#4b5563'}
+            onChange={(color) => updateSetting('cardCommentColor', color)}
+          />
+        </div>
+      </CollapsibleCard>
+
       <CollapsibleCard title="Välj kockar" defaultExpanded={true}>
         <div className="space-y-4">
           <div className="relative">
@@ -476,15 +498,28 @@ export default function WeeklyChefsEditor({ settings, onSettingsChange }: Weekly
           {selectedChefs.length > 0 ? (
             <div className={`grid gap-6 grid-cols-${Math.min(settings.cardsPerRow || 3, selectedChefs.length)}`}>
               {selectedChefs.slice(0, 3).map((chef) => (
-                <div key={chef.id} className="bg-white rounded-lg p-4 shadow text-center">
+                <div
+                  key={chef.id}
+                  className="rounded-lg p-4 shadow text-center"
+                  style={{ backgroundColor: settings.cardBackgroundColor || '#ffffff' }}
+                >
                   {chef.avatar_url && (
                     <img src={chef.avatar_url} alt={chef.display_name} className="w-20 h-20 rounded-full mx-auto mb-3 object-cover" />
                   )}
-                  <p className="font-semibold text-gray-900 mb-1">{chef.display_name}</p>
+                  <p
+                    className="font-semibold mb-1"
+                    style={{ color: settings.cardNameColor || '#111827' }}
+                  >
+                    {chef.display_name || 'Okänd kock'}
+                  </p>
                   {getChefComment(chef.id) && (
-                    <div className="text-sm text-gray-600 mt-2">
-                      <p className="font-medium">Kitchen-kommentar:</p>
-                      <p className="italic">{getChefComment(chef.id)}</p>
+                    <div className="text-sm mt-2">
+                      <p className="font-medium" style={{ color: settings.cardCommentColor || '#4b5563' }}>
+                        Kitchen-kommentar:
+                      </p>
+                      <p className="italic" style={{ color: settings.cardCommentColor || '#4b5563' }}>
+                        {getChefComment(chef.id)}
+                      </p>
                     </div>
                   )}
                 </div>
