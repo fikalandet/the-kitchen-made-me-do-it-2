@@ -10,6 +10,13 @@ export function ChefOfWeekCard(props: ChefOfWeekProps) {
 
   const ringColor = statusColors[props.chef.openStatus];
   const isRound = props.imageShape === 'round' || !props.imageShape;
+  const imageSize = props.imageSize || 112;
+  const imagePlacement = props.imagePlacement || 'center';
+
+  const alignmentClass =
+    imagePlacement === 'left' ? 'items-start' :
+    imagePlacement === 'right' ? 'items-end' :
+    'items-center';
 
   return (
     <div
@@ -28,7 +35,7 @@ export function ChefOfWeekCard(props: ChefOfWeekProps) {
         e.currentTarget.style.boxShadow = shadows.card;
       }}
     >
-      <div className="flex flex-col items-center space-y-4">
+      <div className={`flex flex-col ${alignmentClass} space-y-4`}>
         <div
           className={`p-1 bg-white ${isRound ? 'rounded-full' : 'rounded-2xl'}`}
           style={{
@@ -38,7 +45,11 @@ export function ChefOfWeekCard(props: ChefOfWeekProps) {
           <img
             src={props.chef.avatarUrl}
             alt={props.chef.name}
-            className={`w-28 h-28 object-cover ${isRound ? 'rounded-full' : 'rounded-xl'}`}
+            className={`object-cover ${isRound ? 'rounded-full' : 'rounded-xl'}`}
+            style={{
+              width: `${imageSize}px`,
+              height: `${imageSize}px`
+            }}
           />
         </div>
 

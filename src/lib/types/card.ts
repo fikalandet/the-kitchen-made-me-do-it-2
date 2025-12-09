@@ -96,6 +96,8 @@ export type ChefOfWeekProps = {
   kitchenName: string;
   adminComment: string;
   imageShape?: 'round' | 'square';
+  imageSize?: number;
+  imagePlacement?: 'left' | 'center' | 'right';
   onVisitKitchen?: () => void;
   cardBackgroundColor?: string;
   cardNameColor?: string;

@@ -17,6 +17,9 @@ interface WeeklyChefsSettings {
   subtitleColor?: string;
   featuredChefs?: Array<{ chefId: string; comment: string }>;
   cardsPerRow?: number;
+  chefImageSize?: number;
+  chefImageShape?: 'round' | 'square';
+  chefImagePlacement?: 'left' | 'center' | 'right';
 }
 
 interface WeeklyChefsEditorProps {
@@ -343,6 +346,96 @@ export default function WeeklyChefsEditor({ settings, onSettingsChange }: Weekly
         </div>
       </CollapsibleCard>
 
+      <CollapsibleCard title="Kockbild – inställningar" defaultExpanded={true}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Storlek på kockbild (px)
+            </label>
+            <input
+              type="range"
+              min="64"
+              max="200"
+              step="8"
+              value={settings.chefImageSize || 112}
+              onChange={(e) => updateSetting('chefImageSize', parseInt(e.target.value))}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>64px</span>
+              <span className="font-medium text-gray-700">{settings.chefImageSize || 112}px</span>
+              <span>200px</span>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Form på kockbild
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('chefImageShape', 'round')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  (settings.chefImageShape === 'round' || !settings.chefImageShape)
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Rund
+              </button>
+              <button
+                onClick={() => updateSetting('chefImageShape', 'square')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.chefImageShape === 'square'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Fyrkantig
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Placering av kockbild
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('chefImagePlacement', 'left')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.chefImagePlacement === 'left'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Vänster
+              </button>
+              <button
+                onClick={() => updateSetting('chefImagePlacement', 'center')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  (settings.chefImagePlacement === 'center' || !settings.chefImagePlacement)
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Mitten
+              </button>
+              <button
+                onClick={() => updateSetting('chefImagePlacement', 'right')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.chefImagePlacement === 'right'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Höger
+              </button>
+            </div>
+          </div>
+        </div>
+      </CollapsibleCard>
+
       <CollapsibleCard title="Välj kockar" defaultExpanded={true}>
         <div className="space-y-4">
           <div className="relative">
@@ -497,33 +590,55 @@ export default function WeeklyChefsEditor({ settings, onSettingsChange }: Weekly
 
           {selectedChefs.length > 0 ? (
             <div className={`grid gap-6 grid-cols-${Math.min(settings.cardsPerRow || 3, selectedChefs.length)}`}>
-              {selectedChefs.slice(0, 3).map((chef) => (
-                <div
-                  key={chef.id}
-                  className="rounded-lg p-4 shadow text-center"
-                  style={{ backgroundColor: settings.cardBackgroundColor || '#ffffff' }}
-                >
-                  {chef.avatar_url && (
-                    <img src={chef.avatar_url} alt={chef.display_name} className="w-20 h-20 rounded-full mx-auto mb-3 object-cover" />
-                  )}
-                  <p
-                    className="font-semibold mb-1"
-                    style={{ color: settings.cardNameColor || '#111827' }}
+              {selectedChefs.slice(0, 3).map((chef) => {
+                const imageSize = settings.chefImageSize || 112;
+                const imageShape = settings.chefImageShape || 'round';
+                const imagePlacement = settings.chefImagePlacement || 'center';
+                const alignmentClass =
+                  imagePlacement === 'left' ? 'items-start' :
+                  imagePlacement === 'right' ? 'items-end' :
+                  'items-center';
+
+                return (
+                  <div
+                    key={chef.id}
+                    className="rounded-lg p-4 shadow"
+                    style={{ backgroundColor: settings.cardBackgroundColor || '#ffffff' }}
                   >
-                    {chef.display_name || 'Okänd kock'}
-                  </p>
-                  {getChefComment(chef.id) && (
-                    <div className="text-sm mt-2">
-                      <p className="font-medium" style={{ color: settings.cardCommentColor || '#4b5563' }}>
-                        Kitchen-kommentar:
-                      </p>
-                      <p className="italic" style={{ color: settings.cardCommentColor || '#4b5563' }}>
-                        {getChefComment(chef.id)}
-                      </p>
+                    <div className={`flex flex-col ${alignmentClass} space-y-3`}>
+                      {chef.avatar_url && (
+                        <img
+                          src={chef.avatar_url}
+                          alt={chef.display_name}
+                          className={`object-cover ${imageShape === 'round' ? 'rounded-full' : 'rounded-xl'}`}
+                          style={{
+                            width: `${imageSize}px`,
+                            height: `${imageSize}px`
+                          }}
+                        />
+                      )}
+                      <div className="text-center">
+                        <p
+                          className="font-semibold mb-1"
+                          style={{ color: settings.cardNameColor || '#111827' }}
+                        >
+                          {chef.display_name || 'Okänd kock'}
+                        </p>
+                        {getChefComment(chef.id) && (
+                          <div className="text-sm mt-2">
+                            <p className="font-medium" style={{ color: settings.cardCommentColor || '#4b5563' }}>
+                              Kitchen-kommentar:
+                            </p>
+                            <p className="italic" style={{ color: settings.cardCommentColor || '#4b5563' }}>
+                              {getChefComment(chef.id)}
+                            </p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <p className="text-center text-gray-500">Inga kockar valda</p>

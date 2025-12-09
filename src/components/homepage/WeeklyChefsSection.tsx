@@ -19,6 +19,9 @@ interface WeeklyChefsSectionProps {
     cardBackgroundColor?: string;
     cardNameColor?: string;
     cardCommentColor?: string;
+    chefImageSize?: number;
+    chefImageShape?: 'round' | 'square';
+    chefImagePlacement?: 'left' | 'center' | 'right';
   };
   chefs: any[];
 }
@@ -26,6 +29,33 @@ interface WeeklyChefsSectionProps {
 export function WeeklyChefsSection({ settings, chefs }: WeeklyChefsSectionProps) {
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
+
+  const mockWeeklyChefs = [
+    {
+      id: 'chef-mock-1',
+      display_name: 'Anna Svensson',
+      avatar_url: 'https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=200',
+      city: 'Stockholm',
+      kitchen_open_status: 'open',
+      kitchenComment: 'Känd för sina fantastiska pastarätter med en modern twist'
+    },
+    {
+      id: 'chef-mock-2',
+      display_name: 'Erik Johansson',
+      avatar_url: 'https://images.pexels.com/photos/4253320/pexels-photo-4253320.jpeg?auto=compress&cs=tinysrgb&w=200',
+      city: 'Göteborg',
+      kitchen_open_status: 'soon',
+      kitchenComment: 'Mästare på vegetariska rätter som får köttalskare att ändra sig'
+    },
+    {
+      id: 'chef-mock-3',
+      display_name: 'Sofia Lindberg',
+      avatar_url: 'https://images.pexels.com/photos/3762875/pexels-photo-3762875.jpeg?auto=compress&cs=tinysrgb&w=200',
+      city: 'Malmö',
+      kitchen_open_status: 'open',
+      kitchenComment: 'Specialiserad på asiatisk fusion med lokala råvaror'
+    }
+  ];
 
   const subtitleTexts = settings.subtitleTexts || ['Hetare än chili, och har fler följare än din grannes surdegsblogg'];
   const rotationInterval = settings.subtitleRotationInterval || 10000;
@@ -45,8 +75,10 @@ export function WeeklyChefsSection({ settings, chefs }: WeeklyChefsSectionProps)
     };
   });
 
+  const displayChefs = chefsWithComments.length > 0 ? chefsWithComments : mockWeeklyChefs;
+
   const isProduction = import.meta.env.MODE === 'production';
-  const showSection = chefsWithComments.length > 0 || !isProduction;
+  const showSection = displayChefs.length > 0 || !isProduction;
 
   if (!showSection) {
     return null;
@@ -148,19 +180,23 @@ export function WeeklyChefsSection({ settings, chefs }: WeeklyChefsSectionProps)
           )}
         </div>
 
-        {chefsWithComments.length > 0 ? (
+        {displayChefs.length > 0 ? (
           <div className={`grid ${gridColsClass} gap-6`}>
-            {chefsWithComments.map((chef) => (
+            {displayChefs.map((chef) => (
               <ChefOfWeekCard
                 key={chef.id}
                 kitchenName={chef.display_name || 'Okänd kock'}
                 adminComment={chef.kitchenComment || ''}
                 chef={{
+                  id: chef.id,
                   name: chef.display_name || 'Okänd kock',
                   avatarUrl: chef.avatar_url || 'https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=200',
                   openStatus: chef.kitchen_open_status || 'closed',
+                  membership: 'free'
                 }}
-                imageShape="round"
+                imageShape={settings.chefImageShape || 'round'}
+                imageSize={settings.chefImageSize || 112}
+                imagePlacement={settings.chefImagePlacement || 'center'}
                 cardBackgroundColor={settings.cardBackgroundColor}
                 cardNameColor={settings.cardNameColor}
                 cardCommentColor={settings.cardCommentColor}
