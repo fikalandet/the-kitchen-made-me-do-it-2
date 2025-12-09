@@ -3,7 +3,7 @@ import { ContestCard } from './ContestCard';
 import { EmptyState } from './EmptyState';
 
 interface ContestsSectionProps {
-  settings: {
+  settings?: {
     backgroundColor?: string;
     heading?: string;
     headingFont?: string;
@@ -71,10 +71,10 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
     return null;
   }
 
-  const subtitleTexts = settings.subtitleTexts || ['Tävla och vinn fina priser'];
-  const rotationInterval = settings.subtitleRotationInterval || 10000;
-  const cardsPerRow = settings.cardsPerRow || 4;
-  const subtitlePlacement = settings.subtitlePlacement || 'inline';
+  const subtitleTexts = settings?.subtitleTexts || ['Tävla och vinn fina priser'];
+  const rotationInterval = settings?.subtitleRotationInterval || 10000;
+  const cardsPerRow = settings?.cardsPerRow || 4;
+  const subtitlePlacement = settings?.subtitlePlacement || 'inline';
 
   useEffect(() => {
     if (subtitleTexts.length <= 1) return;
@@ -90,10 +90,10 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
     return () => clearInterval(interval);
   }, [subtitleTexts.length, rotationInterval]);
 
-  const headingFontClass = settings.headingFont === 'lobster' ? 'font-lobster' : '';
+  const headingFontClass = settings?.headingFont === 'lobster' ? 'font-lobster' : '';
   const headingFontFamily =
-    settings.headingFont === 'serif' ? 'serif' :
-    settings.headingFont === 'sans' ? 'sans-serif' :
+    settings?.headingFont === 'serif' ? 'serif' :
+    settings?.headingFont === 'sans' ? 'sans-serif' :
     undefined;
 
   const gridColsClass =
@@ -107,25 +107,25 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
     'grid-cols-1 md:grid-cols-2 lg:grid-cols-4';
 
   return (
-    <section className="py-8 px-4" style={{ backgroundColor: settings.backgroundColor || '#ffffff' }}>
+    <section className="py-8 px-4" style={{ backgroundColor: settings?.backgroundColor || '#ffffff' }}>
       <div className="max-w-7xl mx-auto">
         <div
           className={`mb-6 ${
-            settings.headingAlignment === 'center' ? 'text-center' : 'text-left'
+            settings?.headingAlignment === 'center' ? 'text-center' : 'text-left'
           }`}
         >
           {subtitlePlacement === 'inline' ? (
-            <div className={`flex items-center gap-3 ${settings.headingAlignment === 'center' ? 'justify-center' : ''}`}>
+            <div className={`flex items-center gap-3 ${settings?.headingAlignment === 'center' ? 'justify-center' : ''}`}>
               <h2
                 className={`text-3xl ${headingFontClass} ${
-                  settings.headingBold ? 'font-bold' : ''
+                  settings?.headingBold ? 'font-bold' : ''
                 }`}
                 style={{
                   fontFamily: headingFontFamily,
-                  color: settings.headingColor || '#374151'
+                  color: settings?.headingColor || '#374151'
                 }}
               >
-                {settings.heading || 'Tävlingar'}
+                {settings?.heading || 'Tävlingar'}
               </h2>
               {subtitleTexts.length > 0 && subtitleTexts[0] && (
                 <>
@@ -135,7 +135,7 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
                       className="transition-opacity duration-300"
                       style={{
                         opacity: fadeIn ? 1 : 0,
-                        color: settings.subtitleColor || '#374151'
+                        color: settings?.subtitleColor || '#374151'
                       }}
                     >
                       {subtitleTexts[currentSubtitleIndex] || subtitleTexts[0]}
@@ -148,14 +148,14 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
             <div>
               <h2
                 className={`text-3xl ${headingFontClass} ${
-                  settings.headingBold ? 'font-bold' : ''
+                  settings?.headingBold ? 'font-bold' : ''
                 }`}
                 style={{
                   fontFamily: headingFontFamily,
-                  color: settings.headingColor || '#374151'
+                  color: settings?.headingColor || '#374151'
                 }}
               >
-                {settings.heading || 'Tävlingar'}
+                {settings?.heading || 'Tävlingar'}
               </h2>
               {subtitleTexts.length > 0 && subtitleTexts[currentSubtitleIndex] && (
                 <div className="min-h-[24px] flex items-center mt-2">
@@ -163,7 +163,7 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
                     className="transition-opacity duration-300"
                     style={{
                       opacity: fadeIn ? 1 : 0,
-                      color: settings.subtitleColor || '#374151'
+                      color: settings?.subtitleColor || '#374151'
                     }}
                   >
                     {subtitleTexts[currentSubtitleIndex]}
