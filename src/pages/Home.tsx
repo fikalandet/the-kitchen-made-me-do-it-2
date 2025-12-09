@@ -12,6 +12,8 @@ import { WeeklyChefsSection } from '../components/homepage/WeeklyChefsSection';
 import { EmptyState } from '../components/homepage/EmptyState';
 import { MealKitsSection } from '../components/homepage/MealKitsSection';
 import { DealsSection } from '../components/homepage/DealsSection';
+import { BrattomkakSection } from '../components/homepage/BrattomkakSection';
+import { TjuvkikSection } from '../components/homepage/TjuvkikSection';
 import { TasteTagsSection } from '../components/homepage/TasteTagsSection';
 import { ContestsSection } from '../components/homepage/ContestsSection';
 import { FeedbackDishesSection } from '../components/homepage/FeedbackDishesSection';
@@ -61,7 +63,11 @@ export const Home: React.FC = () => {
   const [newMenuSettings, setNewMenuSettings] = useState<any>({});
   const [fridgeMenuSettings, setFridgeMenuSettings] = useState<any>({});
   const [weeklyChefsSettings, setWeeklyChefsSettings] = useState<any>({});
+  const [brattomkakSettings, setBrattomkakSettings] = useState<any>({});
+  const [tjuvkikSettings, setTjuvkikSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
+  const [brattomDishes, setBrattomDishes] = useState<any[]>([]);
+  const [tjuvkikDishes, setTjuvkikDishes] = useState<any[]>([]);
   const [fridgeMenuProducts, setFridgeMenuProducts] = useState<any[]>([]);
   const [weeklyChefs, setWeeklyChefs] = useState<any[]>([]);
   const [liveChefs, setLiveChefs] = useState<{[key: string]: any}>({});
@@ -137,6 +143,26 @@ export const Home: React.FC = () => {
 
     if (weeklyChefsSection) {
       setWeeklyChefsSettings(weeklyChefsSection.settings || {});
+    }
+
+    const { data: brattomkakSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'brattomkak')
+      .maybeSingle();
+
+    if (brattomkakSection) {
+      setBrattomkakSettings(brattomkakSection.settings || {});
+    }
+
+    const { data: tjuvkikSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'tjuvkik-i-koket')
+      .maybeSingle();
+
+    if (tjuvkikSection) {
+      setTjuvkikSettings(tjuvkikSection.settings || {});
     }
 
     const mockChef = {
@@ -825,7 +851,17 @@ export const Home: React.FC = () => {
         chefs={weeklyChefs}
       />
 
+      <BrattomkakSection
+        settings={brattomkakSettings}
+        dishes={brattomDishes}
+      />
+
       <DealsSection deals={deals} />
+
+      <TjuvkikSection
+        settings={tjuvkikSettings}
+        dishes={tjuvkikDishes}
+      />
 
       <SectionWrapper title="Smaketiketter" subtitle="Kockar delar sina personliga favoriter">
         {tasteTagDishes.length > 0 ? (

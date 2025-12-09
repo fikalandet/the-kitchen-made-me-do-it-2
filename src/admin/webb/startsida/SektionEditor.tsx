@@ -57,6 +57,16 @@ export default function SektionEditor() {
         <SectionEditor slug="kylskapsmeny" displayName="Kylskåpsmeny" />
       ) : sectionSlug === 'veckans-kockar' ? (
         <SectionEditor slug="veckans-kockar" displayName="Veckans kockar" />
+      ) : sectionSlug === 'brattomkak' ? (
+        <SectionEditor slug="brattomkak" displayName="Bråttomkäk" />
+      ) : sectionSlug === 'schyssta-deals' ? (
+        <SectionEditor slug="schyssta-deals" displayName="Schyssta deals" />
+      ) : sectionSlug === 'evenemang' ? (
+        <SectionEditor slug="evenemang" displayName="Evenemang" />
+      ) : sectionSlug === 'tavlingar' ? (
+        <SectionEditor slug="tavlingar" displayName="Tävlingar" />
+      ) : sectionSlug === 'tjuvkik-i-koket' ? (
+        <SectionEditor slug="tjuvkik-i-koket" displayName="Tjuvkik i köket" />
       ) : (
         <>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Sektion: {sectionName}</h2>

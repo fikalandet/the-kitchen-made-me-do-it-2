@@ -9,6 +9,11 @@ import PopularEditor from './PopularEditor';
 import NewMenuEditor from './NewMenuEditor';
 import FridgeMenuEditor from './FridgeMenuEditor';
 import WeeklyChefsEditor from './WeeklyChefsEditor';
+import BrattomkakEditor from './BrattomkakEditor';
+import SchysstaDealsEditor from './SchysstaDealsEditor';
+import EventsEditor from './EventsEditor';
+import ContestsEditor from './ContestsEditor';
+import TjuvkikEditor from './TjuvkikEditor';
 import { Save, Loader } from 'lucide-react';
 
 interface SectionEditorProps {
@@ -77,6 +82,26 @@ const sectionConfigs: Record<string, SectionConfig> = {
   'veckans-kockar': {
     supportsStandardContent: false,
     customPanels: [WeeklyChefsEditor],
+  },
+  'brattomkak': {
+    supportsStandardContent: false,
+    customPanels: [BrattomkakEditor],
+  },
+  'schyssta-deals': {
+    supportsStandardContent: false,
+    customPanels: [SchysstaDealsEditor],
+  },
+  'evenemang': {
+    supportsStandardContent: false,
+    customPanels: [EventsEditor],
+  },
+  'tavlingar': {
+    supportsStandardContent: false,
+    customPanels: [ContestsEditor],
+  },
+  'tjuvkik-i-koket': {
+    supportsStandardContent: false,
+    customPanels: [TjuvkikEditor],
   },
 }
 
