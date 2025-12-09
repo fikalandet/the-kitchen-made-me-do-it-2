@@ -24,6 +24,55 @@ export function NewMenuSection({ settings, dishes }: NewMenuSectionProps) {
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
 
+  const mockNewDishes = [
+    {
+      id: 'new-mock-1',
+      name: 'Sushi-platta',
+      price: 189,
+      image_url: 'https://images.pexels.com/photos/357756/pexels-photo-357756.jpeg?auto=compress&cs=tinysrgb&w=800',
+      seller_id: 'mock-chef',
+      available: true,
+      created_at: new Date().toISOString(),
+      pickup_enabled: true,
+      delivery_enabled: true
+    },
+    {
+      id: 'new-mock-2',
+      name: 'Indisk tikka masala',
+      price: 135,
+      image_url: 'https://images.pexels.com/photos/2474661/pexels-photo-2474661.jpeg?auto=compress&cs=tinysrgb&w=800',
+      seller_id: 'mock-chef',
+      available: true,
+      created_at: new Date().toISOString(),
+      pickup_enabled: true,
+      delivery_enabled: true
+    },
+    {
+      id: 'new-mock-3',
+      name: 'Gourmet hamburgare',
+      price: 159,
+      image_url: 'https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg?auto=compress&cs=tinysrgb&w=800',
+      seller_id: 'mock-chef',
+      available: true,
+      created_at: new Date().toISOString(),
+      pickup_enabled: true,
+      delivery_enabled: true
+    },
+    {
+      id: 'new-mock-4',
+      name: 'Medelhavspizza',
+      price: 145,
+      image_url: 'https://images.pexels.com/photos/825661/pexels-photo-825661.jpeg?auto=compress&cs=tinysrgb&w=800',
+      seller_id: 'mock-chef',
+      available: true,
+      created_at: new Date().toISOString(),
+      pickup_enabled: true,
+      delivery_enabled: false
+    }
+  ];
+
+  const displayDishes = dishes && dishes.length > 0 ? dishes : mockNewDishes;
+
   const subtitleTexts = settings.subtitleTexts || ['Senaste tillskotten'];
   const rotationInterval = settings.subtitleRotationInterval || 10000;
   const cardsPerRow = settings.cardsPerRow || 4;
@@ -127,10 +176,10 @@ export function NewMenuSection({ settings, dishes }: NewMenuSectionProps) {
           )}
         </div>
 
-        {dishes.length > 0 ? (
+        {displayDishes.length > 0 ? (
           <div className={`grid ${gridColsClass} gap-6`}>
-            {dishes.map((dish, idx) => {
-              const chef = transformChef({ id: dish.seller_id, display_name: 'Kock' });
+            {displayDishes.map((dish, idx) => {
+              const chef = transformChef({ id: dish.seller_id || 'mock-chef', display_name: 'Kock' });
               const commonProps = createCommonProps(dish, chef, {
                 onShare: () => console.log('Share:', dish.id),
                 onFavToggle: () => console.log('Favorite toggle:', dish.id),

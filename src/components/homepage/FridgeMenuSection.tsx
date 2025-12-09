@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { EmptyState } from './EmptyState';
+import { BundleCard } from '../CardKit/variants/BundleCard';
+import { transformChef } from '../../lib/adapters/cardKitAdapters';
 
 interface FridgeMenuSectionProps {
   settings: {
@@ -22,6 +24,69 @@ interface FridgeMenuSectionProps {
 export function FridgeMenuSection({ settings, products }: FridgeMenuSectionProps) {
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
+
+  const mockFridgeProducts = [
+    {
+      id: 'fridge-mock-1',
+      name: 'Italiensk matlådekasse',
+      title: 'Italiensk matlådekasse',
+      description: 'Fem färdiga italienska middagar för hela veckan',
+      price: 899,
+      image_url: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800',
+      seller_id: 'mock-chef',
+      type: 'meal_box',
+      available: true,
+      pickup_enabled: true,
+      delivery_enabled: true,
+      pickup_hours: '15:00-18:00',
+      delivery_hours: '17:00-20:00'
+    },
+    {
+      id: 'fridge-mock-2',
+      name: 'Laga-själv sushi-kit',
+      title: 'Laga-själv sushi-kit',
+      description: 'Allt du behöver för att göra sushi hemma - ingredienser och instruktioner',
+      price: 449,
+      image_url: 'https://images.pexels.com/photos/357756/pexels-photo-357756.jpeg?auto=compress&cs=tinysrgb&w=800',
+      seller_id: 'mock-chef',
+      type: 'cooking_kit',
+      available: true,
+      pickup_enabled: true,
+      delivery_enabled: true,
+      pickup_hours: '10:00-19:00',
+      delivery_hours: '12:00-20:00'
+    },
+    {
+      id: 'fridge-mock-3',
+      name: 'Vegansk matlådekasse',
+      title: 'Vegansk matlådekasse',
+      description: 'Hälsosamma och goda veganska rätter, färdiga att äta',
+      price: 799,
+      image_url: 'https://images.pexels.com/photos/1640770/pexels-photo-1640770.jpeg?auto=compress&cs=tinysrgb&w=800',
+      seller_id: 'mock-chef',
+      type: 'meal_box',
+      available: true,
+      pickup_enabled: true,
+      delivery_enabled: false,
+      pickup_hours: '14:00-17:00'
+    },
+    {
+      id: 'fridge-mock-4',
+      name: 'Veckolunch-prenumeration',
+      title: 'Veckolunch-prenumeration',
+      description: 'Få färdiga lunchrätter levererade varje måndag',
+      price: 1299,
+      image_url: 'https://images.pexels.com/photos/1624487/pexels-photo-1624487.jpeg?auto=compress&cs=tinysrgb&w=800',
+      seller_id: 'mock-chef',
+      type: 'subscription',
+      available: true,
+      pickup_enabled: false,
+      delivery_enabled: true,
+      delivery_hours: 'Måndagar 08:00-10:00'
+    }
+  ];
+
+  const displayProducts = products && products.length > 0 ? products : mockFridgeProducts;
 
   const subtitleTexts = settings.subtitleTexts || ['Matlådekassar, laga-själv-kit och prenumerationer'];
   const rotationInterval = settings.subtitleRotationInterval || 10000;
@@ -127,40 +192,98 @@ export function FridgeMenuSection({ settings, products }: FridgeMenuSectionProps
           )}
         </div>
 
-        {products.length > 0 ? (
+        {displayProducts.length > 0 ? (
           layout === 'grid' ? (
             <div className={`grid ${gridColsClass} gap-6`}>
-              {products.map((product, idx) => (
-                <div key={product.id || idx} className="bg-white rounded-lg p-4 shadow">
-                  <div className="h-48 bg-gray-200 rounded mb-3 overflow-hidden">
-                    {product.image_url && (
-                      <img src={product.image_url} alt={product.name || product.title} className="w-full h-full object-cover" />
-                    )}
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">{product.name || product.title}</h3>
-                  {product.description && (
-                    <p className="text-sm text-gray-600 mb-2">{product.description}</p>
-                  )}
-                  <p className="text-lg font-bold text-[#56c5c5]">{product.price} kr</p>
-                </div>
-              ))}
+              {displayProducts.map((product, idx) => {
+                const chef = transformChef({ id: product.seller_id || 'mock-chef', display_name: 'Kock' });
+                const productType =
+                  product.type === 'subscription' || (product.name || product.title || '').toLowerCase().includes('prenumeration')
+                    ? 'Prenumeration'
+                    : product.type === 'cooking_kit' || (product.name || product.title || '').toLowerCase().includes('laga-själv')
+                    ? 'Laga-själv-kit'
+                    : 'Matlådekasse';
+                return (
+                  <BundleCard
+                    key={product.id || idx}
+                    id={product.id || `fridge-${idx}`}
+                    imageUrl={product.image_url || 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg'}
+                    hasGallery={false}
+                    title={product.name || product.title || 'Produkt'}
+                    description={product.description || ''}
+                    price={{ currency: 'SEK', price: product.price || 0 }}
+                    chef={chef}
+                    productType={productType}
+                    logistics={{
+                      pickup: {
+                        enabled: product.pickup_enabled ?? false,
+                        hours: product.pickup_hours,
+                      },
+                      delivery: {
+                        enabled: product.delivery_enabled ?? false,
+                        hours: product.delivery_hours,
+                      },
+                    }}
+                    availability={{
+                      frozenCount: 0,
+                      preOrder: true,
+                      subscribe: chef.membership === 'gold',
+                    }}
+                    gp={60}
+                    onShare={() => console.log('Share:', product.id)}
+                    onFavToggle={() => console.log('Favorite toggle:', product.id)}
+                    isFaved={false}
+                    onInfo={() => console.log('Info:', product.id)}
+                    onPrimary={() => console.log('Buy:', product.id)}
+                  />
+                );
+              })}
             </div>
           ) : (
             <div className="flex gap-6 overflow-x-auto pb-4">
-              {products.map((product, idx) => (
-                <div key={product.id || idx} className="bg-white rounded-lg p-4 shadow flex-shrink-0 w-64">
-                  <div className="h-48 bg-gray-200 rounded mb-3 overflow-hidden">
-                    {product.image_url && (
-                      <img src={product.image_url} alt={product.name || product.title} className="w-full h-full object-cover" />
-                    )}
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">{product.name || product.title}</h3>
-                  {product.description && (
-                    <p className="text-sm text-gray-600 mb-2">{product.description}</p>
-                  )}
-                  <p className="text-lg font-bold text-[#56c5c5]">{product.price} kr</p>
-                </div>
-              ))}
+              {displayProducts.map((product, idx) => {
+                const chef = transformChef({ id: product.seller_id || 'mock-chef', display_name: 'Kock' });
+                const productType =
+                  product.type === 'subscription' || (product.name || product.title || '').toLowerCase().includes('prenumeration')
+                    ? 'Prenumeration'
+                    : product.type === 'cooking_kit' || (product.name || product.title || '').toLowerCase().includes('laga-själv')
+                    ? 'Laga-själv-kit'
+                    : 'Matlådekasse';
+                return (
+                  <BundleCard
+                    key={product.id || idx}
+                    id={product.id || `fridge-${idx}`}
+                    imageUrl={product.image_url || 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg'}
+                    hasGallery={false}
+                    title={product.name || product.title || 'Produkt'}
+                    description={product.description || ''}
+                    price={{ currency: 'SEK', price: product.price || 0 }}
+                    chef={chef}
+                    productType={productType}
+                    logistics={{
+                      pickup: {
+                        enabled: product.pickup_enabled ?? false,
+                        hours: product.pickup_hours,
+                      },
+                      delivery: {
+                        enabled: product.delivery_enabled ?? false,
+                        hours: product.delivery_hours,
+                      },
+                    }}
+                    availability={{
+                      frozenCount: 0,
+                      preOrder: true,
+                      subscribe: chef.membership === 'gold',
+                    }}
+                    gp={60}
+                    onShare={() => console.log('Share:', product.id)}
+                    onFavToggle={() => console.log('Favorite toggle:', product.id)}
+                    isFaved={false}
+                    onInfo={() => console.log('Info:', product.id)}
+                    onPrimary={() => console.log('Buy:', product.id)}
+                  />
+                );
+              })}
             </div>
           )
         ) : (

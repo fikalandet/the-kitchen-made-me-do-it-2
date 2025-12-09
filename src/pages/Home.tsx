@@ -794,59 +794,6 @@ export const Home: React.FC = () => {
         products={fridgeMenuProducts}
       />
 
-      <SectionWrapper title="Kylskåpsmeny (Gammalt)" subtitle="Matlådekassar, laga-själv-kit och prenumerationer" showFilter>
-        {mealKits.length > 0 ? (
-          <div className="relative">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-x-auto pb-4">
-              {mealKits.map((kit) => {
-                const chef = transformChef({ id: kit.seller_id || 'chef1', display_name: 'Kock' });
-                const productType = kit.title.toLowerCase().includes('prenumeration')
-                  ? 'Prenumeration'
-                  : kit.title.toLowerCase().includes('laga-själv')
-                  ? 'Laga-själv-kit'
-                  : 'Matlådekasse';
-                return (
-                  <BundleCard
-                    key={kit.id}
-                    id={kit.id}
-                    imageUrl={kit.image_url || 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg'}
-                    hasGallery={false}
-                    title={kit.title}
-                    description={kit.description}
-                    price={{ currency: 'SEK', price: kit.price }}
-                    chef={chef}
-                    productType={productType}
-                    logistics={{
-                      pickup: {
-                        enabled: kit.pickup_enabled ?? false,
-                        hours: kit.pickup_hours,
-                      },
-                      delivery: {
-                        enabled: kit.delivery_enabled ?? false,
-                        hours: kit.delivery_hours,
-                      },
-                    }}
-                    availability={{
-                      frozenCount: 0,
-                      preOrder: true,
-                      subscribe: chef.membership === 'gold',
-                    }}
-                    gp={60}
-                    onShare={() => console.log('Share:', kit.id)}
-                    onFavToggle={() => console.log('Favorite toggle:', kit.id)}
-                    isFaved={false}
-                    onInfo={() => console.log('Info:', kit.id)}
-                    onPrimary={() => console.log('Buy:', kit.id)}
-                  />
-                );
-              })}
-            </div>
-          </div>
-        ) : (
-          <EmptyState text="Inget här ännu" />
-        )}
-      </SectionWrapper>
-
       <SectionWrapper title="Veckans kockar" subtitle="Hetare än chili, och har fler följare än din grannes surdegsblogg">
         {featuredChefs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
