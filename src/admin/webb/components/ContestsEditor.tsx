@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Upload } from 'lucide-react';
+import { supabase } from '../../../lib/supabase';
+import { useAuth } from '../../../contexts/AuthContext';
 import CollapsibleCard from './CollapsibleCard';
 import ColorPicker from './ColorPicker';
 
@@ -25,8 +27,10 @@ interface ContestsEditorProps {
 }
 
 export default function ContestsEditor({ settings, onSettingsChange }: ContestsEditorProps) {
+  const { user } = useAuth();
   const [activeSubtitleIndex, setActiveSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const updateSetting = (key: keyof ContestsSettings, value: any) => {
     onSettingsChange({ ...settings, [key]: value });
@@ -63,6 +67,38 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
     const newTexts = [...subtitleTexts];
     newTexts[index] = value;
     updateSetting('subtitleTexts', newTexts);
+  };
+
+  const handleImageUpload = async (file: File) => {
+    if (!user) {
+      alert('Du måste vara inloggad för att ladda upp filer');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `contests-featured-${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/contests/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      updateSetting('featuredImage', data.publicUrl);
+    } catch (err) {
+      console.error('Error uploading file:', err);
+      alert('Kunde inte ladda upp filen. Försök igen.');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const subtitleTexts = settings.subtitleTexts || [''];
@@ -277,18 +313,47 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
           {settings.layout !== 'cards-only' && (
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Featured bild-URL
+                Featured bild
               </label>
+              <div className="flex gap-2">
+                <input
+                  type="file"
+                  id="contests-featured-upload"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleImageUpload(file);
+                  }}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="contests-featured-upload"
+                  className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 ${
+                    uploadingImage ? 'opacity-50' : ''
+                  }`}
+                >
+                  <Upload className="w-4 h-4" />
+                  {uploadingImage ? 'Laddar upp...' : 'Ladda upp bild'}
+                </label>
+                {settings.featuredImage && (
+                  <button
+                    onClick={() => updateSetting('featuredImage', '')}
+                    className="px-3 py-2 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-lg hover:bg-red-50"
+                  >
+                    Ta bort
+                  </button>
+                )}
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                Ladda upp eller ange URL till bilden som visas i sektionen
+              </p>
               <input
                 type="text"
                 value={settings.featuredImage || ''}
                 onChange={(e) => updateSetting('featuredImage', e.target.value)}
-                placeholder="https://images.pexels.com/..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+                placeholder="Eller ange bild-URL..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent mt-2"
               />
-              <p className="text-xs text-gray-500 mt-1">
-                URL till bilden som visas i sektionen
-              </p>
               {settings.featuredImage && (
                 <div className="mt-3">
                   <img

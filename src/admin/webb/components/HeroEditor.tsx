@@ -54,6 +54,7 @@ export interface HeroSettings {
   totalCards?: number;
   cardsPerRow?: number;
   sectionHeading?: string;
+  sectionHeadingSize?: string;
   sectionSubheading?: string;
   backgroundColor?: string;
   backgroundImageUrl?: string;

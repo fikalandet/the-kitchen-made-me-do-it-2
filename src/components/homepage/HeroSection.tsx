@@ -50,6 +50,7 @@ interface HeroSettings {
   totalCards?: number;
   cardsPerRow?: number;
   sectionHeading?: string;
+  sectionHeadingSize?: string;
   sectionSubheading?: string;
   backgroundColor?: string;
   backgroundImageUrl?: string;
@@ -153,7 +154,17 @@ export const HeroSection = () => {
       <div className="max-w-6xl mx-auto">
         {settings.sectionHeading && (
           <div className="text-center mb-4">
-            <h2 className="font-lobster text-3xl md:text-4xl text-black font-bold mb-2">
+            <h2
+              className="font-lobster text-black font-bold mb-2"
+              style={{
+                fontSize:
+                  settings.sectionHeadingSize === 'sm' ? '1.5rem' :
+                  settings.sectionHeadingSize === 'md' ? '2rem' :
+                  settings.sectionHeadingSize === 'xl' ? '3rem' :
+                  settings.sectionHeadingSize === '2xl' ? '4rem' :
+                  '2.5rem'
+              }}
+            >
               {settings.sectionHeading}
             </h2>
             {settings.sectionSubheading && (

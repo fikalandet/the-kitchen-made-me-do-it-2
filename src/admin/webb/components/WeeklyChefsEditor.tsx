@@ -72,7 +72,7 @@ export default function WeeklyChefsEditor({ settings, onSettingsChange }: Weekly
       const { data, error } = await supabase
         .from('profiles')
         .select('id, display_name, avatar_url, city, kitchen_open_status')
-        .eq('role', 'seller')
+        .eq('role', 'chef')
         .order('display_name');
 
       if (error) throw error;
@@ -605,19 +605,19 @@ export default function WeeklyChefsEditor({ settings, onSettingsChange }: Weekly
                     className="rounded-lg p-4 shadow"
                     style={{ backgroundColor: settings.cardBackgroundColor || '#ffffff' }}
                   >
-                    <div className={`flex flex-col ${alignmentClass} space-y-3`}>
+                    <div className={`flex flex-col ${alignmentClass} h-full`}>
                       {chef.avatar_url && (
                         <img
                           src={chef.avatar_url}
                           alt={chef.display_name}
-                          className={`object-cover ${imageShape === 'round' ? 'rounded-full' : 'rounded-xl'}`}
+                          className={`object-cover ${imageShape === 'round' ? 'rounded-full' : 'rounded-xl'} mb-3`}
                           style={{
                             width: `${imageSize}px`,
                             height: `${imageSize}px`
                           }}
                         />
                       )}
-                      <div className="text-center">
+                      <div className="text-center flex-grow">
                         <p
                           className="font-semibold mb-1"
                           style={{ color: settings.cardNameColor || '#111827' }}
@@ -635,6 +635,15 @@ export default function WeeklyChefsEditor({ settings, onSettingsChange }: Weekly
                           </div>
                         )}
                       </div>
+                      <button
+                        className="w-full h-10 rounded-xl font-medium text-sm transition-colors mt-4"
+                        style={{
+                          backgroundColor: '#000000',
+                          color: '#ffffff',
+                        }}
+                      >
+                        Till kockens kök
+                      </button>
                     </div>
                   </div>
                 );

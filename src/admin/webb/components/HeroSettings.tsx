@@ -75,6 +75,23 @@ export default function HeroSettings({ settings, onSettingsChange }: HeroSetting
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
+          Rubrikstorlek
+        </label>
+        <select
+          value={settings.sectionHeadingSize || 'lg'}
+          onChange={(e) => updateSetting('sectionHeadingSize', e.target.value)}
+          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#56c5c5] focus:border-transparent"
+        >
+          <option value="sm">S (1.5rem / 24px)</option>
+          <option value="md">M (2rem / 32px)</option>
+          <option value="lg">L (2.5rem / 40px)</option>
+          <option value="xl">XL (3rem / 48px)</option>
+          <option value="2xl">XXL (4rem / 64px)</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">
           Brödtext ovanför alla kort
         </label>
         <textarea

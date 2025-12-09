@@ -35,9 +35,9 @@ export function ChefOfWeekCard(props: ChefOfWeekProps) {
         e.currentTarget.style.boxShadow = shadows.card;
       }}
     >
-      <div className={`flex flex-col ${alignmentClass} space-y-4`}>
+      <div className={`flex flex-col ${alignmentClass} h-full`}>
         <div
-          className={`p-1 bg-white ${isRound ? 'rounded-full' : 'rounded-2xl'}`}
+          className={`p-1 bg-white ${isRound ? 'rounded-full' : 'rounded-2xl'} mb-4`}
           style={{
             boxShadow: `0 0 0 4px ${ringColor}`,
           }}
@@ -53,7 +53,7 @@ export function ChefOfWeekCard(props: ChefOfWeekProps) {
           />
         </div>
 
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-2 flex-grow">
           <h3
             className="font-semibold text-lg"
             style={{
@@ -85,7 +85,7 @@ export function ChefOfWeekCard(props: ChefOfWeekProps) {
             e.stopPropagation();
             props.onVisitKitchen?.();
           }}
-          className="w-full h-10 rounded-xl font-medium text-sm transition-colors"
+          className="w-full h-10 rounded-xl font-medium text-sm transition-colors mt-4"
           style={{
             backgroundColor: colors.primary.black,
             color: colors.primary.white,
