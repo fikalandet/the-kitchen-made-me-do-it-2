@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, Link } from 'react-router-dom';
 import {
   LayoutDashboard,
   ChefHat,
@@ -12,7 +12,8 @@ import {
   Settings,
   Globe,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  ExternalLink
 } from 'lucide-react';
 
 interface SubMenuItem {
@@ -183,6 +184,18 @@ export default function AdminLayout() {
               );
             })}
           </ul>
+
+          <div className="mt-4 px-3">
+            <Link
+              to="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors bg-[#56c5c5] text-white hover:bg-[#45b4b4]"
+            >
+              <ExternalLink className="w-5 h-5" />
+              <span className="font-medium">Till startsidan</span>
+            </Link>
+          </div>
         </nav>
       </aside>
 

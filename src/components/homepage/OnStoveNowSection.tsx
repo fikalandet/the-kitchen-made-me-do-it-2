@@ -3,6 +3,18 @@ import { OnStoveNowCard } from '../CardKit/variants/OnStoveNowCard';
 import { EmptyState } from './EmptyState';
 import { transformChef, transformToOnStoveNowProps } from '../../lib/adapters/cardKitAdapters';
 
+const getTextColorForBackground = (bgColor: string): string => {
+  const colorMap: { [key: string]: string } = {
+    '#000000': '#ffffff',
+    '#f6f2e0': '#000000',
+    '#ffffff': '#000000',
+    '#56c5c5': '#ffffff',
+    '#a1c798': '#000000',
+  };
+
+  return colorMap[bgColor.toLowerCase()] || '#000000';
+};
+
 interface OnStoveNowSectionProps {
   settings: {
     backgroundColor?: string;
@@ -102,26 +114,30 @@ export function OnStoveNowSection({ settings, liveDishes, liveChefs }: OnStoveNo
               const dayName = date.toLocaleDateString('sv-SE', { weekday: 'short' });
               const isSelected = selectedDate === dateStr;
 
+              const hoverBgColor = dayButtons.hoverColor || '#f3f4f6';
+              const hoverTextColor = getTextColorForBackground(hoverBgColor);
+              const defaultBgColor = dayButtons.defaultColor || '#ffffff';
+              const defaultTextColor = getTextColorForBackground(defaultBgColor);
+
               return (
                 <button
                   key={dateStr}
                   onClick={() => setSelectedDate(dateStr)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    isSelected ? 'text-white' : 'text-gray-700'
-                  }`}
+                  className="px-4 py-2 rounded-full text-sm font-medium transition-all"
                   style={{
-                    backgroundColor: isSelected
-                      ? dayButtons.activeColor
-                      : dayButtons.defaultColor,
+                    backgroundColor: isSelected ? dayButtons.activeColor : defaultBgColor,
+                    color: isSelected ? '#ffffff' : defaultTextColor,
                   }}
                   onMouseEnter={(e) => {
                     if (!isSelected) {
-                      e.currentTarget.style.backgroundColor = dayButtons.hoverColor || '#f3f4f6';
+                      e.currentTarget.style.backgroundColor = hoverBgColor;
+                      e.currentTarget.style.color = hoverTextColor;
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isSelected) {
-                      e.currentTarget.style.backgroundColor = dayButtons.defaultColor || '#ffffff';
+                      e.currentTarget.style.backgroundColor = defaultBgColor;
+                      e.currentTarget.style.color = defaultTextColor;
                     }
                   }}
                 >

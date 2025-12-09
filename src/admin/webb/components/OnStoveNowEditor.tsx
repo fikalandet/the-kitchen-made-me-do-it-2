@@ -4,6 +4,18 @@ import CollapsibleCard from './CollapsibleCard';
 import ColorPicker from './ColorPicker';
 import { colors } from '../../../theme/tokens';
 
+const getTextColorForBackground = (bgColor: string): string => {
+  const colorMap: { [key: string]: string } = {
+    '#000000': '#ffffff',
+    '#f6f2e0': '#000000',
+    '#ffffff': '#000000',
+    '#56c5c5': '#ffffff',
+    '#a1c798': '#000000',
+  };
+
+  return colorMap[bgColor.toLowerCase()] || '#000000';
+};
+
 interface OnStoveNowSettings {
   backgroundColor?: string;
   heading?: string;
@@ -366,31 +378,38 @@ export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStove
           <div className="mb-4">
             <p className="text-sm text-gray-600 mb-3">Visar max en vecka framåt</p>
             <div className="flex flex-wrap gap-2">
-              {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((day, index) => (
-                <button
-                  key={day}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    index === 0 ? 'text-white' : ''
-                  }`}
-                  style={
-                    index === 0
-                      ? { backgroundColor: dayButtons.activeColor || '#56c5c5' }
-                      : { backgroundColor: dayButtons.defaultColor || '#ffffff' }
-                  }
-                  onMouseEnter={(e) => {
-                    if (index !== 0) {
-                      e.currentTarget.style.backgroundColor = dayButtons.hoverColor || '#f3f4f6';
+              {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((day, index) => {
+                const hoverBgColor = dayButtons.hoverColor || '#f3f4f6';
+                const hoverTextColor = getTextColorForBackground(hoverBgColor);
+                const defaultBgColor = dayButtons.defaultColor || '#ffffff';
+                const defaultTextColor = getTextColorForBackground(defaultBgColor);
+
+                return (
+                  <button
+                    key={day}
+                    className="px-4 py-2 rounded-full text-sm font-medium transition-all"
+                    style={
+                      index === 0
+                        ? { backgroundColor: dayButtons.activeColor || '#56c5c5', color: '#ffffff' }
+                        : { backgroundColor: defaultBgColor, color: defaultTextColor }
                     }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (index !== 0) {
-                      e.currentTarget.style.backgroundColor = dayButtons.defaultColor || '#ffffff';
-                    }
-                  }}
-                >
-                  {day}
-                </button>
-              ))}
+                    onMouseEnter={(e) => {
+                      if (index !== 0) {
+                        e.currentTarget.style.backgroundColor = hoverBgColor;
+                        e.currentTarget.style.color = hoverTextColor;
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (index !== 0) {
+                        e.currentTarget.style.backgroundColor = defaultBgColor;
+                        e.currentTarget.style.color = defaultTextColor;
+                      }
+                    }}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
