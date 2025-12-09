@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { ExternalLink } from 'lucide-react';
 import HeroSettings from './HeroSettings';
 import HeroCards from './HeroCards';
+import HeroPreview from './HeroPreview';
 import CollapsibleCard from './CollapsibleCard';
 
 export interface HeroCardData {
@@ -68,6 +70,22 @@ export default function HeroEditor({ settings, onSettingsChange }: HeroEditorPro
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-900">Hero-sektion</h3>
+          <p className="text-sm text-gray-600">Anpassad hero-sektion för startsidan</p>
+        </div>
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-[#56c5c5] active:bg-[#56c5c5] transition-colors"
+        >
+          <ExternalLink className="w-4 h-4" />
+          Öppna startsidan
+        </a>
+      </div>
+
       <CollapsibleCard
         title="Hero-sektionsinställningar"
         defaultExpanded={true}
@@ -89,6 +107,13 @@ export default function HeroEditor({ settings, onSettingsChange }: HeroEditorPro
           activeCardId={activeCardId}
           onCardSelect={setActiveCardId}
         />
+      </CollapsibleCard>
+
+      <CollapsibleCard
+        title="Preview - Så här ser det ut på startsidan"
+        defaultExpanded={false}
+      >
+        <HeroPreview settings={settings} />
       </CollapsibleCard>
     </div>
   );

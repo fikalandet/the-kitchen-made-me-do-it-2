@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { ImageCarousel } from '../components/ImageCarousel';
+import { HeroSection } from '../components/homepage/HeroSection';
 import { SectionWrapper } from '../components/homepage/SectionWrapper';
 import { EmptyState } from '../components/homepage/EmptyState';
 import { MealKitsSection } from '../components/homepage/MealKitsSection';
@@ -710,39 +711,7 @@ export const Home: React.FC = () => {
     <div className="min-h-screen" style={{ backgroundColor: '#a1c798' }}>
       <ImageCarousel />
 
-      <section className="py-8 px-4">
-        <div className="max-w-6xl mx-auto text-center mb-4">
-          <h1 className="font-lobster text-3xl md:text-4xl text-black font-bold mb-2">
-            Välkommen till Sveriges hungrigaste webbplats!
-          </h1>
-        </div>
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <button
-              onClick={handleFindFood}
-              className="rounded-2xl p-6 transition-all hover:shadow-2xl hover:scale-105 text-center bg-white cursor-pointer"
-            >
-              <h3 className="font-lobster text-xl text-gray-800 mb-2 font-bold">Hitta käk</h3>
-              <p className="text-gray-600 text-sm">Mata mig • Filtrera själv</p>
-            </button>
-            <HeroCard
-              title="Utforska kassar"
-              description="Matlådekassar • Laga-själv-kit • Prenumerera"
-              link="/hitta-kak?category=meal_box"
-            />
-            <HeroCard
-              title="Boka en kock"
-              description="Hyr en kock • Catering"
-              link="/hitta-kak?category=catering"
-            />
-            <HeroCard
-              title="Recept"
-              description="Matlagningsvideos • Inspirerande recept"
-              link="/recept"
-            />
-          </div>
-        </div>
-      </section>
+      <HeroSection />
 
       <SectionWrapper
         title="På spisen nu"
