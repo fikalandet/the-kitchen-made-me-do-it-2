@@ -44,16 +44,26 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
       text: '',
       imageUrl: '',
       imageAlt: '',
+      cardBackgroundColor: '#ffffff',
+      headingStyle: {
+        fontFamily: 'default',
+        fontSize: 'lg',
+        bold: true,
+        textColor: '#000000',
+        backgroundColor: 'transparent',
+        lineHeight: '1.5',
+        textAlign: 'left'
+      },
       textStyle: {
         fontFamily: 'default',
         fontSize: 'md',
         bold: false,
         textColor: '#000000',
-        backgroundColor: '#ffffff',
+        backgroundColor: 'transparent',
         lineHeight: '1.5',
-        textAlign: 'left',
-        position: 'left'
+        textAlign: 'left'
       },
+      position: 'left',
       ctaLabel: '',
       ctaLinkType: 'internal',
       ctaUrl: '',
@@ -136,11 +146,12 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
       onSettingsChange({ ...settings, cards: updatedCards });
     };
 
+    const headingStyle = card.headingStyle || {};
     const textStyle = card.textStyle || {};
     const ctaStyle = card.ctaStyle || {};
 
     const getTextPositionStyle = () => {
-      const position = textStyle.position || 'left';
+      const position = card.position || 'left';
       if (position === 'center') return { justifyContent: 'center', textAlign: 'center' as const };
       if (position === 'right') return { justifyContent: 'flex-end', textAlign: 'right' as const };
       return { justifyContent: 'flex-start', textAlign: 'left' as const };
@@ -178,10 +189,11 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
 
           <div
             onClick={() => onCardSelect(card.id)}
-            className={`relative aspect-video bg-gray-200 rounded overflow-hidden cursor-pointer transition-shadow mb-3 ${
+            className={`relative aspect-video rounded overflow-hidden cursor-pointer transition-shadow mb-3 ${
               activeCardId === card.id ? 'ring-2 ring-[#56c5c5] shadow-md' : 'hover:shadow-sm'
             }`}
             style={{
+              backgroundColor: card.cardBackgroundColor || '#ffffff',
               backgroundImage: card.imageUrl ? `url(${card.imageUrl})` : 'none',
               backgroundSize: 'cover',
               backgroundPosition: 'center'
@@ -201,20 +213,21 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
                 <div
                   className="mb-2"
                   style={{
-                    backgroundColor: textStyle.backgroundColor && textStyle.backgroundColor !== 'transparent'
-                      ? textStyle.backgroundColor
+                    backgroundColor: headingStyle.backgroundColor && headingStyle.backgroundColor !== 'transparent'
+                      ? headingStyle.backgroundColor
                       : 'transparent',
-                    color: textStyle.textColor || '#000000',
-                    fontWeight: textStyle.bold ? '700' : '400',
-                    fontSize: textStyle.fontSize === 'sm' ? '0.875rem' :
-                             textStyle.fontSize === 'lg' ? '1.25rem' :
-                             textStyle.fontSize === 'xl' ? '1.5rem' : '1rem',
-                    fontFamily: getFontFamily(textStyle.fontFamily),
-                    lineHeight: textStyle.lineHeight || '1.5',
-                    padding: textStyle.backgroundColor && textStyle.backgroundColor !== 'transparent' ? '0.5rem 0.75rem' : '0',
+                    color: headingStyle.textColor || '#000000',
+                    fontWeight: headingStyle.bold ? '700' : '400',
+                    fontSize: headingStyle.fontSize === 'sm' ? '0.875rem' :
+                             headingStyle.fontSize === 'lg' ? '1.25rem' :
+                             headingStyle.fontSize === 'xl' ? '1.5rem' : '1rem',
+                    fontFamily: getFontFamily(headingStyle.fontFamily),
+                    lineHeight: headingStyle.lineHeight || '1.5',
+                    textAlign: headingStyle.textAlign || 'left',
+                    padding: headingStyle.backgroundColor && headingStyle.backgroundColor !== 'transparent' ? '0.5rem 0.75rem' : '0',
                     display: 'inline-block',
-                    width: textStyle.textAlign === 'center' ? 'auto' : '100%',
-                    whiteSpace: textStyle.textAlign === 'center' ? 'pre-line' : 'normal'
+                    width: headingStyle.textAlign === 'center' ? 'auto' : '100%',
+                    whiteSpace: headingStyle.textAlign === 'center' ? 'pre-line' : 'normal'
                   }}
                 >
                   {card.heading}
@@ -235,6 +248,7 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
                              textStyle.fontSize === 'xl' ? '1.25rem' : '0.875rem',
                     fontFamily: getFontFamily(textStyle.fontFamily),
                     lineHeight: textStyle.lineHeight || '1.5',
+                    textAlign: textStyle.textAlign || 'left',
                     padding: textStyle.backgroundColor && textStyle.backgroundColor !== 'transparent' ? '0.5rem 0.75rem' : '0',
                     display: 'inline-block',
                     width: textStyle.textAlign === 'center' ? 'auto' : '100%',
@@ -257,7 +271,7 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
                     padding: '0.625rem 1.5rem',
                     fontFamily: getFontFamily(ctaStyle.fontFamily),
                     borderRadius: ctaStyle.borderRadius || '8px',
-                    alignSelf: textStyle.position === 'center' ? 'center' : textStyle.position === 'right' ? 'flex-end' : 'flex-start',
+                    alignSelf: card.position === 'center' ? 'center' : card.position === 'right' ? 'flex-end' : 'flex-start',
                     display: 'inline-block'
                   }}
                 >
@@ -289,17 +303,30 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
             />
           </div>
 
-          <div className="mt-3">
-            <div className="flex items-center gap-3 mb-2">
+          <div className="mt-3 space-y-3">
+            <div className="flex items-center gap-3">
               <input
                 type="checkbox"
-                id={`bold-${card.id}`}
+                id={`heading-bold-${card.id}`}
+                checked={headingStyle.bold || false}
+                onChange={(e) => updateCardById({ headingStyle: { ...headingStyle, bold: e.target.checked } })}
+                className="w-4 h-4 text-[#56c5c5] border-gray-300 rounded focus:ring-[#56c5c5]"
+              />
+              <label htmlFor={`heading-bold-${card.id}`} className="text-sm font-medium text-gray-700">
+                Fet stil - rubrik
+              </label>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id={`text-bold-${card.id}`}
                 checked={textStyle.bold || false}
                 onChange={(e) => updateCardById({ textStyle: { ...textStyle, bold: e.target.checked } })}
                 className="w-4 h-4 text-[#56c5c5] border-gray-300 rounded focus:ring-[#56c5c5]"
               />
-              <label htmlFor={`bold-${card.id}`} className="text-sm font-medium text-gray-700">
-                Fet stil
+              <label htmlFor={`text-bold-${card.id}`} className="text-sm font-medium text-gray-700">
+                Fet stil - brödtext
               </label>
             </div>
           </div>
@@ -309,8 +336,8 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
               Justering av textposition
             </label>
             <select
-              value={textStyle.position || 'left'}
-              onChange={(e) => updateCardById({ textStyle: { ...textStyle, position: e.target.value as 'left' | 'center' | 'right' } })}
+              value={card.position || 'left'}
+              onChange={(e) => updateCardById({ position: e.target.value as 'left' | 'center' | 'right' })}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#56c5c5]"
             >
               <option value="left">Vänster</option>
@@ -320,8 +347,18 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
           </div>
 
           <div className="mt-3">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Bakgrundsfärg för hero-kort</label>
+            <input
+              type="color"
+              value={card.cardBackgroundColor || '#ffffff'}
+              onChange={(e) => updateCard(card.id, { cardBackgroundColor: e.target.value })}
+              className="w-full h-10 border border-gray-300 rounded-lg cursor-pointer"
+            />
+          </div>
+
+          <div className="mt-3">
             <label className="block text-sm font-medium text-gray-700 mb-1">Bild</label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-2">
               <input
                 type="file"
                 id={`file-${card.id}`}
@@ -342,9 +379,17 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
                 {uploadingCardId === card.id ? 'Laddar upp...' : 'Ladda upp'}
               </label>
               {card.imageUrl && (
-                <div className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-600 truncate">
-                  {card.imageUrl}
-                </div>
+                <>
+                  <div className="flex-1 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-600 truncate">
+                    {card.imageUrl}
+                  </div>
+                  <button
+                    onClick={() => updateCard(card.id, { imageUrl: '' })}
+                    className="px-3 py-2 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-lg hover:bg-red-50"
+                  >
+                    Ta bort
+                  </button>
+                </>
               )}
             </div>
           </div>

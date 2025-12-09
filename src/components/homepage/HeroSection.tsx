@@ -8,6 +8,16 @@ interface HeroCardData {
   text: string;
   imageUrl: string;
   imageAlt: string;
+  cardBackgroundColor?: string;
+  headingStyle?: {
+    fontFamily?: string;
+    fontSize?: string;
+    bold?: boolean;
+    textColor?: string;
+    backgroundColor?: string;
+    lineHeight?: string;
+    textAlign?: 'left' | 'center' | 'right';
+  };
   textStyle?: {
     fontFamily?: string;
     fontSize?: string;
@@ -16,8 +26,8 @@ interface HeroCardData {
     backgroundColor?: string;
     lineHeight?: string;
     textAlign?: 'left' | 'center' | 'right';
-    position?: 'left' | 'center' | 'right';
   };
+  position?: 'left' | 'center' | 'right';
   ctaLabel?: string;
   ctaLinkType?: 'internal' | 'external';
   ctaUrl?: string;
@@ -104,9 +114,9 @@ export const HeroSection = () => {
   };
 
   const getTextPositionStyle = (position?: string) => {
-    if (position === 'center') return { justifyContent: 'center', alignItems: 'center', textAlign: 'center' as const };
-    if (position === 'right') return { justifyContent: 'flex-end', alignItems: 'flex-end', textAlign: 'right' as const };
-    return { justifyContent: 'flex-start', alignItems: 'flex-start', textAlign: 'left' as const };
+    if (position === 'center') return { justifyContent: 'center', alignItems: 'center' };
+    if (position === 'right') return { justifyContent: 'flex-end', alignItems: 'flex-end' };
+    return { justifyContent: 'flex-start', alignItems: 'flex-start' };
   };
 
   const sectionStyle: React.CSSProperties = {
@@ -136,15 +146,17 @@ export const HeroSection = () => {
 
         <div className={`grid ${getGridColumns()} gap-4`}>
           {settings.cards.map((card) => {
+            const headingStyle = card.headingStyle || {};
             const textStyle = card.textStyle || {};
             const ctaStyle = card.ctaStyle || {};
-            const positionStyle = getTextPositionStyle(textStyle.position);
+            const positionStyle = getTextPositionStyle(card.position);
 
             return (
               <div
                 key={card.id}
                 className="rounded-2xl overflow-hidden transition-all hover:shadow-2xl hover:scale-105 text-center relative"
                 style={{
+                  backgroundColor: card.cardBackgroundColor || '#ffffff',
                   backgroundImage: card.imageUrl ? `url(${card.imageUrl})` : undefined,
                   backgroundSize: 'cover',
                   backgroundPosition: 'center',
@@ -159,20 +171,21 @@ export const HeroSection = () => {
                     <div
                       className="mb-2"
                       style={{
-                        backgroundColor: textStyle.backgroundColor && textStyle.backgroundColor !== 'transparent'
-                          ? textStyle.backgroundColor
+                        backgroundColor: headingStyle.backgroundColor && headingStyle.backgroundColor !== 'transparent'
+                          ? headingStyle.backgroundColor
                           : 'transparent',
-                        color: textStyle.textColor || '#000000',
-                        fontWeight: textStyle.bold ? '700' : '400',
-                        fontSize: textStyle.fontSize === 'sm' ? '0.875rem' :
-                                 textStyle.fontSize === 'lg' ? '1.25rem' :
-                                 textStyle.fontSize === 'xl' ? '1.5rem' : '1rem',
-                        fontFamily: getFontFamily(textStyle.fontFamily),
-                        lineHeight: textStyle.lineHeight || '1.5',
-                        textAlign: textStyle.textAlign || 'left',
-                        padding: textStyle.backgroundColor && textStyle.backgroundColor !== 'transparent' ? '0.5rem 0.75rem' : '0',
+                        color: headingStyle.textColor || '#000000',
+                        fontWeight: headingStyle.bold ? '700' : '400',
+                        fontSize: headingStyle.fontSize === 'sm' ? '0.875rem' :
+                                 headingStyle.fontSize === 'lg' ? '1.25rem' :
+                                 headingStyle.fontSize === 'xl' ? '1.5rem' : '1rem',
+                        fontFamily: getFontFamily(headingStyle.fontFamily),
+                        lineHeight: headingStyle.lineHeight || '1.5',
+                        textAlign: headingStyle.textAlign || 'left',
+                        padding: headingStyle.backgroundColor && headingStyle.backgroundColor !== 'transparent' ? '0.5rem 0.75rem' : '0',
                         display: 'inline-block',
-                        whiteSpace: textStyle.textAlign === 'center' ? 'pre-line' : 'normal'
+                        width: headingStyle.textAlign === 'center' ? 'auto' : '100%',
+                        whiteSpace: headingStyle.textAlign === 'center' ? 'pre-line' : 'normal'
                       }}
                     >
                       {card.heading}
@@ -196,6 +209,7 @@ export const HeroSection = () => {
                         textAlign: textStyle.textAlign || 'left',
                         padding: textStyle.backgroundColor && textStyle.backgroundColor !== 'transparent' ? '0.5rem 0.75rem' : '0',
                         display: 'inline-block',
+                        width: textStyle.textAlign === 'center' ? 'auto' : '100%',
                         whiteSpace: textStyle.textAlign === 'center' ? 'pre-line' : 'normal'
                       }}
                     >

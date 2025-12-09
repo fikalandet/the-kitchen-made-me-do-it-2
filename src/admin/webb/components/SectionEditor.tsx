@@ -295,7 +295,7 @@ export default function SectionEditor({ slug, displayName }: SectionEditorProps)
         </AdminCard>
       )}
 
-      {slug !== 'bildspel' && (
+      {slug !== 'bildspel' && slug !== 'hero' && (
         <AdminCard>
           <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Design & färger

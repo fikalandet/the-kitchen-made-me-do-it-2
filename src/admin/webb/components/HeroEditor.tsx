@@ -11,6 +11,16 @@ export interface HeroCardData {
   text: string;
   imageUrl: string;
   imageAlt: string;
+  cardBackgroundColor?: string;
+  headingStyle?: {
+    fontFamily?: string;
+    fontSize?: string;
+    bold?: boolean;
+    textColor?: string;
+    backgroundColor?: string;
+    lineHeight?: string;
+    textAlign?: 'left' | 'center' | 'right';
+  };
   textStyle?: {
     fontFamily?: string;
     fontSize?: string;
@@ -19,8 +29,8 @@ export interface HeroCardData {
     backgroundColor?: string;
     lineHeight?: string;
     textAlign?: 'left' | 'center' | 'right';
-    position?: 'left' | 'center' | 'right';
   };
+  position?: 'left' | 'center' | 'right';
   ctaLabel?: string;
   ctaLinkType?: 'internal' | 'external';
   ctaUrl?: string;
