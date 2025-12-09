@@ -15,6 +15,8 @@ export const ReelCard: React.FC<ReelCardProps> = ({
   chef_name,
   views_count,
 }) => {
+  const safeViewsCount = views_count ?? 0;
+
   return (
     <div className="rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all bg-white cursor-pointer">
       <div className="relative h-64">
@@ -37,7 +39,7 @@ export const ReelCard: React.FC<ReelCardProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 text-gray-600">
             <Eye size={14} />
-            <span className="text-sm">{views_count.toLocaleString()}</span>
+            <span className="text-sm">{safeViewsCount.toLocaleString()}</span>
           </div>
           <div className="flex gap-2">
             <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
