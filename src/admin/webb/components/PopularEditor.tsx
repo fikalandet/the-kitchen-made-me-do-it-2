@@ -10,9 +10,11 @@ interface PopularSettings {
   headingFont?: string;
   headingBold?: boolean;
   headingAlignment?: 'left' | 'center';
+  headingColor?: string;
   subtitleTexts?: string[];
   subtitleRotationInterval?: number;
   subtitlePlacement?: 'inline' | 'below';
+  subtitleColor?: string;
   cardsPerRow?: number;
 }
 
@@ -150,6 +152,12 @@ export default function PopularEditor({ settings, onSettingsChange }: PopularEdi
               </button>
             </div>
           </div>
+
+          <ColorPicker
+            label="Rubrik – textfärg"
+            value={settings.headingColor || '#374151'}
+            onChange={(color) => updateSetting('headingColor', color)}
+          />
         </div>
       </CollapsibleCard>
 
@@ -236,6 +244,12 @@ export default function PopularEditor({ settings, onSettingsChange }: PopularEdi
               </button>
             </div>
           </div>
+
+          <ColorPicker
+            label="Textrad – textfärg"
+            value={settings.subtitleColor || '#374151'}
+            onChange={(color) => updateSetting('subtitleColor', color)}
+          />
         </div>
       </CollapsibleCard>
 
@@ -271,11 +285,12 @@ export default function PopularEditor({ settings, onSettingsChange }: PopularEdi
             {settings.subtitlePlacement === 'inline' || !settings.subtitlePlacement ? (
               <div className={`flex items-center gap-3 mb-2 ${settings.headingAlignment === 'center' ? 'justify-center' : ''}`}>
                 <h2
-                  className={`text-3xl text-gray-800 ${
+                  className={`text-3xl ${
                     settings.headingFont === 'lobster' ? 'font-lobster' : ''
                   } ${settings.headingBold ? 'font-bold' : ''}`}
                   style={{
-                    fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined
+                    fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+                    color: settings.headingColor || '#374151'
                   }}
                 >
                   {settings.heading || 'Populärt käk'}
@@ -285,8 +300,11 @@ export default function PopularEditor({ settings, onSettingsChange }: PopularEdi
                     <span className="text-gray-400 text-2xl">|</span>
                     <div className="min-h-[24px] flex items-center">
                       <p
-                        className="text-gray-700 transition-opacity duration-300"
-                        style={{ opacity: fadeIn ? 1 : 0 }}
+                        className="transition-opacity duration-300"
+                        style={{
+                          opacity: fadeIn ? 1 : 0,
+                          color: settings.subtitleColor || '#374151'
+                        }}
                       >
                         {subtitleTexts[activeSubtitleIndex] || subtitleTexts[0]}
                       </p>
@@ -297,11 +315,12 @@ export default function PopularEditor({ settings, onSettingsChange }: PopularEdi
             ) : (
               <div>
                 <h2
-                  className={`text-3xl text-gray-800 ${
+                  className={`text-3xl ${
                     settings.headingFont === 'lobster' ? 'font-lobster' : ''
                   } ${settings.headingBold ? 'font-bold' : ''}`}
                   style={{
-                    fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined
+                    fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+                    color: settings.headingColor || '#374151'
                   }}
                 >
                   {settings.heading || 'Populärt käk'}
@@ -309,8 +328,11 @@ export default function PopularEditor({ settings, onSettingsChange }: PopularEdi
                 {subtitleTexts.length > 0 && subtitleTexts[0] && (
                   <div className="min-h-[24px] flex items-center mt-2">
                     <p
-                      className="text-gray-700 transition-opacity duration-300"
-                      style={{ opacity: fadeIn ? 1 : 0 }}
+                      className="transition-opacity duration-300"
+                      style={{
+                        opacity: fadeIn ? 1 : 0,
+                        color: settings.subtitleColor || '#374151'
+                      }}
                     >
                       {subtitleTexts[activeSubtitleIndex] || subtitleTexts[0]}
                     </p>

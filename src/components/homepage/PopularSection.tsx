@@ -10,9 +10,11 @@ interface PopularSectionProps {
     headingFont?: string;
     headingBold?: boolean;
     headingAlignment?: 'left' | 'center';
+    headingColor?: string;
     subtitleTexts?: string[];
     subtitleRotationInterval?: number;
     subtitlePlacement?: 'inline' | 'below';
+    subtitleColor?: string;
     cardsPerRow?: number;
   };
   dishes: any[];
@@ -68,10 +70,13 @@ export function PopularSection({ settings, dishes }: PopularSectionProps) {
           {subtitlePlacement === 'inline' ? (
             <div className={`flex items-center gap-3 ${settings.headingAlignment === 'center' ? 'justify-center' : ''}`}>
               <h2
-                className={`text-3xl text-gray-800 ${headingFontClass} ${
+                className={`text-3xl ${headingFontClass} ${
                   settings.headingBold ? 'font-bold' : ''
                 }`}
-                style={{ fontFamily: headingFontFamily }}
+                style={{
+                  fontFamily: headingFontFamily,
+                  color: settings.headingColor || '#374151'
+                }}
               >
                 {settings.heading || 'Populärt käk'}
               </h2>
@@ -80,8 +85,11 @@ export function PopularSection({ settings, dishes }: PopularSectionProps) {
                   <span className="text-gray-400 text-2xl">|</span>
                   <div className="min-h-[24px] flex items-center">
                     <p
-                      className="text-gray-700 transition-opacity duration-300"
-                      style={{ opacity: fadeIn ? 1 : 0 }}
+                      className="transition-opacity duration-300"
+                      style={{
+                        opacity: fadeIn ? 1 : 0,
+                        color: settings.subtitleColor || '#374151'
+                      }}
                     >
                       {subtitleTexts[currentSubtitleIndex] || subtitleTexts[0]}
                     </p>
@@ -92,18 +100,24 @@ export function PopularSection({ settings, dishes }: PopularSectionProps) {
           ) : (
             <div>
               <h2
-                className={`text-3xl text-gray-800 ${headingFontClass} ${
+                className={`text-3xl ${headingFontClass} ${
                   settings.headingBold ? 'font-bold' : ''
                 }`}
-                style={{ fontFamily: headingFontFamily }}
+                style={{
+                  fontFamily: headingFontFamily,
+                  color: settings.headingColor || '#374151'
+                }}
               >
                 {settings.heading || 'Populärt käk'}
               </h2>
               {subtitleTexts.length > 0 && subtitleTexts[currentSubtitleIndex] && (
                 <div className="min-h-[24px] flex items-center mt-2">
                   <p
-                    className="text-gray-700 transition-opacity duration-300"
-                    style={{ opacity: fadeIn ? 1 : 0 }}
+                    className="transition-opacity duration-300"
+                    style={{
+                      opacity: fadeIn ? 1 : 0,
+                      color: settings.subtitleColor || '#374151'
+                    }}
                   >
                     {subtitleTexts[currentSubtitleIndex]}
                   </p>
