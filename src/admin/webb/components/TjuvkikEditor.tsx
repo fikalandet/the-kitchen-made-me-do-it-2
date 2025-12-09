@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Check, X, Eye, Video } from 'lucide-react';
 import CollapsibleCard from './CollapsibleCard';
 import ColorPicker from './ColorPicker';
+import { supabase } from '../../../lib/supabase';
 
 interface TjuvkikSettings {
   backgroundColor?: string;
@@ -22,13 +23,44 @@ interface TjuvkikEditorProps {
   onSettingsChange: (settings: TjuvkikSettings) => void;
 }
 
+interface ChefReel {
+  id: string;
+  chef_id: string;
+  product_id: string | null;
+  video_url: string;
+  thumbnail_url: string | null;
+  title: string;
+  duration_seconds: number;
+  status: 'pending_review' | 'approved' | 'rejected';
+  rejection_reason: string | null;
+  admin_notes: string | null;
+  views_count: number;
+  created_at: string;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
+  chef?: {
+    display_name: string;
+    avatar_url: string | null;
+  };
+}
+
 export default function TjuvkikEditor({ settings, onSettingsChange }: TjuvkikEditorProps) {
   const [activeSubtitleIndex, setActiveSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
+  const [reels, setReels] = useState<ChefReel[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedReel, setSelectedReel] = useState<ChefReel | null>(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [adminNotes, setAdminNotes] = useState('');
+  const [filterStatus, setFilterStatus] = useState<string>('pending_review');
 
   const updateSetting = (key: keyof TjuvkikSettings, value: any) => {
     onSettingsChange({ ...settings, [key]: value });
   };
+
+  useEffect(() => {
+    fetchReels();
+  }, [filterStatus]);
 
   useEffect(() => {
     const subtitleTexts = settings.subtitleTexts || [];
@@ -61,6 +93,101 @@ export default function TjuvkikEditor({ settings, onSettingsChange }: TjuvkikEdi
     const newTexts = [...subtitleTexts];
     newTexts[index] = value;
     updateSetting('subtitleTexts', newTexts);
+  };
+
+  const fetchReels = async () => {
+    try {
+      setLoading(true);
+      let query = supabase
+        .from('chef_reels')
+        .select(`
+          *,
+          chef:profiles!chef_reels_chef_id_fkey(display_name, avatar_url)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (filterStatus !== 'all') {
+        query = query.eq('status', filterStatus);
+      }
+
+      const { data, error } = await query;
+
+      if (error) throw error;
+      setReels(data || []);
+    } catch (error) {
+      console.error('Error fetching reels:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleApproveReel = async (reelId: string) => {
+    try {
+      const { error } = await supabase
+        .from('chef_reels')
+        .update({
+          status: 'approved',
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: (await supabase.auth.getUser()).data.user?.id
+        })
+        .eq('id', reelId);
+
+      if (error) throw error;
+      fetchReels();
+      setSelectedReel(null);
+    } catch (error) {
+      console.error('Error approving reel:', error);
+      alert('Kunde inte godkänna video');
+    }
+  };
+
+  const handleRejectReel = async (reelId: string) => {
+    if (!rejectionReason.trim()) {
+      alert('Vänligen ange en anledning för avvisning');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('chef_reels')
+        .update({
+          status: 'rejected',
+          rejection_reason: rejectionReason,
+          admin_notes: adminNotes || null,
+          reviewed_at: new Date().toISOString(),
+          reviewed_by: (await supabase.auth.getUser()).data.user?.id
+        })
+        .eq('id', reelId);
+
+      if (error) throw error;
+      fetchReels();
+      setSelectedReel(null);
+      setRejectionReason('');
+      setAdminNotes('');
+    } catch (error) {
+      console.error('Error rejecting reel:', error);
+      alert('Kunde inte avvisa video');
+    }
+  };
+
+  const handleDeleteReel = async (reelId: string) => {
+    if (!confirm('Är du säker på att du vill ta bort denna video permanent?')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('chef_reels')
+        .delete()
+        .eq('id', reelId);
+
+      if (error) throw error;
+      fetchReels();
+      setSelectedReel(null);
+    } catch (error) {
+      console.error('Error deleting reel:', error);
+      alert('Kunde inte ta bort video');
+    }
   };
 
   const subtitleTexts = settings.subtitleTexts || [''];
@@ -268,6 +395,199 @@ export default function TjuvkikEditor({ settings, onSettingsChange }: TjuvkikEdi
           <p className="text-xs text-gray-500 mt-1">
             Rekommenderat: 4 för desktop, 1-2 för mobil (responsivt)
           </p>
+        </div>
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Video-moderering" defaultExpanded={true}>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-gray-600">
+              Granska och godkänn videos som kockar laddar upp
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setFilterStatus('pending_review')}
+                className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                  filterStatus === 'pending_review'
+                    ? 'bg-[#56c5c5] text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Väntar ({reels.filter(r => r.status === 'pending_review').length})
+              </button>
+              <button
+                onClick={() => setFilterStatus('approved')}
+                className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                  filterStatus === 'approved'
+                    ? 'bg-[#56c5c5] text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Godkända
+              </button>
+              <button
+                onClick={() => setFilterStatus('rejected')}
+                className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                  filterStatus === 'rejected'
+                    ? 'bg-[#56c5c5] text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Avvisade
+              </button>
+              <button
+                onClick={() => setFilterStatus('all')}
+                className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                  filterStatus === 'all'
+                    ? 'bg-[#56c5c5] text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                Alla
+              </button>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-8 text-gray-500">Laddar videos...</div>
+          ) : reels.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <Video className="w-12 h-12 mx-auto mb-2 text-gray-300" />
+              <p>Inga videos att visa</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {reels.map((reel) => (
+                <div
+                  key={reel.id}
+                  className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                >
+                  <div className="relative aspect-[9/16] bg-gray-100">
+                    {reel.thumbnail_url ? (
+                      <img
+                        src={reel.thumbnail_url}
+                        alt={reel.title}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Video className="w-12 h-12 text-gray-300" />
+                      </div>
+                    )}
+                    <div className="absolute top-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs">
+                      {Math.floor(reel.duration_seconds / 60)}:{(reel.duration_seconds % 60).toString().padStart(2, '0')}
+                    </div>
+                    <div className={`absolute top-2 left-2 px-2 py-1 rounded text-xs font-medium ${
+                      reel.status === 'approved' ? 'bg-green-500 text-white' :
+                      reel.status === 'rejected' ? 'bg-red-500 text-white' :
+                      'bg-yellow-500 text-black'
+                    }`}>
+                      {reel.status === 'approved' ? 'Godkänd' :
+                       reel.status === 'rejected' ? 'Avvisad' :
+                       'Väntar'}
+                    </div>
+                  </div>
+                  <div className="p-3">
+                    <h4 className="font-medium text-sm text-gray-900 mb-1 line-clamp-2">
+                      {reel.title}
+                    </h4>
+                    <p className="text-xs text-gray-600 mb-2">
+                      {reel.chef?.display_name || 'Okänd kock'}
+                    </p>
+                    <div className="flex items-center gap-1 text-xs text-gray-500 mb-3">
+                      <Eye className="w-3 h-3" />
+                      <span>{reel.views_count} visningar</span>
+                    </div>
+                    <div className="flex gap-2">
+                      {reel.status === 'pending_review' && (
+                        <>
+                          <button
+                            onClick={() => handleApproveReel(reel.id)}
+                            className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-green-500 text-white text-sm rounded hover:bg-green-600 transition-colors"
+                          >
+                            <Check className="w-3 h-3" />
+                            Godkänn
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedReel(reel);
+                              setRejectionReason('');
+                              setAdminNotes('');
+                            }}
+                            className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors"
+                          >
+                            <X className="w-3 h-3" />
+                            Avvisa
+                          </button>
+                        </>
+                      )}
+                      <button
+                        onClick={() => handleDeleteReel(reel.id)}
+                        className="px-3 py-1.5 bg-black text-white text-sm rounded hover:bg-gray-800 transition-colors"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {selectedReel && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full">
+                <h3 className="text-lg font-semibold mb-4">Avvisa video</h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Video: {selectedReel.title}
+                </p>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Anledning (syns för kocken) *
+                    </label>
+                    <textarea
+                      value={rejectionReason}
+                      onChange={(e) => setRejectionReason(e.target.value)}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+                      placeholder="T.ex. Innehåller olämpligt material, dålig videokvalitet..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Interna anteckningar (valfritt)
+                    </label>
+                    <textarea
+                      value={adminNotes}
+                      onChange={(e) => setAdminNotes(e.target.value)}
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+                      placeholder="Interna noteringar..."
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleRejectReel(selectedReel.id)}
+                      className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      Avvisa video
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedReel(null);
+                        setRejectionReason('');
+                        setAdminNotes('');
+                      }}
+                      className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                      Avbryt
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </CollapsibleCard>
 

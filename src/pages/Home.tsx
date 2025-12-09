@@ -19,7 +19,6 @@ import { ContestsSection } from '../components/homepage/ContestsSection';
 import { FeedbackDishesSection } from '../components/homepage/FeedbackDishesSection';
 import { WishesSection } from '../components/homepage/WishesSection';
 import { EventsSection } from '../components/homepage/EventsSection';
-import { ReelsSection } from '../components/homepage/ReelsSection';
 import { ChefSpotlightSection } from '../components/homepage/ChefSpotlightSection';
 import { MoodDishesSection } from '../components/homepage/MoodDishesSection';
 import { HealthArticlesSection } from '../components/homepage/HealthArticlesSection';
@@ -65,6 +64,8 @@ export const Home: React.FC = () => {
   const [weeklyChefsSettings, setWeeklyChefsSettings] = useState<any>({});
   const [brattomkakSettings, setBrattomkakSettings] = useState<any>({});
   const [tjuvkikSettings, setTjuvkikSettings] = useState<any>({});
+  const [dealsSettings, setDealsSettings] = useState<any>({});
+  const [eventsSettings, setEventsSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
   const [brattomDishes, setBrattomDishes] = useState<any[]>([]);
   const [tjuvkikDishes, setTjuvkikDishes] = useState<any[]>([]);
@@ -81,7 +82,6 @@ export const Home: React.FC = () => {
   const [feedbackDishes, setFeedbackDishes] = useState<Dish[]>([]);
   const [wishes, setWishes] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>([]);
-  const [reels, setReels] = useState<any[]>([]);
   const [spotlightChef, setSpotlightChef] = useState<Chef | null>(null);
   const [moodDishes, setMoodDishes] = useState<Dish[]>([]);
   const [healthArticles, setHealthArticles] = useState<any[]>([]);
@@ -163,6 +163,26 @@ export const Home: React.FC = () => {
 
     if (tjuvkikSection) {
       setTjuvkikSettings(tjuvkikSection.settings || {});
+    }
+
+    const { data: dealsSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'schyssta-deals')
+      .maybeSingle();
+
+    if (dealsSection) {
+      setDealsSettings(dealsSection.settings || {});
+    }
+
+    const { data: eventsSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'evenemang')
+      .maybeSingle();
+
+    if (eventsSection) {
+      setEventsSettings(eventsSection.settings || {});
     }
 
     const mockChef = {
@@ -856,7 +876,10 @@ export const Home: React.FC = () => {
         dishes={brattomDishes}
       />
 
-      <DealsSection deals={deals} />
+      <DealsSection
+        settings={dealsSettings}
+        dishes={deals}
+      />
 
       <TjuvkikSection
         settings={tjuvkikSettings}
@@ -946,43 +969,10 @@ export const Home: React.FC = () => {
 
       <WishesSection wishes={wishes} />
 
-      <SectionWrapper title="Evenemang" subtitle="Upplev matlagning tillsammans">
-        {events.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map((event) => {
-              const chef = transformChef({ id: 'chef1', display_name: 'Kock' });
-              return (
-                <EventCard
-                  key={event.id}
-                  id={event.id}
-                  imageUrl={event.image_url}
-                  title={event.name}
-                  description={event.description}
-                  price={{ currency: 'SEK', price: event.price }}
-                  seats={event.spots}
-                  city={event.location?.split(', ')[0] || ''}
-                  venue={event.location?.split(', ')[1] || ''}
-                  address={event.address}
-                  date={event.date}
-                  time={event.time}
-                  chef={chef}
-                  attendingStatus={null}
-                  attendingCounts={{ yes: event.attending_yes || 0, maybe: event.attending_maybe || 0 }}
-                  isFaved={false}
-                  onShare={() => console.log('Share:', event.id)}
-                  onFavToggle={() => console.log('Favorite toggle:', event.id)}
-                  onComment={() => console.log('Comment:', event.id)}
-                  onAttending={(status) => console.log('Attending:', event.id, status)}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <EmptyState text="Inget h\u00e4r \u00e4nnu" />
-        )}
-      </SectionWrapper>
-
-      <ReelsSection reels={reels} />
+      <EventsSection
+        settings={eventsSettings}
+        events={events}
+      />
 
       <ChefSpotlightSection chef={spotlightChef} />
 
