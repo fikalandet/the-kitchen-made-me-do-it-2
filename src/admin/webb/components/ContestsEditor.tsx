@@ -15,6 +15,8 @@ interface ContestsSettings {
   subtitlePlacement?: 'inline' | 'below';
   subtitleColor?: string;
   cardsPerRow?: number;
+  layout?: 'cards-only' | 'image-third' | 'image-half';
+  featuredImage?: string;
 }
 
 interface ContestsEditorProps {
@@ -249,6 +251,55 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
             value={settings.subtitleColor || '#374151'}
             onChange={(color) => updateSetting('subtitleColor', color)}
           />
+        </div>
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Layout för sektionen" defaultExpanded={true}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Välj layout
+            </label>
+            <select
+              value={settings.layout || 'cards-only'}
+              onChange={(e) => updateSetting('layout', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+            >
+              <option value="cards-only">Endast tävlingskort</option>
+              <option value="image-third">Stor bild = 1/3 av sektionen, kort = 2/3</option>
+              <option value="image-half">Stor bild = 1/2 av sektionen, kort = 1/2</option>
+            </select>
+            <p className="text-xs text-gray-500 mt-1">
+              Välj hur innehållet ska visas på sidan
+            </p>
+          </div>
+
+          {settings.layout !== 'cards-only' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Featured bild-URL
+              </label>
+              <input
+                type="text"
+                value={settings.featuredImage || ''}
+                onChange={(e) => updateSetting('featuredImage', e.target.value)}
+                placeholder="https://images.pexels.com/..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                URL till bilden som visas i sektionen
+              </p>
+              {settings.featuredImage && (
+                <div className="mt-3">
+                  <img
+                    src={settings.featuredImage}
+                    alt="Featured"
+                    className="w-full h-48 object-cover rounded-lg"
+                  />
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </CollapsibleCard>
 

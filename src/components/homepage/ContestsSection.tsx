@@ -15,6 +15,8 @@ interface ContestsSectionProps {
     subtitlePlacement?: 'inline' | 'below';
     subtitleColor?: string;
     cardsPerRow?: number;
+    layout?: 'cards-only' | 'image-third' | 'image-half';
+    featuredImage?: string;
   };
   contests: any[];
 }
@@ -75,6 +77,8 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
   const rotationInterval = settings?.subtitleRotationInterval || 10000;
   const cardsPerRow = settings?.cardsPerRow || 4;
   const subtitlePlacement = settings?.subtitlePlacement || 'inline';
+  const layout = settings?.layout || 'cards-only';
+  const featuredImage = settings?.featuredImage;
 
   useEffect(() => {
     if (subtitleTexts.length <= 1) return;
@@ -175,11 +179,34 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
         </div>
 
         {contestsWithImages.length > 0 ? (
-          <div className={`grid ${gridColsClass} gap-6`}>
-            {contestsWithImages.map((contest) => (
-              <ContestCard key={contest.id} {...contest} />
-            ))}
-          </div>
+          layout === 'cards-only' || !featuredImage ? (
+            <div className={`grid ${gridColsClass} gap-6`}>
+              {contestsWithImages.map((contest) => (
+                <ContestCard key={contest.id} {...contest} />
+              ))}
+            </div>
+          ) : (
+            <div
+              className={`grid gap-6 ${
+                layout === 'image-third'
+                  ? 'grid-cols-1 lg:grid-cols-[1fr_2fr]'
+                  : 'grid-cols-1 lg:grid-cols-2'
+              }`}
+            >
+              <div className="rounded-lg overflow-hidden">
+                <img
+                  src={featuredImage}
+                  alt="Featured"
+                  className="w-full h-full object-cover min-h-[300px]"
+                />
+              </div>
+              <div className={`grid ${gridColsClass} gap-6`}>
+                {contestsWithImages.map((contest) => (
+                  <ContestCard key={contest.id} {...contest} />
+                ))}
+              </div>
+            </div>
+          )
         ) : (
           <EmptyState text="Inget här ännu" />
         )}

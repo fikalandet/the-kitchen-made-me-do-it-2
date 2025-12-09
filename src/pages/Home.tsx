@@ -66,6 +66,7 @@ export const Home: React.FC = () => {
   const [tjuvkikSettings, setTjuvkikSettings] = useState<any>({});
   const [dealsSettings, setDealsSettings] = useState<any>({});
   const [eventsSettings, setEventsSettings] = useState<any>({});
+  const [contestsSettings, setContestsSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
   const [brattomDishes, setBrattomDishes] = useState<any[]>([]);
   const [tjuvkikDishes, setTjuvkikDishes] = useState<any[]>([]);
@@ -183,6 +184,16 @@ export const Home: React.FC = () => {
 
     if (eventsSection) {
       setEventsSettings(eventsSection.settings || {});
+    }
+
+    const { data: contestsSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'tavlingar')
+      .maybeSingle();
+
+    if (contestsSection) {
+      setContestsSettings(contestsSection.settings || {});
     }
 
     const mockChef = {
@@ -935,7 +946,10 @@ export const Home: React.FC = () => {
         )}
       </SectionWrapper>
 
-      <ContestsSection contests={contests} />
+      <ContestsSection
+        settings={contestsSettings}
+        contests={contests}
+      />
 
       <SectionWrapper title="Testkäka & Tyck till" subtitle="Hjälp kockarna att förbättra sina recept">
         {feedbackDishes.length > 0 ? (
