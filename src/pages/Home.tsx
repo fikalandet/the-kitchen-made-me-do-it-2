@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ImageCarousel } from '../components/ImageCarousel';
 import { HeroSection } from '../components/homepage/HeroSection';
 import { SectionWrapper } from '../components/homepage/SectionWrapper';
+import { OnStoveNowSection } from '../components/homepage/OnStoveNowSection';
 import { EmptyState } from '../components/homepage/EmptyState';
 import { MealKitsSection } from '../components/homepage/MealKitsSection';
 import { DealsSection } from '../components/homepage/DealsSection';
@@ -51,6 +52,7 @@ export const Home: React.FC = () => {
   const navigate = useNavigate();
   const [showFoodModal, setShowFoodModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [onStoveNowSettings, setOnStoveNowSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
   const [liveChefs, setLiveChefs] = useState<{[key: string]: any}>({});
   const [popularDishes, setPopularDishes] = useState<Dish[]>([]);
@@ -76,6 +78,16 @@ export const Home: React.FC = () => {
 
   const fetchData = async () => {
     const today = new Date().toISOString().split('T')[0];
+
+    const { data: onStoveNowSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'pa-spisen-nu')
+      .maybeSingle();
+
+    if (onStoveNowSection) {
+      setOnStoveNowSettings(onStoveNowSection.settings || {});
+    }
 
     const mockChef = {
       id: 'chef1',
@@ -713,57 +725,11 @@ export const Home: React.FC = () => {
 
       <HeroSection />
 
-      <SectionWrapper
-        title="På spisen nu"
-        subtitle="Just nu i en stekpanna nära dig"
-        showFilter
-      >
-        <div className="mb-4 space-y-3">
-          <p className="text-sm text-gray-600">Visar max en vecka framåt</p>
-          <div className="flex flex-wrap gap-2 mb-3">
-            {Array.from({ length: 7 }, (_, i) => {
-              const date = new Date();
-              date.setDate(date.getDate() + i);
-              const dateStr = date.toISOString().split('T')[0];
-              const dayName = date.toLocaleDateString('sv-SE', { weekday: 'short' });
-              return (
-                <button
-                  key={dateStr}
-                  onClick={() => setSelectedDate(dateStr)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                    selectedDate === dateStr
-                      ? 'text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
-                  style={selectedDate === dateStr ? { backgroundColor: '#56c5c5' } : {}}
-                >
-                  {dayName.charAt(0).toUpperCase() + dayName.slice(1)}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        {(() => {
-          const filteredDishes = liveDishes.filter(schedule => schedule.cook_date === selectedDate);
-          return filteredDishes.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {filteredDishes.map((schedule) => {
-                const chef = transformChef(liveChefs[schedule.product?.seller_id]);
-                const props = transformToOnStoveNowProps(schedule, chef, {
-                  onShare: () => console.log('Share:', schedule.product?.id),
-                  onFavToggle: () => console.log('Favorite toggle:', schedule.product?.id),
-                  isFaved: false,
-                  onInfo: () => console.log('Info:', schedule.product?.id),
-                  onPrimary: () => console.log('Buy:', schedule.product?.id),
-                });
-                return <OnStoveNowCard key={schedule.product?.id} {...props} rating={{ value: 4.7, count: 18 }} />;
-              })}
-            </div>
-          ) : (
-            <EmptyState text="Inget här ännu" />
-          );
-        })()}
-      </SectionWrapper>
+      <OnStoveNowSection
+        settings={onStoveNowSettings}
+        liveDishes={liveDishes}
+        liveChefs={liveChefs}
+      />
 
       <SectionWrapper title="Populärt käk" subtitle="Mat som får annat käk att kännas som ... limpa" showFilter>
         {popularDishes.length > 0 ? (

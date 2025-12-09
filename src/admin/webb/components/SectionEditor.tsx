@@ -4,6 +4,7 @@ import { AdminCard } from '../../components';
 import ColorPicker from './ColorPicker';
 import BildspelEditor from './BildspelEditor';
 import HeroEditor from './HeroEditor';
+import OnStoveNowEditor from './OnStoveNowEditor';
 import { Save, Loader } from 'lucide-react';
 
 interface SectionEditorProps {
@@ -52,6 +53,10 @@ const sectionConfigs: Record<string, SectionConfig> = {
   hero: {
     supportsStandardContent: false,
     customPanels: [HeroEditor],
+  },
+  'pa-spisen-nu': {
+    supportsStandardContent: false,
+    customPanels: [OnStoveNowEditor],
   },
 }
 
