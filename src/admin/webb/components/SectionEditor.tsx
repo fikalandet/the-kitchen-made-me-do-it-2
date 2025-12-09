@@ -7,6 +7,7 @@ import HeroEditor from './HeroEditor';
 import OnStoveNowEditor from './OnStoveNowEditor';
 import PopularEditor from './PopularEditor';
 import NewMenuEditor from './NewMenuEditor';
+import FridgeMenuEditor from './FridgeMenuEditor';
 import { Save, Loader } from 'lucide-react';
 
 interface SectionEditorProps {
@@ -67,6 +68,10 @@ const sectionConfigs: Record<string, SectionConfig> = {
   'nytt-pa-menyn': {
     supportsStandardContent: false,
     customPanels: [NewMenuEditor],
+  },
+  'kylskapsmeny': {
+    supportsStandardContent: false,
+    customPanels: [FridgeMenuEditor],
   },
 }
 

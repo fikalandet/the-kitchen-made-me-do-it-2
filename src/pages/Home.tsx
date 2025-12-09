@@ -7,6 +7,7 @@ import { SectionWrapper } from '../components/homepage/SectionWrapper';
 import { OnStoveNowSection } from '../components/homepage/OnStoveNowSection';
 import { PopularSection } from '../components/homepage/PopularSection';
 import { NewMenuSection } from '../components/homepage/NewMenuSection';
+import { FridgeMenuSection } from '../components/homepage/FridgeMenuSection';
 import { EmptyState } from '../components/homepage/EmptyState';
 import { MealKitsSection } from '../components/homepage/MealKitsSection';
 import { DealsSection } from '../components/homepage/DealsSection';
@@ -57,7 +58,9 @@ export const Home: React.FC = () => {
   const [onStoveNowSettings, setOnStoveNowSettings] = useState<any>({});
   const [popularSettings, setPopularSettings] = useState<any>({});
   const [newMenuSettings, setNewMenuSettings] = useState<any>({});
+  const [fridgeMenuSettings, setFridgeMenuSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
+  const [fridgeMenuProducts, setFridgeMenuProducts] = useState<any[]>([]);
   const [liveChefs, setLiveChefs] = useState<{[key: string]: any}>({});
   const [popularDishes, setPopularDishes] = useState<Dish[]>([]);
   const [newDishes, setNewDishes] = useState<Dish[]>([]);
@@ -111,6 +114,16 @@ export const Home: React.FC = () => {
 
     if (newMenuSection) {
       setNewMenuSettings(newMenuSection.settings || {});
+    }
+
+    const { data: fridgeMenuSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'kylskapsmeny')
+      .maybeSingle();
+
+    if (fridgeMenuSection) {
+      setFridgeMenuSettings(fridgeMenuSection.settings || {});
     }
 
     const mockChef = {
@@ -691,6 +704,17 @@ export const Home: React.FC = () => {
       setMealKits(mealBoxesData);
     }
 
+    const { data: fridgeMenuProductsData } = await supabase
+      .from('products')
+      .select('*')
+      .in('type', ['meal_box', 'cooking_kit', 'subscription'])
+      .eq('available', true)
+      .limit(8);
+
+    if (fridgeMenuProductsData && fridgeMenuProductsData.length > 0) {
+      setFridgeMenuProducts(fridgeMenuProductsData);
+    }
+
     const { data: healthArticlesData } = await supabase
       .from('articles')
       .select('*')
@@ -765,7 +789,12 @@ export const Home: React.FC = () => {
         dishes={newDishes}
       />
 
-      <SectionWrapper title="Kylskåpsmeny" subtitle="Matlådekassar, laga-själv-kit och prenumerationer" showFilter>
+      <FridgeMenuSection
+        settings={fridgeMenuSettings}
+        products={fridgeMenuProducts}
+      />
+
+      <SectionWrapper title="Kylskåpsmeny (Gammalt)" subtitle="Matlådekassar, laga-själv-kit och prenumerationer" showFilter>
         {mealKits.length > 0 ? (
           <div className="relative">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-x-auto pb-4">
