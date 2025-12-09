@@ -414,6 +414,7 @@ export default function HeroCards({ settings, onSettingsChange, activeCardId, on
                 { name: 'Svart', color: colors.primary.black },
                 { name: 'Kitchen Grön', color: colors.primary.green },
                 { name: 'Kitchen Cyan', color: colors.primary.cyan },
+                { name: 'Kitchen Beige', color: '#f6f2e0' },
                 { name: 'Ljusgrön', color: colors.background.lightGreen },
                 { name: 'Ljusgrå', color: colors.background.lightGray },
                 { name: 'Gul', color: colors.status.soon }
