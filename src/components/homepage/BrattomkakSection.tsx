@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ContestCard } from './ContestCard';
+import { RushCard } from '../CardKit/variants/RushCard';
 import { EmptyState } from './EmptyState';
+import { transformChef, createCommonProps } from '../../lib/adapters/cardKitAdapters';
 
-interface ContestsSectionProps {
+interface BrattomkakSectionProps {
   settings: {
     backgroundColor?: string;
     heading?: string;
@@ -16,62 +17,82 @@ interface ContestsSectionProps {
     subtitleColor?: string;
     cardsPerRow?: number;
   };
-  contests: any[];
+  dishes: any[];
 }
 
-export function ContestsSection({ settings, contests }: ContestsSectionProps) {
+export function BrattomkakSection({ settings, dishes }: BrattomkakSectionProps) {
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
 
-  const mockContests = [
+  const mockBrattomDishes = [
     {
-      id: 'contest-mock-1',
-      title: 'Bästa hempizzan',
-      description: 'Visa din bästa pizza-kreation',
-      deadline_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
-      image_url: 'https://images.pexels.com/photos/825661/pexels-photo-825661.jpeg?auto=compress&cs=tinysrgb&w=800',
-      prize: 'Pizzaugn värd 5000 kr'
+      id: 'brattom-mock-1',
+      name: 'Express-pasta carbonara',
+      price: 129,
+      image_url: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800',
+      seller_id: 'mock-chef',
+      available: true,
+      created_at: new Date().toISOString(),
+      pickup_enabled: true,
+      delivery_enabled: true,
+      is_brattomkak: true,
+      brattomkak_delivery_minutes: 30
     },
     {
-      id: 'contest-mock-2',
-      title: 'Kreativa sushi-rullar',
-      description: 'Tävla om vem som gör mest kreativ sushi',
-      deadline_at: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
-      image_url: 'https://images.pexels.com/photos/357756/pexels-photo-357756.jpeg?auto=compress&cs=tinysrgb&w=800',
-      prize: 'Sushi-kit värt 2000 kr'
-    },
-    {
-      id: 'contest-mock-3',
-      title: 'Godaste desserter',
-      description: 'Tävla med din söta kreation',
-      deadline_at: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000).toISOString(),
-      image_url: 'https://images.pexels.com/photos/1126359/pexels-photo-1126359.jpeg?auto=compress&cs=tinysrgb&w=800',
-      prize: 'Köksredskap värt 3000 kr'
-    },
-    {
-      id: 'contest-mock-4',
-      title: 'Vegansk innovation',
-      description: 'Visa din bästa veganska rätt',
-      deadline_at: new Date(Date.now() + 35 * 24 * 60 * 60 * 1000).toISOString(),
+      id: 'brattom-mock-2',
+      name: 'Snabb buddha bowl',
+      price: 119,
       image_url: 'https://images.pexels.com/photos/1640770/pexels-photo-1640770.jpeg?auto=compress&cs=tinysrgb&w=800',
-      prize: 'Presentkort värt 2500 kr'
+      seller_id: 'mock-chef',
+      available: true,
+      created_at: new Date().toISOString(),
+      pickup_enabled: true,
+      delivery_enabled: true,
+      is_brattomkak: true,
+      brattomkak_delivery_minutes: 25
+    },
+    {
+      id: 'brattom-mock-3',
+      name: 'Snabb wok med kyckling',
+      price: 139,
+      image_url: 'https://images.pexels.com/photos/1624487/pexels-photo-1624487.jpeg?auto=compress&cs=tinysrgb&w=800',
+      seller_id: 'mock-chef',
+      available: true,
+      created_at: new Date().toISOString(),
+      pickup_enabled: true,
+      delivery_enabled: true,
+      is_brattomkak: true,
+      brattomkak_delivery_minutes: 35
+    },
+    {
+      id: 'brattom-mock-4',
+      name: 'Express-sushi',
+      price: 159,
+      image_url: 'https://images.pexels.com/photos/357756/pexels-photo-357756.jpeg?auto=compress&cs=tinysrgb&w=800',
+      seller_id: 'mock-chef',
+      available: true,
+      created_at: new Date().toISOString(),
+      pickup_enabled: true,
+      delivery_enabled: true,
+      is_brattomkak: true,
+      brattomkak_delivery_minutes: 40
     }
   ];
 
-  const displayContests = contests && contests.length > 0 ? contests : mockContests;
+  const displayDishes = dishes && dishes.length > 0 ? dishes : mockBrattomDishes;
 
-  const contestsWithImages = displayContests.filter(
-    contest => contest?.image_url && contest.image_url.trim() !== ''
+  const dishesWithImages = displayDishes.filter(
+    dish => dish?.image_url && dish.image_url.trim() !== ''
   );
 
   const isProduction = import.meta.env.MODE === 'production';
-  const showSection = contestsWithImages.length > 0 || !isProduction;
+  const showSection = dishesWithImages.length > 0 || !isProduction;
 
   if (!showSection) {
     return null;
   }
 
-  const subtitleTexts = settings.subtitleTexts || ['Tävla och vinn fina priser'];
+  const subtitleTexts = settings.subtitleTexts || ['Snabb leverans för hungriga magar'];
   const rotationInterval = settings.subtitleRotationInterval || 10000;
   const cardsPerRow = settings.cardsPerRow || 4;
   const subtitlePlacement = settings.subtitlePlacement || 'inline';
@@ -125,7 +146,7 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
                   color: settings.headingColor || '#374151'
                 }}
               >
-                {settings.heading || 'Tävlingar'}
+                {settings.heading || 'Bråttomkäk'}
               </h2>
               {subtitleTexts.length > 0 && subtitleTexts[0] && (
                 <>
@@ -155,7 +176,7 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
                   color: settings.headingColor || '#374151'
                 }}
               >
-                {settings.heading || 'Tävlingar'}
+                {settings.heading || 'Bråttomkäk'}
               </h2>
               {subtitleTexts.length > 0 && subtitleTexts[currentSubtitleIndex] && (
                 <div className="min-h-[24px] flex items-center mt-2">
@@ -174,11 +195,30 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
           )}
         </div>
 
-        {contestsWithImages.length > 0 ? (
+        {dishesWithImages.length > 0 ? (
           <div className={`grid ${gridColsClass} gap-6`}>
-            {contestsWithImages.map((contest) => (
-              <ContestCard key={contest.id} {...contest} />
-            ))}
+            {dishesWithImages.map((dish, idx) => {
+              const chef = transformChef({ id: dish.seller_id || 'mock-chef', display_name: 'Kock' });
+              const commonProps = createCommonProps(dish, chef, {
+                onShare: () => console.log('Share:', dish.id),
+                onFavToggle: () => console.log('Favorite toggle:', dish.id),
+                isFaved: false,
+                onInfo: () => console.log('Info:', dish.id),
+                onPrimary: () => console.log('Buy:', dish.id),
+              });
+              return (
+                <RushCard
+                  key={dish.id || idx}
+                  {...commonProps}
+                  availability={{
+                    frozenCount: 0,
+                    preOrder: false,
+                    subscribe: false
+                  }}
+                  shortDate={false}
+                />
+              );
+            })}
           </div>
         ) : (
           <EmptyState text="Inget här ännu" />
