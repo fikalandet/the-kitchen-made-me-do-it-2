@@ -5,6 +5,8 @@ import { ImageCarousel } from '../components/ImageCarousel';
 import { HeroSection } from '../components/homepage/HeroSection';
 import { SectionWrapper } from '../components/homepage/SectionWrapper';
 import { OnStoveNowSection } from '../components/homepage/OnStoveNowSection';
+import { PopularSection } from '../components/homepage/PopularSection';
+import { NewMenuSection } from '../components/homepage/NewMenuSection';
 import { EmptyState } from '../components/homepage/EmptyState';
 import { MealKitsSection } from '../components/homepage/MealKitsSection';
 import { DealsSection } from '../components/homepage/DealsSection';
@@ -53,6 +55,8 @@ export const Home: React.FC = () => {
   const [showFoodModal, setShowFoodModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [onStoveNowSettings, setOnStoveNowSettings] = useState<any>({});
+  const [popularSettings, setPopularSettings] = useState<any>({});
+  const [newMenuSettings, setNewMenuSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
   const [liveChefs, setLiveChefs] = useState<{[key: string]: any}>({});
   const [popularDishes, setPopularDishes] = useState<Dish[]>([]);
@@ -87,6 +91,26 @@ export const Home: React.FC = () => {
 
     if (onStoveNowSection) {
       setOnStoveNowSettings(onStoveNowSection.settings || {});
+    }
+
+    const { data: popularSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'populart-kak')
+      .maybeSingle();
+
+    if (popularSection) {
+      setPopularSettings(popularSection.settings || {});
+    }
+
+    const { data: newMenuSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'nytt-pa-menyn')
+      .maybeSingle();
+
+    if (newMenuSection) {
+      setNewMenuSettings(newMenuSection.settings || {});
     }
 
     const mockChef = {
@@ -731,66 +755,15 @@ export const Home: React.FC = () => {
         liveChefs={liveChefs}
       />
 
-      <SectionWrapper title="Populärt käk" subtitle="Mat som får annat käk att kännas som ... limpa" showFilter>
-        {popularDishes.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {popularDishes.map((dish, idx) => {
-              const chef = transformChef({ id: dish.seller_id, display_name: 'Kock' });
-              const commonProps = createCommonProps(dish, chef, {
-                onShare: () => console.log('Share:', dish.id),
-                onFavToggle: () => console.log('Favorite toggle:', dish.id),
-                isFaved: false,
-                onInfo: () => console.log('Info:', dish.id),
-                onPrimary: () => console.log('Buy:', dish.id),
-              });
-              return (
-                <PopularNewMoodCard
-                  key={dish.id}
-                  {...commonProps}
-                  rating={{ value: 4.5, count: 23 }}
-                  availability={{
-                    frozenCount: idx % 2 === 0 ? 5 : undefined,
-                    preOrder: true,
-                  }}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <EmptyState text="Inget här ännu" />
-        )}
-      </SectionWrapper>
+      <PopularSection
+        settings={popularSettings}
+        dishes={popularDishes}
+      />
 
-      <SectionWrapper title="Nytt på menyn" subtitle="Senaste tillskotten" showFilter>
-        {newDishes.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {newDishes.map((dish, idx) => {
-              const chef = transformChef({ id: dish.seller_id, display_name: 'Kock' });
-              const commonProps = createCommonProps(dish, chef, {
-                onShare: () => console.log('Share:', dish.id),
-                onFavToggle: () => console.log('Favorite toggle:', dish.id),
-                isFaved: false,
-                onInfo: () => console.log('Info:', dish.id),
-                onPrimary: () => console.log('Buy:', dish.id),
-              });
-              return (
-                <PopularNewMoodCard
-                  key={dish.id}
-                  {...commonProps}
-                  rating={{ value: 4.8, count: 12 }}
-                  availability={{
-                    frozenCount: idx === 1 ? 3 : undefined,
-                    preOrder: true,
-                    subscribe: idx % 2 === 0,
-                  }}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <EmptyState text="Inget här ännu" />
-        )}
-      </SectionWrapper>
+      <NewMenuSection
+        settings={newMenuSettings}
+        dishes={newDishes}
+      />
 
       <SectionWrapper title="Kylskåpsmeny" subtitle="Matlådekassar, laga-själv-kit och prenumerationer" showFilter>
         {mealKits.length > 0 ? (

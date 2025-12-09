@@ -4,19 +4,7 @@ import CollapsibleCard from './CollapsibleCard';
 import ColorPicker from './ColorPicker';
 import { colors } from '../../../theme/tokens';
 
-const getTextColorForBackground = (bgColor: string): string => {
-  const colorMap: { [key: string]: string } = {
-    '#000000': '#ffffff',
-    '#f6f2e0': '#000000',
-    '#ffffff': '#000000',
-    '#56c5c5': '#ffffff',
-    '#a1c798': '#000000',
-  };
-
-  return colorMap[bgColor.toLowerCase()] || '#000000';
-};
-
-interface OnStoveNowSettings {
+interface PopularSettings {
   backgroundColor?: string;
   heading?: string;
   headingFont?: string;
@@ -26,24 +14,18 @@ interface OnStoveNowSettings {
   subtitleRotationInterval?: number;
   subtitlePlacement?: 'inline' | 'below';
   cardsPerRow?: number;
-  showWeekAheadText?: boolean;
-  dayButtons?: {
-    defaultColor?: string;
-    hoverColor?: string;
-    activeColor?: string;
-  };
 }
 
-interface OnStoveNowEditorProps {
-  settings: OnStoveNowSettings;
-  onSettingsChange: (settings: OnStoveNowSettings) => void;
+interface PopularEditorProps {
+  settings: PopularSettings;
+  onSettingsChange: (settings: PopularSettings) => void;
 }
 
-export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStoveNowEditorProps) {
+export default function PopularEditor({ settings, onSettingsChange }: PopularEditorProps) {
   const [activeSubtitleIndex, setActiveSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
 
-  const updateSetting = (key: keyof OnStoveNowSettings, value: any) => {
+  const updateSetting = (key: keyof PopularSettings, value: any) => {
     onSettingsChange({ ...settings, [key]: value });
   };
 
@@ -63,16 +45,6 @@ export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStove
     return () => clearInterval(interval);
   }, [settings.subtitleTexts, settings.subtitleRotationInterval]);
 
-  const updateDayButtonColor = (key: 'defaultColor' | 'hoverColor' | 'activeColor', value: string) => {
-    onSettingsChange({
-      ...settings,
-      dayButtons: {
-        ...settings.dayButtons,
-        [key]: value,
-      },
-    });
-  };
-
   const addSubtitleText = () => {
     const subtitleTexts = settings.subtitleTexts || [];
     updateSetting('subtitleTexts', [...subtitleTexts, '']);
@@ -91,14 +63,13 @@ export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStove
   };
 
   const subtitleTexts = settings.subtitleTexts || [''];
-  const dayButtons = settings.dayButtons || {};
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">På spisen nu</h3>
-          <p className="text-sm text-gray-600">Anpassa inställningar för På spisen nu-sektionen</p>
+          <h3 className="text-lg font-semibold text-gray-900">Populärt käk</h3>
+          <p className="text-sm text-gray-600">Anpassa inställningar för Populärt käk-sektionen</p>
         </div>
       </div>
 
@@ -120,7 +91,7 @@ export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStove
               type="text"
               value={settings.heading || ''}
               onChange={(e) => updateSetting('heading', e.target.value)}
-              placeholder="På spisen nu"
+              placeholder="Populärt käk"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
             />
           </div>
@@ -287,128 +258,6 @@ export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStove
         </div>
       </CollapsibleCard>
 
-      <CollapsibleCard title="Dag-knappar" defaultExpanded={true}>
-        <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Standardfärg
-            </label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {[
-                { name: 'Vit', color: colors.primary.white },
-                { name: 'Svart', color: colors.primary.black },
-                { name: 'Kitchen Grön', color: colors.primary.green },
-                { name: 'Kitchen Cyan', color: colors.primary.cyan },
-                { name: 'Kitchen Beige', color: '#f6f2e0' },
-                { name: 'Ljusgrön', color: colors.background.lightGreen },
-                { name: 'Ljusgrå', color: colors.background.lightGray },
-                { name: 'Gul', color: colors.status.soon }
-              ].map((preset) => (
-                <button
-                  key={preset.color}
-                  onClick={() => updateDayButtonColor('defaultColor', preset.color)}
-                  className={`w-10 h-10 rounded border-2 transition-all ${
-                    dayButtons.defaultColor === preset.color ? 'border-[#56c5c5] scale-110' : 'border-gray-300'
-                  }`}
-                  style={{ backgroundColor: preset.color }}
-                  title={preset.name}
-                />
-              ))}
-            </div>
-            <input
-              type="color"
-              value={dayButtons.defaultColor || '#ffffff'}
-              onChange={(e) => updateDayButtonColor('defaultColor', e.target.value)}
-              className="mt-2 w-full h-10 rounded border border-gray-300 cursor-pointer"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Hover-färg
-            </label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {[
-                { name: 'Vit', color: colors.primary.white },
-                { name: 'Svart', color: colors.primary.black },
-                { name: 'Kitchen Grön', color: colors.primary.green },
-                { name: 'Kitchen Cyan', color: colors.primary.cyan },
-                { name: 'Kitchen Beige', color: '#f6f2e0' },
-                { name: 'Ljusgrön', color: colors.background.lightGreen },
-                { name: 'Ljusgrå', color: colors.background.lightGray },
-                { name: 'Gul', color: colors.status.soon }
-              ].map((preset) => (
-                <button
-                  key={preset.color}
-                  onClick={() => updateDayButtonColor('hoverColor', preset.color)}
-                  className={`w-10 h-10 rounded border-2 transition-all ${
-                    dayButtons.hoverColor === preset.color ? 'border-[#56c5c5] scale-110' : 'border-gray-300'
-                  }`}
-                  style={{ backgroundColor: preset.color }}
-                  title={preset.name}
-                />
-              ))}
-            </div>
-            <input
-              type="color"
-              value={dayButtons.hoverColor || '#f3f4f6'}
-              onChange={(e) => updateDayButtonColor('hoverColor', e.target.value)}
-              className="mt-2 w-full h-10 rounded border border-gray-300 cursor-pointer"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Aktiv färg
-            </label>
-            <div className="flex flex-wrap gap-2 mb-2">
-              {[
-                { name: 'Vit', color: colors.primary.white },
-                { name: 'Svart', color: colors.primary.black },
-                { name: 'Kitchen Grön', color: colors.primary.green },
-                { name: 'Kitchen Cyan', color: colors.primary.cyan },
-                { name: 'Kitchen Beige', color: '#f6f2e0' },
-                { name: 'Ljusgrön', color: colors.background.lightGreen },
-                { name: 'Ljusgrå', color: colors.background.lightGray },
-                { name: 'Gul', color: colors.status.soon }
-              ].map((preset) => (
-                <button
-                  key={preset.color}
-                  onClick={() => updateDayButtonColor('activeColor', preset.color)}
-                  className={`w-10 h-10 rounded border-2 transition-all ${
-                    dayButtons.activeColor === preset.color ? 'border-[#56c5c5] scale-110' : 'border-gray-300'
-                  }`}
-                  style={{ backgroundColor: preset.color }}
-                  title={preset.name}
-                />
-              ))}
-            </div>
-            <input
-              type="color"
-              value={dayButtons.activeColor || '#56c5c5'}
-              onChange={(e) => updateDayButtonColor('activeColor', e.target.value)}
-              className="mt-2 w-full h-10 rounded border border-gray-300 cursor-pointer"
-            />
-          </div>
-        </div>
-      </CollapsibleCard>
-
-      <CollapsibleCard title="Vecka-information" defaultExpanded={true}>
-        <div>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.showWeekAheadText !== false}
-              onChange={(e) => updateSetting('showWeekAheadText', e.target.checked)}
-              className="w-4 h-4 rounded"
-            />
-            <span className="text-sm font-medium text-gray-700">
-              Visa texten "Visar max en vecka framåt"
-            </span>
-          </label>
-        </div>
-      </CollapsibleCard>
-
       <CollapsibleCard title="Preview" defaultExpanded={true}>
         <div
           className="p-8 rounded-lg"
@@ -429,7 +278,7 @@ export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStove
                     fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined
                   }}
                 >
-                  {settings.heading || 'På spisen nu'}
+                  {settings.heading || 'Populärt käk'}
                 </h2>
                 {subtitleTexts.length > 0 && subtitleTexts[0] && (
                   <>
@@ -455,7 +304,7 @@ export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStove
                     fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined
                   }}
                 >
-                  {settings.heading || 'På spisen nu'}
+                  {settings.heading || 'Populärt käk'}
                 </h2>
                 {subtitleTexts.length > 0 && subtitleTexts[0] && (
                   <div className="min-h-[24px] flex items-center mt-2">
@@ -469,46 +318,6 @@ export default function OnStoveNowEditor({ settings, onSettingsChange }: OnStove
                 )}
               </div>
             )}
-          </div>
-
-          <div className="mb-4">
-            {(settings.showWeekAheadText !== false) && (
-              <p className="text-sm text-gray-600 mb-3">Visar max en vecka framåt</p>
-            )}
-            <div className="flex flex-wrap gap-2">
-              {['Mån', 'Tis', 'Ons', 'Tor', 'Fre', 'Lör', 'Sön'].map((day, index) => {
-                const hoverBgColor = dayButtons.hoverColor || '#f3f4f6';
-                const hoverTextColor = getTextColorForBackground(hoverBgColor);
-                const defaultBgColor = dayButtons.defaultColor || '#ffffff';
-                const defaultTextColor = getTextColorForBackground(defaultBgColor);
-
-                return (
-                  <button
-                    key={day}
-                    className="px-4 py-2 rounded-full text-sm font-medium transition-all"
-                    style={
-                      index === 0
-                        ? { backgroundColor: dayButtons.activeColor || '#56c5c5', color: '#ffffff' }
-                        : { backgroundColor: defaultBgColor, color: defaultTextColor }
-                    }
-                    onMouseEnter={(e) => {
-                      if (index !== 0) {
-                        e.currentTarget.style.backgroundColor = hoverBgColor;
-                        e.currentTarget.style.color = hoverTextColor;
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (index !== 0) {
-                        e.currentTarget.style.backgroundColor = defaultBgColor;
-                        e.currentTarget.style.color = defaultTextColor;
-                      }
-                    }}
-                  >
-                    {day}
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
           <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${settings.cardsPerRow || 4}, 1fr)` }}>

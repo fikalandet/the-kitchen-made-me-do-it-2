@@ -5,6 +5,8 @@ import ColorPicker from './ColorPicker';
 import BildspelEditor from './BildspelEditor';
 import HeroEditor from './HeroEditor';
 import OnStoveNowEditor from './OnStoveNowEditor';
+import PopularEditor from './PopularEditor';
+import NewMenuEditor from './NewMenuEditor';
 import { Save, Loader } from 'lucide-react';
 
 interface SectionEditorProps {
@@ -57,6 +59,14 @@ const sectionConfigs: Record<string, SectionConfig> = {
   'pa-spisen-nu': {
     supportsStandardContent: false,
     customPanels: [OnStoveNowEditor],
+  },
+  'populart-kak': {
+    supportsStandardContent: false,
+    customPanels: [PopularEditor],
+  },
+  'nytt-pa-menyn': {
+    supportsStandardContent: false,
+    customPanels: [NewMenuEditor],
   },
 }
 
