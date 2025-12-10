@@ -26,6 +26,7 @@ import { MoodDishesSection } from '../components/homepage/MoodDishesSection';
 import { HealthArticlesSection } from '../components/homepage/HealthArticlesSection';
 import { CharityArticlesSection } from '../components/homepage/CharityArticlesSection';
 import { HoroscopeSection } from '../components/homepage/HoroscopeSection';
+import { EditorialCategoriesSection } from '../components/homepage/EditorialCategoriesSection';
 import { OnStoveNowCard } from '../components/CardKit/variants/OnStoveNowCard';
 import { PopularNewMoodCard } from '../components/CardKit/variants/PopularNewMoodCard';
 import { ChefOfWeekCard } from '../components/CardKit/variants/ChefOfWeekCard';
@@ -72,6 +73,7 @@ export const Home: React.FC = () => {
   const [testEatSettings, setTestEatSettings] = useState<any>({});
   const [tasteTagsSettings, setTasteTagsSettings] = useState<any>({});
   const [newsSettings, setNewsSettings] = useState<any>({});
+  const [editorialCategoriesSettings, setEditorialCategoriesSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
   const [brattomDishes, setBrattomDishes] = useState<any[]>([]);
   const [tjuvkikDishes, setTjuvkikDishes] = useState<any[]>([]);
@@ -238,6 +240,16 @@ export const Home: React.FC = () => {
 
     if (newsSection) {
       setNewsSettings(newsSection.settings || {});
+    }
+
+    const { data: editorialCategoriesSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'redaktionella-kategorier')
+      .maybeSingle();
+
+    if (editorialCategoriesSection) {
+      setEditorialCategoriesSettings(editorialCategoriesSection.settings || {});
     }
 
     const mockChef = {
@@ -886,6 +898,8 @@ export const Home: React.FC = () => {
       <TasteTagsSection settings={tasteTagsSettings} />
 
       <NewsSection settings={newsSettings} />
+
+      <EditorialCategoriesSection settings={editorialCategoriesSettings} />
 
       <ContestsSection
         settings={contestsSettings}
