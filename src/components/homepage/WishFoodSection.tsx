@@ -17,6 +17,8 @@ interface WishFoodSettings {
   subtitleColor?: string;
   subtitleBold?: boolean;
   subtitleItalic?: boolean;
+  subtitleTexts?: string[];
+  subtitleRotationInterval?: number;
   textPosition?: 'top' | 'center' | 'bottom';
   textAlign?: 'left' | 'center' | 'right';
   backgroundType?: 'color' | 'image' | 'image-overlay';
@@ -27,6 +29,7 @@ interface WishFoodSettings {
   textBackgroundColor?: string;
   textBackgroundOpacity?: number;
   textBackgroundEnabled?: boolean;
+  leftColumnImage?: string;
 }
 
 interface WishFoodSectionProps {
@@ -48,10 +51,28 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
   const [newWish, setNewWish] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
+  const [fadeIn, setFadeIn] = useState(true);
 
   useEffect(() => {
     fetchWishes();
   }, []);
+
+  useEffect(() => {
+    const subtitleTexts = settings.subtitleTexts || [];
+    if (subtitleTexts.length <= 1) return;
+
+    const rotationInterval = settings.subtitleRotationInterval || 10000;
+    const interval = setInterval(() => {
+      setFadeIn(false);
+      setTimeout(() => {
+        setCurrentSubtitleIndex((prev) => (prev + 1) % subtitleTexts.length);
+        setFadeIn(true);
+      }, 300);
+    }, rotationInterval);
+
+    return () => clearInterval(interval);
+  }, [settings.subtitleTexts, settings.subtitleRotationInterval]);
 
   const fetchWishes = async () => {
     try {
@@ -127,6 +148,9 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
     }
   };
 
+  const subtitleTexts = settings.subtitleTexts || [];
+  const rotationInterval = settings.subtitleRotationInterval || 10000;
+
   return (
     <section
       className="relative py-12 px-4"
@@ -148,104 +172,128 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
       )}
 
       <div className="max-w-7xl mx-auto relative z-10">
-        <div
-          className={`mb-8 flex ${
-            settings.textPosition === 'top' ? 'items-start' :
-            settings.textPosition === 'bottom' ? 'items-end' :
-            'items-center'
-          } ${
-            settings.textAlign === 'left' ? 'justify-start' :
-            settings.textAlign === 'right' ? 'justify-end' :
-            'justify-center'
-          }`}
-        >
-          <div
-            className={`${settings.textBackgroundEnabled ? 'p-6 rounded-lg' : ''}`}
+        <div className="mb-8 text-center">
+          <h2
+            className={`${settings.headingFont === 'lobster' ? 'font-lobster' : ''} ${settings.headingBold ? 'font-bold' : ''} ${settings.headingItalic ? 'italic' : ''}`}
             style={{
-              backgroundColor: settings.textBackgroundEnabled ? settings.textBackgroundColor || '#ffffff' : 'transparent',
-              opacity: settings.textBackgroundEnabled ? (settings.textBackgroundOpacity || 80) / 100 : 1
+              fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+              fontSize: `${settings.headingFontSize || 32}px`,
+              color: settings.headingColor || '#374151'
             }}
           >
-            <h2
-              className={`${settings.headingFont === 'lobster' ? 'font-lobster' : ''} ${settings.headingBold ? 'font-bold' : ''} ${settings.headingItalic ? 'italic' : ''}`}
-              style={{
-                fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
-                fontSize: `${settings.headingFontSize || 32}px`,
-                color: settings.headingColor || '#374151',
-                textAlign: settings.textAlign || 'center'
-              }}
-            >
-              {settings.heading || 'Önska käk'}
-            </h2>
-            {settings.subtitle && (
+            {settings.heading || 'Önska käk'}
+          </h2>
+          {subtitleTexts.length > 0 && subtitleTexts[0] && (
+            <div className="min-h-[24px] flex items-center justify-center mt-2">
               <p
-                className={`mt-2 ${settings.subtitleFont === 'lobster' ? 'font-lobster' : ''} ${settings.subtitleBold ? 'font-bold' : ''} ${settings.subtitleItalic ? 'italic' : ''}`}
+                className={`transition-opacity duration-300 ${settings.subtitleFont === 'lobster' ? 'font-lobster' : ''} ${settings.subtitleBold ? 'font-bold' : ''} ${settings.subtitleItalic ? 'italic' : ''}`}
                 style={{
+                  opacity: fadeIn ? 1 : 0,
                   fontFamily: settings.subtitleFont === 'serif' ? 'serif' : settings.subtitleFont === 'sans' ? 'sans-serif' : undefined,
                   fontSize: `${settings.subtitleFontSize || 16}px`,
-                  color: settings.subtitleColor || '#6b7280',
-                  textAlign: settings.textAlign || 'center'
+                  color: settings.subtitleColor || '#6b7280'
                 }}
               >
-                {settings.subtitle}
+                {subtitleTexts[currentSubtitleIndex]}
               </p>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <input
-              type="text"
-              value={newWish}
-              onChange={(e) => setNewWish(e.target.value)}
-              placeholder="Skriv in ditt önskemål"
-              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent text-lg"
-            />
-            <button
-              onClick={handleSubmitWish}
-              disabled={loading || !newWish.trim()}
-              className="px-6 py-3 bg-[#a1c798] text-white rounded-lg hover:bg-[#8fb386] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium whitespace-nowrap"
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div
+            className="relative rounded-lg overflow-hidden min-h-[500px] flex"
+            style={{
+              backgroundImage: settings.leftColumnImage ? `url(${settings.leftColumnImage})` : 'linear-gradient(135deg, #a1c798 0%, #8fb386 100%)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          >
+            <div
+              className={`w-full flex ${
+                settings.textPosition === 'top' ? 'items-start' :
+                settings.textPosition === 'bottom' ? 'items-end' :
+                'items-center'
+              } ${
+                settings.textAlign === 'left' ? 'justify-start' :
+                settings.textAlign === 'right' ? 'justify-end' :
+                'justify-center'
+              } p-8`}
             >
-              {loading ? 'Skickar...' : 'Skicka önskning'}
-            </button>
-          </div>
-          <textarea
-            value={newDescription}
-            onChange={(e) => setNewDescription(e.target.value)}
-            placeholder="Eventuell kommentar (valfritt)"
-            rows={2}
-            className="w-full mt-3 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
-          />
-        </div>
-
-        {wishes.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {wishes.map((wish) => (
-              <div key={wish.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{wish.dish_name}</h3>
-                {wish.description && (
-                  <p className="text-gray-600 mb-4">{wish.description}</p>
-                )}
-                <div className="flex items-center gap-4 pt-4 border-t border-gray-200">
+              <div
+                className={`w-full max-w-md ${settings.textBackgroundEnabled ? 'p-6 rounded-lg' : ''}`}
+                style={{
+                  backgroundColor: settings.textBackgroundEnabled ? settings.textBackgroundColor || '#ffffff' : 'transparent',
+                  opacity: settings.textBackgroundEnabled ? (settings.textBackgroundOpacity || 80) / 100 : 1
+                }}
+              >
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={newWish}
+                    onChange={(e) => setNewWish(e.target.value)}
+                    placeholder="Skriv in ditt önskemål"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent text-lg"
+                  />
+                  <textarea
+                    value={newDescription}
+                    onChange={(e) => setNewDescription(e.target.value)}
+                    placeholder="Eventuell kommentar (valfritt)"
+                    rows={2}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+                  />
                   <button
-                    onClick={() => handleLike(wish.id)}
-                    className="flex items-center gap-2 text-gray-600 hover:text-[#a1c798] transition-colors"
+                    onClick={handleSubmitWish}
+                    disabled={loading || !newWish.trim()}
+                    className="w-full px-6 py-3 bg-[#a1c798] text-white rounded-lg hover:bg-[#8fb386] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                   >
-                    <Heart className="w-5 h-5" />
-                    <span>{wish.likes_count}</span>
-                  </button>
-                  <button className="flex items-center gap-2 text-gray-600 hover:text-[#a1c798] transition-colors">
-                    <MessageCircle className="w-5 h-5" />
-                    <span>Kommentera</span>
+                    {loading ? 'Skickar...' : 'Skicka önskning'}
                   </button>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
-        ) : (
-          <EmptyState text="Inga önskningar ännu. Var först med att önska en rätt!" />
-        )}
+
+          <div className="flex flex-col">
+            {wishes.length > 0 ? (
+              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                {wishes.map((wish) => (
+                  <div key={wish.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{wish.dish_name}</h3>
+                    {wish.description && (
+                      <p className="text-gray-600 mb-4">{wish.description}</p>
+                    )}
+                    <div className="flex items-center gap-4 pt-4 border-t border-gray-200">
+                      <button
+                        onClick={() => handleLike(wish.id)}
+                        className="flex items-center gap-2 text-gray-600 hover:text-[#a1c798] transition-colors"
+                      >
+                        <Heart className="w-5 h-5" />
+                        <span>{wish.likes_count}</span>
+                      </button>
+                      <button className="flex items-center gap-2 text-gray-600 hover:text-[#a1c798] transition-colors">
+                        <MessageCircle className="w-5 h-5" />
+                        <span>Kommentera</span>
+                      </button>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <p className="text-sm text-gray-500 mb-2">Kockarnas kommentarer:</p>
+                      <div className="flex flex-wrap gap-2">
+                        <div className="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full">
+                          Kommer snart...
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-[500px]">
+                <EmptyState text="Inga önskningar ännu. Var först med att önska en rätt!" />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </section>
   );
