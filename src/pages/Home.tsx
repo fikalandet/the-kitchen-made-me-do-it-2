@@ -29,7 +29,6 @@ import { OnStoveNowCard } from '../components/CardKit/variants/OnStoveNowCard';
 import { PopularNewMoodCard } from '../components/CardKit/variants/PopularNewMoodCard';
 import { ChefOfWeekCard } from '../components/CardKit/variants/ChefOfWeekCard';
 import { BundleCard } from '../components/CardKit/variants/BundleCard';
-import { FlavorTagCard } from '../components/CardKit/variants/FlavorTagCard';
 import { EventCard } from '../components/CardKit/variants/EventCard';
 import { TestEatCard } from '../components/CardKit/variants/TestEatCard';
 import { X } from 'lucide-react';
@@ -70,6 +69,7 @@ export const Home: React.FC = () => {
   const [contestsSettings, setContestsSettings] = useState<any>({});
   const [wishFoodSettings, setWishFoodSettings] = useState<any>({});
   const [testEatSettings, setTestEatSettings] = useState<any>({});
+  const [tasteTagsSettings, setTasteTagsSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
   const [brattomDishes, setBrattomDishes] = useState<any[]>([]);
   const [tjuvkikDishes, setTjuvkikDishes] = useState<any[]>([]);
@@ -81,7 +81,6 @@ export const Home: React.FC = () => {
   const [mealKits, setMealKits] = useState<any[]>([]);
   const [featuredChefs, setFeaturedChefs] = useState<Chef[]>([]);
   const [deals, setDeals] = useState<any[]>([]);
-  const [tasteTagDishes, setTasteTagDishes] = useState<Dish[]>([]);
   const [contests, setContests] = useState<any[]>([]);
   const [feedbackDishes, setFeedbackDishes] = useState<Dish[]>([]);
   const [wishes, setWishes] = useState<any[]>([]);
@@ -217,6 +216,16 @@ export const Home: React.FC = () => {
 
     if (testEatSection) {
       setTestEatSettings(testEatSection.settings || {});
+    }
+
+    const { data: tasteTagsSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'smaketiketter')
+      .maybeSingle();
+
+    if (tasteTagsSection) {
+      setTasteTagsSettings(tasteTagsSection.settings || {});
     }
 
     const mockChef = {
@@ -588,53 +597,6 @@ export const Home: React.FC = () => {
       setMoodDishes(moodDishesData);
     }
 
-    const mockTasteTags = [
-      {
-        id: 'taste1',
-        name: 'Riktigt kryddstark chili',
-        price: 139,
-        image_url: 'https://images.pexels.com/photos/2474661/pexels-photo-2474661.jpeg?auto=compress&cs=tinysrgb&w=800',
-        seller_id: 'chef1',
-        available: true,
-        created_at: new Date().toISOString(),
-        pickup_enabled: true,
-        delivery_enabled: true
-      },
-      {
-        id: 'taste2',
-        name: 'Mums för ostfantaster',
-        price: 155,
-        image_url: 'https://images.pexels.com/photos/4079520/pexels-photo-4079520.jpeg?auto=compress&cs=tinysrgb&w=800',
-        seller_id: 'chef1',
-        available: true,
-        created_at: new Date().toISOString(),
-        pickup_enabled: true,
-        delivery_enabled: true
-      },
-      {
-        id: 'taste3',
-        name: 'Extra mycket vitlök',
-        price: 129,
-        image_url: 'https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800',
-        seller_id: 'chef1',
-        available: true,
-        created_at: new Date().toISOString(),
-        pickup_enabled: true,
-        delivery_enabled: false
-      },
-      {
-        id: 'taste4',
-        name: 'Perfekt för barnfamiljen',
-        price: 145,
-        image_url: 'https://images.pexels.com/photos/1624487/pexels-photo-1624487.jpeg?auto=compress&cs=tinysrgb&w=800',
-        seller_id: 'chef1',
-        available: true,
-        created_at: new Date().toISOString(),
-        pickup_enabled: true,
-        delivery_enabled: true
-      }
-    ];
-
     const mockFeedback = [
       {
         id: 'feedback1',
@@ -786,20 +748,9 @@ export const Home: React.FC = () => {
       }
     ];
 
-    setTasteTagDishes(mockTasteTags);
     setFeedbackDishes(mockFeedback);
     setEvents(mockEvents);
     setMealKits(mockMealKits);
-
-    const { data: tasteDishesData } = await supabase
-      .from('products')
-      .select('*')
-      .not('taste_tag', 'is', null)
-      .limit(8);
-
-    if (tasteDishesData && tasteDishesData.length > 0) {
-      setTasteTagDishes(tasteDishesData);
-    }
 
     const { data: mealBoxesData } = await supabase
       .from('meal_boxes')
@@ -920,54 +871,7 @@ export const Home: React.FC = () => {
         dishes={tjuvkikDishes}
       />
 
-      <SectionWrapper title="Smaketiketter" subtitle="Kockar delar sina personliga favoriter">
-        {tasteTagDishes.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {tasteTagDishes.map((dish, idx) => {
-              const chef = transformChef({ id: dish.seller_id, display_name: 'Kock', membership_level: 'gold' });
-              const flavorTags = ['Massa vitl\u00f6k!', 'F\u00f6r ostfantaster!', 'Riktigt stark!', 'Barnv\u00e4nlig'];
-              const tagColors = ['#56c5c5', '#a1c798', '#F6C445', '#FF6B6B'];
-              return (
-                <FlavorTagCard
-                  key={dish.id}
-                  id={dish.id}
-                  imageUrl={dish.image_url}
-                  hasGallery={false}
-                  title={dish.name}
-                  price={{ currency: 'SEK', price: dish.price }}
-                  chef={chef}
-                  flavorTag={flavorTags[idx % flavorTags.length]}
-                  flavorTagColor={tagColors[idx % tagColors.length]}
-                  rating={{ value: 4.6, count: 15 }}
-                  logistics={{
-                    pickup: {
-                      enabled: dish.pickup_enabled ?? true,
-                      hours: '17:00-19:00',
-                    },
-                    delivery: {
-                      enabled: dish.delivery_enabled ?? true,
-                      hours: '18:00-20:00',
-                    },
-                  }}
-                  availability={{
-                    frozenCount: idx % 3 === 0 ? 4 : undefined,
-                    preOrder: true,
-                    subscribe: true,
-                  }}
-                  gp={30}
-                  onShare={() => console.log('Share:', dish.id)}
-                  onFavToggle={() => console.log('Favorite toggle:', dish.id)}
-                  isFaved={false}
-                  onInfo={() => console.log('Info:', dish.id)}
-                  onPrimary={() => console.log('Buy:', dish.id)}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <EmptyState text="Inget h\u00e4r \u00e4nnu" />
-        )}
-      </SectionWrapper>
+      <TasteTagsSection settings={tasteTagsSettings} />
 
       <ContestsSection
         settings={contestsSettings}
