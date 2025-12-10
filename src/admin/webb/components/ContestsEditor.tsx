@@ -20,6 +20,17 @@ interface ContestsSettings {
   subtitleRotationInterval?: number;
   subtitlePlacement?: 'inline' | 'below';
   subtitleColor?: string;
+  descriptionText?: string;
+  descriptionFont?: string;
+  descriptionFontSize?: number;
+  descriptionBold?: boolean;
+  descriptionItalic?: boolean;
+  descriptionAlignment?: 'left' | 'center' | 'right';
+  descriptionColor?: string;
+  descriptionBackgroundColor?: string;
+  descriptionBackgroundOpacity?: number;
+  descriptionSpaceTop?: number;
+  descriptionSpaceBottom?: number;
   cardsPerRow?: number;
   layout?: 'cards-only' | 'image-third' | 'image-half';
   featuredImage?: string;
@@ -236,7 +247,7 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
         </div>
       </CollapsibleCard>
 
-      <CollapsibleCard title="Textrad(er) efter rubriken" defaultExpanded={true}>
+      <CollapsibleCard title="Textrader" defaultExpanded={true}>
         <div className="space-y-4">
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -325,6 +336,199 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
             value={settings.subtitleColor || '#374151'}
             onChange={(color) => updateSetting('subtitleColor', color)}
           />
+        </div>
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Beskrivande text" defaultExpanded={true}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Beskrivande text
+            </label>
+            <textarea
+              value={settings.descriptionText || ''}
+              onChange={(e) => updateSetting('descriptionText', e.target.value)}
+              placeholder="Skriv en beskrivande text för sektionen..."
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Typsnitt
+              </label>
+              <select
+                value={settings.descriptionFont || 'sans'}
+                onChange={(e) => updateSetting('descriptionFont', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              >
+                <option value="sans">Sans-serif</option>
+                <option value="serif">Serif</option>
+                <option value="lobster">Lobster</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Storlek (px)
+              </label>
+              <input
+                type="number"
+                value={settings.descriptionFontSize || 16}
+                onChange={(e) => updateSetting('descriptionFontSize', parseInt(e.target.value))}
+                min="12"
+                max="48"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.descriptionBold || false}
+                  onChange={(e) => updateSetting('descriptionBold', e.target.checked)}
+                  className="w-4 h-4 text-[#56c5c5] border-gray-300 rounded focus:ring-[#56c5c5]"
+                />
+                <span className="text-sm font-medium text-gray-700">Fet stil</span>
+              </label>
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.descriptionItalic || false}
+                  onChange={(e) => updateSetting('descriptionItalic', e.target.checked)}
+                  className="w-4 h-4 text-[#56c5c5] border-gray-300 rounded focus:ring-[#56c5c5]"
+                />
+                <span className="text-sm font-medium text-gray-700">Kursiv stil</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Placering
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('descriptionAlignment', 'left')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.descriptionAlignment === 'left' || !settings.descriptionAlignment
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Vänster
+              </button>
+              <button
+                onClick={() => updateSetting('descriptionAlignment', 'center')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.descriptionAlignment === 'center'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Centrerad
+              </button>
+              <button
+                onClick={() => updateSetting('descriptionAlignment', 'right')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.descriptionAlignment === 'right'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Höger
+              </button>
+            </div>
+          </div>
+
+          <ColorPicker
+            label="Textfärg"
+            value={settings.descriptionColor || '#374151'}
+            onChange={(color) => updateSetting('descriptionColor', color)}
+          />
+
+          <div>
+            <label className="flex items-center gap-2 mb-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!!settings.descriptionBackgroundColor}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    updateSetting('descriptionBackgroundColor', '#f3f4f6');
+                  } else {
+                    updateSetting('descriptionBackgroundColor', '');
+                  }
+                }}
+                className="w-4 h-4 text-[#56c5c5] border-gray-300 rounded focus:ring-[#56c5c5]"
+              />
+              <span className="text-sm font-medium text-gray-700">Bakgrundsfärg bakom text</span>
+            </label>
+
+            {settings.descriptionBackgroundColor && (
+              <>
+                <ColorPicker
+                  label="Bakgrundsfärg"
+                  value={settings.descriptionBackgroundColor}
+                  onChange={(color) => updateSetting('descriptionBackgroundColor', color)}
+                />
+
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Opacity (%)
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={settings.descriptionBackgroundOpacity ?? 100}
+                    onChange={(e) => updateSetting('descriptionBackgroundOpacity', parseInt(e.target.value))}
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <div className="text-right text-sm text-gray-600 mt-1">
+                    {settings.descriptionBackgroundOpacity ?? 100}%
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Space till huvudrubrik (px)
+              </label>
+              <input
+                type="number"
+                value={settings.descriptionSpaceTop ?? 16}
+                onChange={(e) => updateSetting('descriptionSpaceTop', parseInt(e.target.value))}
+                min="0"
+                max="100"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Space till produktkort (px)
+              </label>
+              <input
+                type="number"
+                value={settings.descriptionSpaceBottom ?? 24}
+                onChange={(e) => updateSetting('descriptionSpaceBottom', parseInt(e.target.value))}
+                min="0"
+                max="100"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              />
+            </div>
+          </div>
         </div>
       </CollapsibleCard>
 
@@ -615,6 +819,35 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
               </div>
             )}
           </div>
+
+          {settings.descriptionText && (
+            <div
+              className={`${settings.descriptionAlignment === 'center' ? 'text-center' : settings.descriptionAlignment === 'right' ? 'text-right' : 'text-left'}`}
+              style={{
+                marginTop: `${settings.descriptionSpaceTop ?? 16}px`,
+                marginBottom: `${settings.descriptionSpaceBottom ?? 24}px`
+              }}
+            >
+              <p
+                className={`${
+                  settings.descriptionFont === 'lobster' ? 'font-lobster' : ''
+                } ${settings.descriptionBold ? 'font-bold' : ''} ${settings.descriptionItalic ? 'italic' : ''}`}
+                style={{
+                  fontFamily: settings.descriptionFont === 'serif' ? 'serif' : settings.descriptionFont === 'sans' ? 'sans-serif' : undefined,
+                  fontSize: `${settings.descriptionFontSize || 16}px`,
+                  color: settings.descriptionColor || '#374151',
+                  backgroundColor: settings.descriptionBackgroundColor || 'transparent',
+                  opacity: settings.descriptionBackgroundColor ? (settings.descriptionBackgroundOpacity ?? 100) / 100 : 1,
+                  padding: settings.descriptionBackgroundColor ? '12px 16px' : '0',
+                  borderRadius: settings.descriptionBackgroundColor ? '8px' : '0',
+                  display: 'inline-block',
+                  maxWidth: '100%'
+                }}
+              >
+                {settings.descriptionText}
+              </p>
+            </div>
+          )}
 
           {settings.layout === 'cards-only' || !settings.featuredImage ? (
             <div className="grid gap-6" style={{ gridTemplateColumns: `repeat(${settings.cardsPerRow || 4}, 1fr)` }}>

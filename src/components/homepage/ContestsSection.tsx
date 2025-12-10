@@ -18,6 +18,17 @@ interface ContestsSectionProps {
     subtitleRotationInterval?: number;
     subtitlePlacement?: 'inline' | 'below';
     subtitleColor?: string;
+    descriptionText?: string;
+    descriptionFont?: string;
+    descriptionFontSize?: number;
+    descriptionBold?: boolean;
+    descriptionItalic?: boolean;
+    descriptionAlignment?: 'left' | 'center' | 'right';
+    descriptionColor?: string;
+    descriptionBackgroundColor?: string;
+    descriptionBackgroundOpacity?: number;
+    descriptionSpaceTop?: number;
+    descriptionSpaceBottom?: number;
     cardsPerRow?: number;
     layout?: 'cards-only' | 'image-third' | 'image-half';
     featuredImage?: string;
@@ -208,6 +219,35 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
             </div>
           )}
         </div>
+
+        {settings?.descriptionText && (
+          <div
+            className={`${settings.descriptionAlignment === 'center' ? 'text-center' : settings.descriptionAlignment === 'right' ? 'text-right' : 'text-left'}`}
+            style={{
+              marginTop: `${settings.descriptionSpaceTop ?? 16}px`,
+              marginBottom: `${settings.descriptionSpaceBottom ?? 24}px`
+            }}
+          >
+            <p
+              className={`${
+                settings.descriptionFont === 'lobster' ? 'font-lobster' : ''
+              } ${settings.descriptionBold ? 'font-bold' : ''} ${settings.descriptionItalic ? 'italic' : ''}`}
+              style={{
+                fontFamily: settings.descriptionFont === 'serif' ? 'serif' : settings.descriptionFont === 'sans' ? 'sans-serif' : undefined,
+                fontSize: `${settings.descriptionFontSize || 16}px`,
+                color: settings.descriptionColor || '#374151',
+                backgroundColor: settings.descriptionBackgroundColor || 'transparent',
+                opacity: settings.descriptionBackgroundColor ? (settings.descriptionBackgroundOpacity ?? 100) / 100 : 1,
+                padding: settings.descriptionBackgroundColor ? '12px 16px' : '0',
+                borderRadius: settings.descriptionBackgroundColor ? '8px' : '0',
+                display: 'inline-block',
+                maxWidth: '100%'
+              }}
+            >
+              {settings.descriptionText}
+            </p>
+          </div>
+        )}
 
         {contestsWithImages.length > 0 ? (
           layout === 'cards-only' || !featuredImage ? (
