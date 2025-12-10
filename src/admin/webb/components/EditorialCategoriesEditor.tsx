@@ -28,13 +28,6 @@ interface EditorialCategoriesSettings {
   subtitleColor?: string;
   subtitleBold?: boolean;
   subtitleItalic?: boolean;
-  ctaText?: string;
-  ctaLinkType?: 'internal' | 'external';
-  ctaLink?: string;
-  ctaColor?: string;
-  ctaFont?: string;
-  ctaFontSize?: number;
-  ctaPlacement?: 'left' | 'center' | 'right';
   [key: string]: any;
 }
 
@@ -54,6 +47,23 @@ interface EditorialCategory {
   background_color: string;
   category_type: string;
   display_order: number;
+  title_font: string;
+  title_bold: boolean;
+  title_italic: boolean;
+  title_size: number;
+  title_alignment: string;
+  title_color: string;
+  description_font: string;
+  description_bold: boolean;
+  description_italic: boolean;
+  description_size: number;
+  description_alignment: string;
+  description_color: string;
+  cta_bg_color: string;
+  cta_text_color: string;
+  cta_font: string;
+  cta_bold: boolean;
+  cta_placement: string;
 }
 
 export default function EditorialCategoriesEditor({ settings, onSettingsChange }: EditorialCategoriesEditorProps) {
@@ -537,7 +547,24 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
                 cta_text: 'Läs mer',
                 is_featured: false,
                 background_color: '#ffffff',
-                category_type: ''
+                category_type: '',
+                title_font: 'sans',
+                title_bold: true,
+                title_italic: false,
+                title_size: 24,
+                title_alignment: 'left',
+                title_color: '#1f2937',
+                description_font: 'sans',
+                description_bold: false,
+                description_italic: false,
+                description_size: 16,
+                description_alignment: 'left',
+                description_color: '#4b5563',
+                cta_bg_color: '#a1c798',
+                cta_text_color: '#ffffff',
+                cta_font: 'sans',
+                cta_bold: true,
+                cta_placement: 'left'
               })}
               className="flex items-center gap-2 px-4 py-2 bg-[#56c5c5] text-white rounded-lg"
             >
@@ -547,122 +574,428 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
           </div>
 
           {editingCategory && (
-            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg space-y-3">
-              <h5 className="font-medium">{editingCategory.id ? 'Redigera' : 'Ny'} kategori</h5>
+            <div className="p-6 bg-gray-50 border-2 border-gray-300 rounded-lg space-y-6">
+              <h5 className="text-lg font-bold text-gray-900 pb-2 border-b-2 border-gray-300">
+                {editingCategory.id ? 'Redigera' : 'Ny'} kategori
+              </h5>
 
-              <input
-                type="text"
-                value={editingCategory.title || ''}
-                onChange={(e) => setEditingCategory({ ...editingCategory, title: e.target.value })}
-                placeholder="Titel"
-                className="w-full px-3 py-2 border rounded"
-              />
+              <div className="space-y-4 p-4 bg-white rounded-lg border border-gray-200">
+                <h6 className="font-semibold text-gray-900">Grundläggande information</h6>
 
-              <input
-                type="text"
-                value={editingCategory.slug || ''}
-                onChange={(e) => setEditingCategory({ ...editingCategory, slug: e.target.value })}
-                placeholder="Slug (URL-del, t.ex. en-sked-for-mamma)"
-                className="w-full px-3 py-2 border rounded"
-              />
-
-              <textarea
-                value={editingCategory.description || ''}
-                onChange={(e) => setEditingCategory({ ...editingCategory, description: e.target.value })}
-                placeholder="Kort beskrivning"
-                rows={2}
-                className="w-full px-3 py-2 border rounded"
-              />
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Bild</label>
-                <div className="flex gap-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Titel
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">Detta är titeln som syns på kategorikortet på startsidan.</p>
                   <input
-                    type="file"
-                    id="category-image-upload"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleImageUpload(file);
-                    }}
-                    className="hidden"
+                    type="text"
+                    value={editingCategory.title || ''}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, title: e.target.value })}
+                    placeholder="t.ex. En sked för mamma"
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
                   />
-                  <label
-                    htmlFor="category-image-upload"
-                    className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                      uploadingImage ? 'opacity-50' : ''
-                    }`}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Slug / URL-del
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">Används i URL:en för kategorisidan, t.ex. 'en-sked-for-mamma'</p>
+                  <input
+                    type="text"
+                    value={editingCategory.slug || ''}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, slug: e.target.value })}
+                    placeholder="en-sked-for-mamma"
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Bild
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">Huvudbild för kategorikortet</p>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="file"
+                      id="category-image-upload"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageUpload(file);
+                      }}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor="category-image-upload"
+                      className={`flex items-center gap-2 px-4 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 ${
+                        uploadingImage ? 'opacity-50' : ''
+                      }`}
+                    >
+                      <Upload className="w-4 h-4" />
+                      {uploadingImage ? 'Laddar...' : 'Ladda upp'}
+                    </label>
+                  </div>
+                  <input
+                    type="text"
+                    value={editingCategory.image_url || ''}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, image_url: e.target.value })}
+                    placeholder="Eller ange bild-URL..."
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
+                  />
+                  {editingCategory.image_url && (
+                    <img
+                      src={editingCategory.image_url}
+                      alt="Preview"
+                      className="w-full h-48 object-cover rounded-lg mt-2 border-2 border-gray-200"
+                    />
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Kategori-typ (valfritt)
+                  </label>
+                  <select
+                    value={editingCategory.category_type || ''}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, category_type: e.target.value })}
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
                   >
-                    <Upload className="w-4 h-4" />
-                    {uploadingImage ? 'Laddar...' : 'Ladda upp'}
+                    <option value="">Ingen</option>
+                    <option value="Mamma">Mamma</option>
+                    <option value="Hälsa">Hälsa</option>
+                    <option value="Barn & familj">Barn & familj</option>
+                    <option value="Budget">Budget</option>
+                    <option value="Vegohörna">Vegohörna</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Bakgrundsfärg för kort
+                  </label>
+                  <ColorPicker
+                    label=""
+                    value={editingCategory.background_color || '#ffffff'}
+                    onChange={(color) => setEditingCategory({ ...editingCategory, background_color: color })}
+                  />
+                </div>
+
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editingCategory.is_featured || false}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, is_featured: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm font-medium">Featured (större kort på startsidan)</span>
+                </label>
+              </div>
+
+              <div className="space-y-4 p-4 bg-white rounded-lg border border-gray-200">
+                <h6 className="font-semibold text-gray-900">Rubrik - typografi</h6>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Rubrik - typsnitt</label>
+                    <select
+                      value={editingCategory.title_font || 'sans'}
+                      onChange={(e) => setEditingCategory({ ...editingCategory, title_font: e.target.value })}
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
+                    >
+                      <option value="lobster">Lobster</option>
+                      <option value="sans">Sans Serif</option>
+                      <option value="serif">Serif</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Rubrik - storlek (px)</label>
+                    <input
+                      type="number"
+                      min="12"
+                      max="72"
+                      value={editingCategory.title_size || 24}
+                      onChange={(e) => setEditingCategory({ ...editingCategory, title_size: parseInt(e.target.value) })}
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Rubrik - färg</label>
+                  <ColorPicker
+                    label=""
+                    value={editingCategory.title_color || '#1f2937'}
+                    onChange={(color) => setEditingCategory({ ...editingCategory, title_color: color })}
+                  />
+                </div>
+
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={editingCategory.title_bold || false}
+                      onChange={(e) => setEditingCategory({ ...editingCategory, title_bold: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">Rubrik - fet</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={editingCategory.title_italic || false}
+                      onChange={(e) => setEditingCategory({ ...editingCategory, title_italic: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">Rubrik - kursiv</span>
                   </label>
                 </div>
-                <input
-                  type="text"
-                  value={editingCategory.image_url || ''}
-                  onChange={(e) => setEditingCategory({ ...editingCategory, image_url: e.target.value })}
-                  placeholder="Eller ange bild-URL..."
-                  className="w-full px-3 py-2 border rounded mt-2"
-                />
-                {editingCategory.image_url && (
-                  <img
-                    src={editingCategory.image_url}
-                    alt="Preview"
-                    className="w-full h-48 object-cover rounded mt-2"
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Rubrik - placering</label>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setEditingCategory({ ...editingCategory, title_alignment: 'left' })}
+                      className={`px-4 py-2 rounded-lg border-2 ${
+                        editingCategory.title_alignment === 'left'
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Vänster
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingCategory({ ...editingCategory, title_alignment: 'center' })}
+                      className={`px-4 py-2 rounded-lg border-2 ${
+                        editingCategory.title_alignment === 'center'
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Centrerad
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 p-4 bg-white rounded-lg border border-gray-200">
+                <h6 className="font-semibold text-gray-900">Text - beskrivning</h6>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Kort text / beskrivning
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">En kort pitch-text som visas under rubriken på kortet.</p>
+                  <textarea
+                    value={editingCategory.description || ''}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, description: e.target.value })}
+                    placeholder="Kort beskrivning av kategorin..."
+                    rows={2}
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
                   />
-                )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Text - typsnitt</label>
+                    <select
+                      value={editingCategory.description_font || 'sans'}
+                      onChange={(e) => setEditingCategory({ ...editingCategory, description_font: e.target.value })}
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
+                    >
+                      <option value="lobster">Lobster</option>
+                      <option value="sans">Sans Serif</option>
+                      <option value="serif">Serif</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Text - storlek (px)</label>
+                    <input
+                      type="number"
+                      min="12"
+                      max="32"
+                      value={editingCategory.description_size || 16}
+                      onChange={(e) => setEditingCategory({ ...editingCategory, description_size: parseInt(e.target.value) })}
+                      className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Text - färg</label>
+                  <ColorPicker
+                    label=""
+                    value={editingCategory.description_color || '#4b5563'}
+                    onChange={(color) => setEditingCategory({ ...editingCategory, description_color: color })}
+                  />
+                </div>
+
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={editingCategory.description_bold || false}
+                      onChange={(e) => setEditingCategory({ ...editingCategory, description_bold: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">Text - fet</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={editingCategory.description_italic || false}
+                      onChange={(e) => setEditingCategory({ ...editingCategory, description_italic: e.target.checked })}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm">Text - kursiv</span>
+                  </label>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Text - placering</label>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setEditingCategory({ ...editingCategory, description_alignment: 'left' })}
+                      className={`px-4 py-2 rounded-lg border-2 ${
+                        editingCategory.description_alignment === 'left'
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Vänster
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingCategory({ ...editingCategory, description_alignment: 'center' })}
+                      className={`px-4 py-2 rounded-lg border-2 ${
+                        editingCategory.description_alignment === 'center'
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Centrerad
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <input
-                type="text"
-                value={editingCategory.cta_text || ''}
-                onChange={(e) => setEditingCategory({ ...editingCategory, cta_text: e.target.value })}
-                placeholder="CTA-text (t.ex. Läs mer)"
-                className="w-full px-3 py-2 border rounded"
-              />
+              <div className="space-y-4 p-4 bg-white rounded-lg border border-gray-200">
+                <h6 className="font-semibold text-gray-900">Knapp - CTA</h6>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Kategori-typ (valfritt)</label>
-                <select
-                  value={editingCategory.category_type || ''}
-                  onChange={(e) => setEditingCategory({ ...editingCategory, category_type: e.target.value })}
-                  className="w-full px-3 py-2 border rounded"
-                >
-                  <option value="">Ingen</option>
-                  <option value="Mamma">Mamma</option>
-                  <option value="Hälsa">Hälsa</option>
-                  <option value="Barn & familj">Barn & familj</option>
-                  <option value="Budget">Budget</option>
-                  <option value="Vegohörna">Vegohörna</option>
-                </select>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Knapptext
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">Texten på knappen, t.ex. 'Läs mer' eller 'Utforska'</p>
+                  <input
+                    type="text"
+                    value={editingCategory.cta_text || ''}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, cta_text: e.target.value })}
+                    placeholder="Läs mer"
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Knapp - bakgrundsfärg</label>
+                    <ColorPicker
+                      label=""
+                      value={editingCategory.cta_bg_color || '#a1c798'}
+                      onChange={(color) => setEditingCategory({ ...editingCategory, cta_bg_color: color })}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Knapp - textfärg</label>
+                    <ColorPicker
+                      label=""
+                      value={editingCategory.cta_text_color || '#ffffff'}
+                      onChange={(color) => setEditingCategory({ ...editingCategory, cta_text_color: color })}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Knapp - typsnitt</label>
+                  <select
+                    value={editingCategory.cta_font || 'sans'}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, cta_font: e.target.value })}
+                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
+                  >
+                    <option value="lobster">Lobster</option>
+                    <option value="sans">Sans Serif</option>
+                    <option value="serif">Serif</option>
+                  </select>
+                </div>
+
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={editingCategory.cta_bold || false}
+                    onChange={(e) => setEditingCategory({ ...editingCategory, cta_bold: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-sm">Knapp - fet text</span>
+                </label>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Knapp - placering</label>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setEditingCategory({ ...editingCategory, cta_placement: 'left' })}
+                      className={`px-4 py-2 rounded-lg border-2 ${
+                        editingCategory.cta_placement === 'left'
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Vänster
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingCategory({ ...editingCategory, cta_placement: 'center' })}
+                      className={`px-4 py-2 rounded-lg border-2 ${
+                        editingCategory.cta_placement === 'center'
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Centrerad
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEditingCategory({ ...editingCategory, cta_placement: 'right' })}
+                      className={`px-4 py-2 rounded-lg border-2 ${
+                        editingCategory.cta_placement === 'right'
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Höger
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <ColorPicker
-                label="Bakgrundsfärg för kort"
-                value={editingCategory.background_color || '#ffffff'}
-                onChange={(color) => setEditingCategory({ ...editingCategory, background_color: color })}
-              />
-
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={editingCategory.is_featured || false}
-                  onChange={(e) => setEditingCategory({ ...editingCategory, is_featured: e.target.checked })}
-                  className="w-4 h-4"
-                />
-                <span className="text-sm">Featured (större kort)</span>
-              </label>
-
-              <div className="flex gap-2">
+              <div className="flex gap-2 pt-4">
                 <button
                   onClick={handleSaveCategory}
-                  className="px-4 py-2 bg-[#a1c798] text-white rounded"
+                  className="px-6 py-2 bg-[#a1c798] text-white rounded-lg font-medium hover:bg-[#8fb386] transition-colors"
                 >
                   Spara
                 </button>
                 <button
                   onClick={() => setEditingCategory(null)}
-                  className="px-4 py-2 bg-gray-200 rounded"
+                  className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-400 transition-colors"
                 >
                   Avbryt
                 </button>
@@ -734,114 +1067,6 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
         </div>
       </CollapsibleCard>
 
-      <CollapsibleCard title="Knappar" defaultExpanded={true}>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              CTA-text
-            </label>
-            <input
-              type="text"
-              value={settings.ctaText || ''}
-              onChange={(e) => updateSetting('ctaText', e.target.value)}
-              placeholder="Se alla artiklar"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Länktyp
-            </label>
-            <div className="flex gap-3 mb-2">
-              <button
-                onClick={() => updateSetting('ctaLinkType', 'internal')}
-                className={`px-4 py-2 rounded-lg border-2 ${
-                  settings.ctaLinkType === 'internal'
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300'
-                }`}
-              >
-                Intern sida
-              </button>
-              <button
-                onClick={() => updateSetting('ctaLinkType', 'external')}
-                className={`px-4 py-2 rounded-lg border-2 ${
-                  settings.ctaLinkType === 'external' || !settings.ctaLinkType
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300'
-                }`}
-              >
-                Extern URL
-              </button>
-            </div>
-            {settings.ctaLinkType === 'internal' ? (
-              <select
-                value={settings.ctaLink || ''}
-                onChange={(e) => updateSetting('ctaLink', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              >
-                <option value="">Välj sida</option>
-                <option value="/">Startsida</option>
-                <option value="/marketplace">Marknadsplats</option>
-                <option value="/bli-kock">Bli kock</option>
-                <option value="/membership">Medlemskap</option>
-              </select>
-            ) : (
-              <input
-                type="text"
-                value={settings.ctaLink || ''}
-                onChange={(e) => updateSetting('ctaLink', e.target.value)}
-                placeholder="https://..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              />
-            )}
-          </div>
-
-          <ColorPicker
-            label="Knappfärg"
-            value={settings.ctaColor || '#a1c798'}
-            onChange={(color) => updateSetting('ctaColor', color)}
-          />
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
-            <div className="flex gap-3">
-              <button
-                onClick={() => updateSetting('ctaPlacement', 'left')}
-                className={`px-4 py-2 rounded-lg border-2 ${
-                  settings.ctaPlacement === 'left'
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300'
-                }`}
-              >
-                Vänster
-              </button>
-              <button
-                onClick={() => updateSetting('ctaPlacement', 'center')}
-                className={`px-4 py-2 rounded-lg border-2 ${
-                  settings.ctaPlacement === 'center' || !settings.ctaPlacement
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300'
-                }`}
-              >
-                Centrerad
-              </button>
-              <button
-                onClick={() => updateSetting('ctaPlacement', 'right')}
-                className={`px-4 py-2 rounded-lg border-2 ${
-                  settings.ctaPlacement === 'right'
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300'
-                }`}
-              >
-                Höger
-              </button>
-            </div>
-          </div>
-        </div>
-      </CollapsibleCard>
-
       <CollapsibleCard title="Preview" defaultExpanded={false}>
         <div
           className="relative min-h-[500px] rounded-lg overflow-hidden"
@@ -904,36 +1129,44 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
                     </div>
                   )}
                   <div className="p-6">
-                    <h3 className={`font-bold text-gray-900 mb-2 ${category.is_featured ? 'text-2xl' : 'text-xl'}`}>
+                    <h3
+                      className={`mb-2 ${category.is_featured ? 'text-2xl' : 'text-xl'} ${category.title_bold ? 'font-bold' : ''} ${category.title_italic ? 'italic' : ''}`}
+                      style={{
+                        fontFamily: category.title_font === 'serif' ? 'serif' : category.title_font === 'sans' ? 'sans-serif' : category.title_font === 'lobster' ? 'Lobster' : undefined,
+                        fontSize: `${category.title_size}px`,
+                        color: category.title_color,
+                        textAlign: category.title_alignment as any
+                      }}
+                    >
                       {category.title}
                     </h3>
-                    <p className="text-gray-600 mb-4">{category.description}</p>
-                    <button className="text-[#a1c798] font-medium">
-                      {category.cta_text}
-                    </button>
+                    <p
+                      className={`mb-4 ${category.description_bold ? 'font-bold' : ''} ${category.description_italic ? 'italic' : ''}`}
+                      style={{
+                        fontFamily: category.description_font === 'serif' ? 'serif' : category.description_font === 'sans' ? 'sans-serif' : category.description_font === 'lobster' ? 'Lobster' : undefined,
+                        fontSize: `${category.description_size}px`,
+                        color: category.description_color,
+                        textAlign: category.description_alignment as any
+                      }}
+                    >
+                      {category.description}
+                    </p>
+                    <div style={{ textAlign: category.cta_placement as any }}>
+                      <button
+                        className={`inline-block px-4 py-2 rounded-lg ${category.cta_bold ? 'font-bold' : ''}`}
+                        style={{
+                          fontFamily: category.cta_font === 'serif' ? 'serif' : category.cta_font === 'sans' ? 'sans-serif' : category.cta_font === 'lobster' ? 'Lobster' : undefined,
+                          backgroundColor: category.cta_bg_color,
+                          color: category.cta_text_color
+                        }}
+                      >
+                        {category.cta_text}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
             </div>
-
-            {settings.ctaText && (
-              <div
-                className={`flex ${
-                  settings.ctaPlacement === 'center' || !settings.ctaPlacement
-                    ? 'justify-center'
-                    : settings.ctaPlacement === 'right'
-                    ? 'justify-end'
-                    : 'justify-start'
-                }`}
-              >
-                <button
-                  className="px-6 py-3 rounded-lg text-white font-medium"
-                  style={{ backgroundColor: settings.ctaColor || '#a1c798' }}
-                >
-                  {settings.ctaText}
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </CollapsibleCard>

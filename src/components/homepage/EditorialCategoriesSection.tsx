@@ -48,6 +48,23 @@ interface EditorialCategory {
   is_featured: boolean;
   background_color: string;
   display_order: number;
+  title_font: string;
+  title_bold: boolean;
+  title_italic: boolean;
+  title_size: number;
+  title_alignment: string;
+  title_color: string;
+  description_font: string;
+  description_bold: boolean;
+  description_italic: boolean;
+  description_size: number;
+  description_alignment: string;
+  description_color: string;
+  cta_bg_color: string;
+  cta_text_color: string;
+  cta_font: string;
+  cta_bold: boolean;
+  cta_placement: string;
 }
 
 export function EditorialCategoriesSection({ settings }: EditorialCategoriesSectionProps) {
@@ -224,13 +241,42 @@ export function EditorialCategoriesSection({ settings }: EditorialCategoriesSect
                 </div>
               )}
               <div className="p-6">
-                <h3 className={`font-bold text-gray-900 mb-2 ${category.is_featured ? 'text-2xl' : 'text-xl'}`}>
+                <h3
+                  className={`mb-2 ${category.is_featured ? 'text-2xl' : 'text-xl'} ${category.title_bold ? 'font-bold' : ''} ${category.title_italic ? 'italic' : ''}`}
+                  style={{
+                    fontFamily: category.title_font === 'serif' ? 'serif' : category.title_font === 'sans' ? 'sans-serif' : category.title_font === 'lobster' ? 'Lobster' : undefined,
+                    fontSize: `${category.title_size}px`,
+                    color: category.title_color,
+                    textAlign: category.title_alignment as any
+                  }}
+                >
                   {category.title}
                 </h3>
-                <p className="text-gray-600 mb-4">{category.description}</p>
-                <div className="inline-flex items-center gap-2 text-[#a1c798] hover:text-[#8fb386] font-medium transition-colors">
-                  {category.cta_text}
-                  <ArrowRight className="w-4 h-4" />
+                <p
+                  className={`mb-4 ${category.description_bold ? 'font-bold' : ''} ${category.description_italic ? 'italic' : ''}`}
+                  style={{
+                    fontFamily: category.description_font === 'serif' ? 'serif' : category.description_font === 'sans' ? 'sans-serif' : category.description_font === 'lobster' ? 'Lobster' : undefined,
+                    fontSize: `${category.description_size}px`,
+                    color: category.description_color,
+                    textAlign: category.description_alignment as any
+                  }}
+                >
+                  {category.description}
+                </p>
+                <div style={{ textAlign: category.cta_placement as any }}>
+                  <span
+                    className={`inline-flex items-center gap-2 transition-opacity hover:opacity-80 ${category.cta_bold ? 'font-bold' : ''}`}
+                    style={{
+                      fontFamily: category.cta_font === 'serif' ? 'serif' : category.cta_font === 'sans' ? 'sans-serif' : category.cta_font === 'lobster' ? 'Lobster' : undefined,
+                      backgroundColor: category.cta_bg_color,
+                      color: category.cta_text_color,
+                      padding: '0.5rem 1rem',
+                      borderRadius: '0.5rem'
+                    }}
+                  >
+                    {category.cta_text}
+                    <ArrowRight className="w-4 h-4" />
+                  </span>
                 </div>
               </div>
             </Link>
