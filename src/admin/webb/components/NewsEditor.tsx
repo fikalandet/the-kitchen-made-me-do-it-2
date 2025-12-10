@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Upload, MoveUp, MoveDown, Edit2, Star } from 'lucide-react';
+import { Plus, Trash2, Upload, MoveUp, MoveDown, Edit2, Star, ArrowRight } from 'lucide-react';
 import CollapsibleCard from './CollapsibleCard';
 import ColorPicker from './ColorPicker';
 import EmojiPicker from './EmojiPicker';
