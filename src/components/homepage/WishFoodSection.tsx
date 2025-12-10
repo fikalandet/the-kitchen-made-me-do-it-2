@@ -535,26 +535,23 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
                   {currentWishes.map((wish) => (
                     <div
                       key={wish.id}
-                      className="bg-white rounded-lg shadow-md p-3 hover:shadow-lg transition-shadow flex flex-col justify-between"
-                      style={{ minHeight: '200px' }}
+                      className="bg-white rounded-lg shadow-md p-2 hover:shadow-lg transition-shadow flex flex-col justify-between"
+                      style={{ height: '116px' }}
                     >
-                      <div>
-                        <p className="text-xs font-medium text-gray-900 mb-1 line-clamp-2">{wish.dish_name}</p>
+                      <div className="flex-1 min-h-0">
+                        <p className="text-xs font-medium text-gray-900 mb-1 line-clamp-1">{wish.dish_name}</p>
                         {wish.description && (
-                          <p className="text-xs text-gray-600 mb-1 line-clamp-2">{wish.description}</p>
+                          <p className="text-xs text-gray-600 mb-1 line-clamp-1">{wish.description}</p>
                         )}
-                        <p className="text-xs text-gray-500">Önskat av användare</p>
+                        <p className="text-[10px] text-gray-500">Önskat av användare</p>
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-2">
                           <button
                             onClick={() => handleLike(wish.id)}
                             disabled={!user}
-                            className={`flex items-center gap-1 transition-colors text-xs ${
-                              wish.isLikedByCurrentUser
-                                ? 'text-red-500 hover:text-red-600'
-                                : 'text-gray-600 hover:text-[#a1c798]'
-                            } disabled:opacity-50 disabled:cursor-not-allowed`}
+                            className="flex items-center gap-1 transition-colors text-xs text-gray-600 hover:text-[#a1c798] disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={wish.isLikedByCurrentUser ? { color: '#56c5c5' } : undefined}
                           >
                             <Heart
                               className="w-3 h-3"
@@ -562,54 +559,57 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
                             />
                             <span>{wish.likes_count}</span>
                           </button>
-                          {userRole === 'seller' && (
-                            <button
-                              onClick={() => {
-                                if (commentingWishId === wish.id) {
-                                  setCommentingWishId(null);
-                                  setCommentText('');
-                                } else {
-                                  setCommentingWishId(wish.id);
-                                }
-                              }}
-                              className="flex items-center gap-1 text-gray-600 hover:text-[#a1c798] transition-colors text-xs"
-                            >
-                              <MessageCircle className="w-3 h-3" />
-                              <span>{(wish.comments || []).length}</span>
-                            </button>
-                          )}
+                          <button
+                            onClick={() => {
+                              if (userRole !== 'seller') {
+                                return;
+                              }
+                              if (commentingWishId === wish.id) {
+                                setCommentingWishId(null);
+                                setCommentText('');
+                              } else {
+                                setCommentingWishId(wish.id);
+                              }
+                            }}
+                            className={`flex items-center gap-1 text-gray-600 transition-colors text-xs ${
+                              userRole === 'seller' ? 'hover:text-[#a1c798] cursor-pointer' : 'cursor-default'
+                            }`}
+                          >
+                            <MessageCircle className="w-3 h-3" />
+                            <span>{(wish.comments || []).length}</span>
+                          </button>
                         </div>
 
                         {wish.comments && wish.comments.length > 0 && (
-                          <div className="mb-2 space-y-1 max-h-20 overflow-y-auto">
+                          <div className="mb-1 space-y-0.5 max-h-12 overflow-y-auto">
                             {wish.comments.map((comment) => (
                               <div
                                 key={comment.id}
-                                className="bg-gray-100 rounded-lg px-2 py-1 text-xs"
+                                className="bg-gray-100 rounded px-1.5 py-0.5 text-[10px]"
                               >
-                                <p className="font-medium text-gray-700">
+                                <p className="font-medium text-gray-700 leading-tight">
                                   {comment.profiles?.full_name || 'Kock'}
                                 </p>
-                                <p className="text-gray-600">{comment.comment_text}</p>
+                                <p className="text-gray-600 leading-tight line-clamp-1">{comment.comment_text}</p>
                               </div>
                             ))}
                           </div>
                         )}
 
                         {commentingWishId === wish.id && (
-                          <div className="mt-2 space-y-1">
+                          <div className="mt-1 space-y-0.5">
                             <textarea
                               value={commentText}
                               onChange={(e) => setCommentText(e.target.value)}
                               placeholder="Skriv en kommentar..."
-                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#a1c798] focus:border-transparent resize-none"
+                              className="w-full px-1.5 py-1 text-[10px] border border-gray-300 rounded focus:ring-1 focus:ring-[#a1c798] focus:border-transparent resize-none"
                               rows={2}
                             />
-                            <div className="flex gap-1">
+                            <div className="flex gap-0.5">
                               <button
                                 onClick={() => handleCommentSubmit(wish.id)}
                                 disabled={!commentText.trim()}
-                                className="px-2 py-1 bg-[#a1c798] text-white text-xs rounded-lg hover:bg-[#8fb386] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-1.5 py-0.5 bg-[#a1c798] text-white text-[10px] rounded hover:bg-[#8fb386] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 Skicka
                               </button>
@@ -618,7 +618,7 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
                                   setCommentingWishId(null);
                                   setCommentText('');
                                 }}
-                                className="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded-lg hover:bg-gray-300 transition-colors"
+                                className="px-1.5 py-0.5 bg-gray-200 text-gray-700 text-[10px] rounded hover:bg-gray-300 transition-colors"
                               >
                                 Avbryt
                               </button>
