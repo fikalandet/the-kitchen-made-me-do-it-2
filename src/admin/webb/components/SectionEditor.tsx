@@ -17,6 +17,7 @@ import TjuvkikEditor from './TjuvkikEditor';
 import WishFoodEditor from './WishFoodEditor';
 import TestEatEditor from './TestEatEditor';
 import TasteTagsEditor from './TasteTagsEditor';
+import NewsEditor from './NewsEditor';
 import { Save, Loader } from 'lucide-react';
 
 interface SectionEditorProps {
@@ -117,6 +118,10 @@ const sectionConfigs: Record<string, SectionConfig> = {
   'smaketiketter': {
     supportsStandardContent: false,
     customPanels: [TasteTagsEditor],
+  },
+  'nyheter': {
+    supportsStandardContent: false,
+    customPanels: [NewsEditor],
   },
 }
 

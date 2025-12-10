@@ -15,6 +15,7 @@ import { DealsSection } from '../components/homepage/DealsSection';
 import { BrattomkakSection } from '../components/homepage/BrattomkakSection';
 import { TjuvkikSection } from '../components/homepage/TjuvkikSection';
 import { TasteTagsSection } from '../components/homepage/TasteTagsSection';
+import { NewsSection } from '../components/homepage/NewsSection';
 import { ContestsSection } from '../components/homepage/ContestsSection';
 import { FeedbackDishesSection } from '../components/homepage/FeedbackDishesSection';
 import { WishFoodSection } from '../components/homepage/WishFoodSection';
@@ -70,6 +71,7 @@ export const Home: React.FC = () => {
   const [wishFoodSettings, setWishFoodSettings] = useState<any>({});
   const [testEatSettings, setTestEatSettings] = useState<any>({});
   const [tasteTagsSettings, setTasteTagsSettings] = useState<any>({});
+  const [newsSettings, setNewsSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
   const [brattomDishes, setBrattomDishes] = useState<any[]>([]);
   const [tjuvkikDishes, setTjuvkikDishes] = useState<any[]>([]);
@@ -226,6 +228,16 @@ export const Home: React.FC = () => {
 
     if (tasteTagsSection) {
       setTasteTagsSettings(tasteTagsSection.settings || {});
+    }
+
+    const { data: newsSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'nyheter')
+      .maybeSingle();
+
+    if (newsSection) {
+      setNewsSettings(newsSection.settings || {});
     }
 
     const mockChef = {
@@ -872,6 +884,8 @@ export const Home: React.FC = () => {
       />
 
       <TasteTagsSection settings={tasteTagsSettings} />
+
+      <NewsSection settings={newsSettings} />
 
       <ContestsSection
         settings={contestsSettings}
