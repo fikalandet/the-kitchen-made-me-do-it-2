@@ -139,9 +139,17 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
                   color: settings?.headingColor || '#374151'
                 }}
               >
-                {settings?.headingEmojiStart && <span>{settings.headingEmojiStart}</span>}
+                {settings?.headingEmojiStart && (
+                  <span className={settings.headingEmojiStart === '⭐' || settings.headingEmojiStart === '✨' || settings.headingEmojiStart === '🌟' ? 'animate-pulse' : ''}>
+                    {settings.headingEmojiStart}
+                  </span>
+                )}
                 {settings?.heading || 'Tävlingar'}
-                {settings?.headingEmojiEnd && <span>{settings.headingEmojiEnd}</span>}
+                {settings?.headingEmojiEnd && (
+                  <span className={settings.headingEmojiEnd === '⭐' || settings.headingEmojiEnd === '✨' || settings.headingEmojiEnd === '🌟' ? 'animate-pulse' : ''}>
+                    {settings.headingEmojiEnd}
+                  </span>
+                )}
               </h2>
               {subtitleTexts.length > 0 && subtitleTexts[0] && (
                 <>
@@ -161,7 +169,7 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
               )}
             </div>
           ) : (
-            <div>
+            <div className={settings?.headingAlignment === 'center' ? 'flex flex-col items-center' : ''}>
               <h2
                 className={`text-3xl ${headingFontClass} ${
                   settings?.headingBold ? 'font-bold' : ''
@@ -172,9 +180,17 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
                   color: settings?.headingColor || '#374151'
                 }}
               >
-                {settings?.headingEmojiStart && <span>{settings.headingEmojiStart}</span>}
+                {settings?.headingEmojiStart && (
+                  <span className={settings.headingEmojiStart === '⭐' || settings.headingEmojiStart === '✨' || settings.headingEmojiStart === '🌟' ? 'animate-pulse' : ''}>
+                    {settings.headingEmojiStart}
+                  </span>
+                )}
                 {settings?.heading || 'Tävlingar'}
-                {settings?.headingEmojiEnd && <span>{settings.headingEmojiEnd}</span>}
+                {settings?.headingEmojiEnd && (
+                  <span className={settings.headingEmojiEnd === '⭐' || settings.headingEmojiEnd === '✨' || settings.headingEmojiEnd === '🌟' ? 'animate-pulse' : ''}>
+                    {settings.headingEmojiEnd}
+                  </span>
+                )}
               </h2>
               {subtitleTexts.length > 0 && subtitleTexts[currentSubtitleIndex] && (
                 <div className="min-h-[24px] flex items-center mt-2">

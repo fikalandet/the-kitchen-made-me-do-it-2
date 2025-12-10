@@ -4,6 +4,7 @@ import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../contexts/AuthContext';
 import CollapsibleCard from './CollapsibleCard';
 import ColorPicker from './ColorPicker';
+import EmojiPicker from './EmojiPicker';
 
 interface ContestsSettings {
   backgroundColor?: string;
@@ -143,31 +144,17 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Emoji före rubrik
-              </label>
-              <input
-                type="text"
-                value={settings.headingEmojiStart || ''}
-                onChange={(e) => updateSetting('headingEmojiStart', e.target.value)}
-                placeholder="🏆"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
-              />
-            </div>
+            <EmojiPicker
+              value={settings.headingEmojiStart || ''}
+              onChange={(emoji) => updateSetting('headingEmojiStart', emoji)}
+              label="Emoji före rubrik"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Emoji efter rubrik
-              </label>
-              <input
-                type="text"
-                value={settings.headingEmojiEnd || ''}
-                onChange={(e) => updateSetting('headingEmojiEnd', e.target.value)}
-                placeholder="🎉"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
-              />
-            </div>
+            <EmojiPicker
+              value={settings.headingEmojiEnd || ''}
+              onChange={(emoji) => updateSetting('headingEmojiEnd', emoji)}
+              label="Emoji efter rubrik"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -559,9 +546,17 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
                     color: settings.headingColor || '#374151'
                   }}
                 >
-                  {settings.headingEmojiStart && <span>{settings.headingEmojiStart}</span>}
+                  {settings.headingEmojiStart && (
+                    <span className={settings.headingEmojiStart === '⭐' || settings.headingEmojiStart === '✨' || settings.headingEmojiStart === '🌟' ? 'animate-pulse' : ''}>
+                      {settings.headingEmojiStart}
+                    </span>
+                  )}
                   {settings.heading || 'Tävlingar'}
-                  {settings.headingEmojiEnd && <span>{settings.headingEmojiEnd}</span>}
+                  {settings.headingEmojiEnd && (
+                    <span className={settings.headingEmojiEnd === '⭐' || settings.headingEmojiEnd === '✨' || settings.headingEmojiEnd === '🌟' ? 'animate-pulse' : ''}>
+                      {settings.headingEmojiEnd}
+                    </span>
+                  )}
                 </h2>
                 {subtitleTexts.length > 0 && subtitleTexts[0] && (
                   <>
@@ -581,7 +576,7 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
                 )}
               </div>
             ) : (
-              <div>
+              <div className={settings.headingAlignment === 'center' ? 'flex flex-col items-center' : ''}>
                 <h2
                   className={`text-3xl ${
                     settings.headingFont === 'lobster' ? 'font-lobster' : ''
@@ -592,9 +587,17 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
                     color: settings.headingColor || '#374151'
                   }}
                 >
-                  {settings.headingEmojiStart && <span>{settings.headingEmojiStart}</span>}
+                  {settings.headingEmojiStart && (
+                    <span className={settings.headingEmojiStart === '⭐' || settings.headingEmojiStart === '✨' || settings.headingEmojiStart === '🌟' ? 'animate-pulse' : ''}>
+                      {settings.headingEmojiStart}
+                    </span>
+                  )}
                   {settings.heading || 'Tävlingar'}
-                  {settings.headingEmojiEnd && <span>{settings.headingEmojiEnd}</span>}
+                  {settings.headingEmojiEnd && (
+                    <span className={settings.headingEmojiEnd === '⭐' || settings.headingEmojiEnd === '✨' || settings.headingEmojiEnd === '🌟' ? 'animate-pulse' : ''}>
+                      {settings.headingEmojiEnd}
+                    </span>
+                  )}
                 </h2>
                 {subtitleTexts.length > 0 && subtitleTexts[0] && (
                   <div className="min-h-[24px] flex items-center mt-2">
