@@ -980,7 +980,7 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
 
             <div className="grid grid-cols-2 gap-6">
               <div
-                className={`relative rounded-lg overflow-hidden min-h-[400px] flex ${
+                className={`relative rounded-lg overflow-hidden min-h-[400px] ${
                   settings.mainImagePosition === 'right' ? 'order-2' : ''
                 }`}
                 style={{
@@ -999,7 +999,7 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
                 }}
               >
                 <div
-                  className={`w-full flex ${
+                  className={`relative w-full h-full flex ${
                     settings.mainImageTextPosition === 'top' || !settings.mainImageTextPosition
                       ? 'items-start'
                       : settings.mainImageTextPosition === 'bottom'
@@ -1013,20 +1013,27 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
                       : 'justify-center'
                   } p-6`}
                 >
-                  <div
-                    className={`w-full ${
-                      settings.mainImageTextBackgroundEnabled ? 'p-4 rounded-lg' : ''
-                    }`}
-                    style={{
-                      backgroundColor: settings.mainImageTextBackgroundEnabled
-                        ? settings.mainImageTextBackgroundColor || '#ffffff'
-                        : 'transparent',
-                      opacity: settings.mainImageTextBackgroundEnabled
-                        ? (settings.mainImageTextBackgroundOpacity || 80) / 100
-                        : 1
-                    }}
-                  >
-                    <div className="space-y-3">
+                  {settings.mainImageTextBackgroundEnabled && (
+                    <div
+                      className="absolute inset-0 rounded-lg"
+                      style={{
+                        backgroundColor: (() => {
+                          const hex = settings.mainImageTextBackgroundColor || '#ffffff';
+                          const opacity = (settings.mainImageTextBackgroundOpacity || 80) / 100;
+                          const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                          if (result) {
+                            const r = parseInt(result[1], 16);
+                            const g = parseInt(result[2], 16);
+                            const b = parseInt(result[3], 16);
+                            return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                          }
+                          return hex;
+                        })()
+                      }}
+                    />
+                  )}
+                  <div className={`relative w-full max-w-md ${settings.mainImageTextAlign === 'center' || !settings.mainImageTextAlign ? 'text-center' : settings.mainImageTextAlign === 'right' ? 'text-right' : 'text-left'}`}>
+                    <div className={`space-y-3 ${settings.mainImageTextAlign === 'center' || !settings.mainImageTextAlign ? 'flex flex-col items-center' : ''}`}>
                       {settings.mainImageTitle && (
                         <h3
                           className={`${
@@ -1096,30 +1103,97 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
               </div>
 
               <div
-                className={`flex flex-col space-y-3 max-h-[400px] overflow-y-auto pr-2 ${
+                className={`grid grid-cols-3 gap-2 min-h-[400px] ${
                   settings.mainImagePosition === 'right' ? 'order-1' : ''
                 }`}
               >
-                <div className="aspect-square bg-white rounded-lg shadow p-4 flex flex-col justify-between">
+                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
                   <div>
-                    <p className="text-sm text-gray-800 mb-2">Jag önskar mig thailändsk massaman-curry!</p>
+                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Thailändsk massaman-curry</p>
                     <p className="text-xs text-gray-500">Önskat av Anna</p>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
                     <span>💛 5</span>
                     <span>💬 2</span>
                   </div>
-                  <div className="flex flex-wrap gap-1 mt-2">
-                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">Kock: Låter gott!</span>
-                  </div>
                 </div>
-                <div className="aspect-square bg-white rounded-lg shadow p-4 flex flex-col justify-between">
+                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
                   <div>
-                    <p className="text-sm text-gray-800 mb-2">Vegetarisk lasagne</p>
+                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Vegetarisk lasagne</p>
                     <p className="text-xs text-gray-500">Önskat av Erik</p>
                   </div>
-                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
                     <span>💛 3</span>
+                    <span>💬 1</span>
+                  </div>
+                </div>
+                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
+                  <div>
+                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Hemlagad pizza</p>
+                    <p className="text-xs text-gray-500">Önskat av Sara</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span>💛 7</span>
+                    <span>💬 3</span>
+                  </div>
+                </div>
+                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
+                  <div>
+                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Sushi</p>
+                    <p className="text-xs text-gray-500">Önskat av Lisa</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span>💛 2</span>
+                    <span>💬 0</span>
+                  </div>
+                </div>
+                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
+                  <div>
+                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Pasta carbonara</p>
+                    <p className="text-xs text-gray-500">Önskat av John</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span>💛 4</span>
+                    <span>💬 1</span>
+                  </div>
+                </div>
+                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
+                  <div>
+                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Tacos</p>
+                    <p className="text-xs text-gray-500">Önskat av Maria</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span>💛 6</span>
+                    <span>💬 2</span>
+                  </div>
+                </div>
+                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
+                  <div>
+                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Pad thai</p>
+                    <p className="text-xs text-gray-500">Önskat av David</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span>💛 1</span>
+                    <span>💬 0</span>
+                  </div>
+                </div>
+                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
+                  <div>
+                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Köttbullar med mos</p>
+                    <p className="text-xs text-gray-500">Önskat av Emma</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span>💛 8</span>
+                    <span>💬 4</span>
+                  </div>
+                </div>
+                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
+                  <div>
+                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Grillad lax</p>
+                    <p className="text-xs text-gray-500">Önskat av Peter</p>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                    <span>💛 5</span>
                     <span>💬 1</span>
                   </div>
                 </div>

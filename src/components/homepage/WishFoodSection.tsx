@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Heart, MessageCircle } from 'lucide-react';
+import { Heart, MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { EmptyState } from './EmptyState';
@@ -69,6 +69,7 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
   const [loading, setLoading] = useState(false);
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
+  const [currentPage, setCurrentPage] = useState(0);
 
   useEffect(() => {
     fetchWishes();
@@ -176,6 +177,35 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
     settings.subtitleFont === 'sans' ? 'sans-serif' :
     undefined;
 
+  const pageSize = 9;
+  const totalPages = Math.ceil(wishes.length / pageSize);
+  const startIndex = currentPage * pageSize;
+  const endIndex = startIndex + pageSize;
+  const currentWishes = wishes.slice(startIndex, endIndex);
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const hexToRgba = (hex: string, opacity: number) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (result) {
+      const r = parseInt(result[1], 16);
+      const g = parseInt(result[2], 16);
+      const b = parseInt(result[3], 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    return hex;
+  };
+
   return (
     <section
       className="py-12 px-4"
@@ -255,7 +285,7 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div
-            className={`relative rounded-lg overflow-hidden min-h-[500px] flex ${
+            className={`relative rounded-lg overflow-hidden min-h-[500px] ${
               settings.mainImagePosition === 'right' ? 'order-2' : ''
             }`}
             style={{
@@ -274,7 +304,7 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
             }}
           >
             <div
-              className={`w-full flex ${
+              className={`relative w-full h-full flex ${
                 settings.mainImageTextPosition === 'top' || !settings.mainImageTextPosition
                   ? 'items-start'
                   : settings.mainImageTextPosition === 'bottom'
@@ -288,18 +318,19 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
                   : 'justify-center'
               } p-8`}
             >
-              <div
-                className={`w-full max-w-md ${settings.mainImageTextBackgroundEnabled ? 'p-6 rounded-lg' : ''}`}
-                style={{
-                  backgroundColor: settings.mainImageTextBackgroundEnabled
-                    ? settings.mainImageTextBackgroundColor || '#ffffff'
-                    : 'transparent',
-                  opacity: settings.mainImageTextBackgroundEnabled
-                    ? (settings.mainImageTextBackgroundOpacity || 80) / 100
-                    : 1
-                }}
-              >
-                <div className="space-y-4">
+              {settings.mainImageTextBackgroundEnabled && (
+                <div
+                  className="absolute inset-0 rounded-lg"
+                  style={{
+                    backgroundColor: hexToRgba(
+                      settings.mainImageTextBackgroundColor || '#ffffff',
+                      (settings.mainImageTextBackgroundOpacity || 80) / 100
+                    )
+                  }}
+                />
+              )}
+              <div className={`relative w-full max-w-md ${settings.mainImageTextAlign === 'center' || !settings.mainImageTextAlign ? 'text-center' : settings.mainImageTextAlign === 'right' ? 'text-right' : 'text-left'}`}>
+                <div className={`space-y-4 ${settings.mainImageTextAlign === 'center' || !settings.mainImageTextAlign ? 'flex flex-col items-center' : ''}`}>
                   {settings.mainImageTitle && (
                     <h3
                       className={`${
@@ -377,47 +408,69 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
             }`}
           >
             {wishes.length > 0 ? (
-              <div
-                className={`${
-                  settings.customerCardsLayout === 'list'
-                    ? 'space-y-4'
-                    : 'grid grid-cols-1 md:grid-cols-2 gap-4'
-                } max-h-[500px] overflow-y-auto pr-2`}
-              >
-                {wishes.map((wish) => (
-                  <div
-                    key={wish.id}
-                    className="aspect-square bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col justify-between"
-                  >
-                    <div>
-                      <p className="text-base font-medium text-gray-900 mb-2">{wish.dish_name}</p>
-                      {wish.description && (
-                        <p className="text-sm text-gray-600 mb-2">{wish.description}</p>
-                      )}
-                      <p className="text-xs text-gray-500">Önskat av användare</p>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-4 mb-3">
-                        <button
-                          onClick={() => handleLike(wish.id)}
-                          className="flex items-center gap-2 text-gray-600 hover:text-[#a1c798] transition-colors text-sm"
-                        >
-                          <Heart className="w-4 h-4" />
-                          <span>{wish.likes_count}</span>
-                        </button>
-                        <button className="flex items-center gap-2 text-gray-600 hover:text-[#a1c798] transition-colors text-sm">
-                          <MessageCircle className="w-4 h-4" />
-                          <span>Kommentera</span>
-                        </button>
+              <div className="relative">
+                <div
+                  className={`${
+                    settings.customerCardsLayout === 'list'
+                      ? 'space-y-3'
+                      : 'grid grid-cols-3 gap-3'
+                  } min-h-[500px]`}
+                >
+                  {currentWishes.map((wish) => (
+                    <div
+                      key={wish.id}
+                      className="aspect-square bg-white rounded-lg shadow-md p-3 hover:shadow-lg transition-shadow flex flex-col justify-between"
+                    >
+                      <div>
+                        <p className="text-xs font-medium text-gray-900 mb-1 line-clamp-2">{wish.dish_name}</p>
+                        {wish.description && (
+                          <p className="text-xs text-gray-600 mb-1 line-clamp-2">{wish.description}</p>
+                        )}
+                        <p className="text-xs text-gray-500">Önskat av användare</p>
                       </div>
-                      <div className="flex flex-wrap gap-1">
-                        <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
-                          Kommer snart...
-                        </span>
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <button
+                            onClick={() => handleLike(wish.id)}
+                            className="flex items-center gap-1 text-gray-600 hover:text-[#a1c798] transition-colors text-xs"
+                          >
+                            <Heart className="w-3 h-3" />
+                            <span>{wish.likes_count}</span>
+                          </button>
+                          <button className="flex items-center gap-1 text-gray-600 hover:text-[#a1c798] transition-colors text-xs">
+                            <MessageCircle className="w-3 h-3" />
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          <span className="text-xs bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded-full">
+                            Snart...
+                          </span>
+                        </div>
                       </div>
                     </div>
+                  ))}
+                </div>
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-4 mt-4">
+                    <button
+                      onClick={handlePrevPage}
+                      disabled={currentPage === 0}
+                      className="p-2 rounded-lg bg-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft className="w-5 h-5 text-gray-700" />
+                    </button>
+                    <span className="text-sm text-gray-600">
+                      {currentPage + 1} / {totalPages}
+                    </span>
+                    <button
+                      onClick={handleNextPage}
+                      disabled={currentPage === totalPages - 1}
+                      className="p-2 rounded-lg bg-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronRight className="w-5 h-5 text-gray-700" />
+                    </button>
                   </div>
-                ))}
+                )}
               </div>
             ) : (
               <div className="flex items-center justify-center h-[500px]">
