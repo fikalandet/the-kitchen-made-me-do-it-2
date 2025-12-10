@@ -60,16 +60,30 @@ interface FoodWish {
   likes_count: number;
   customer_id: string;
   created_at: string;
+  isLikedByCurrentUser?: boolean;
+  comments?: WishComment[];
+}
+
+interface WishComment {
+  id: string;
+  user_id: string;
+  comment_text: string;
+  created_at: string;
+  profiles?: {
+    full_name: string;
+  };
 }
 
 export function WishFoodSection({ settings }: WishFoodSectionProps) {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const [wishes, setWishes] = useState<FoodWish[]>([]);
   const [newWish, setNewWish] = useState('');
   const [loading, setLoading] = useState(false);
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
+  const [commentingWishId, setCommentingWishId] = useState<string | null>(null);
+  const [commentText, setCommentText] = useState('');
 
   useEffect(() => {
     fetchWishes();
@@ -93,15 +107,57 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
 
   const fetchWishes = async () => {
     try {
-      const { data, error } = await supabase
+      const { data: wishesData, error: wishesError } = await supabase
         .from('food_wishes')
         .select('*')
         .eq('status', 'pending')
         .order('created_at', { ascending: false })
         .limit(settings.customerCardsMaxCount || 10);
 
-      if (error) throw error;
-      setWishes(data || []);
+      if (wishesError) throw wishesError;
+
+      if (!wishesData || wishesData.length === 0) {
+        setWishes([]);
+        return;
+      }
+
+      const wishIds = wishesData.map((w) => w.id);
+
+      const [likesResult, commentsResult, userLikesResult] = await Promise.all([
+        supabase.from('food_wish_likes').select('wish_id').in('wish_id', wishIds),
+        supabase
+          .from('food_wish_comments')
+          .select('*, profiles(full_name)')
+          .in('wish_id', wishIds)
+          .order('created_at', { ascending: true }),
+        user
+          ? supabase
+              .from('food_wish_likes')
+              .select('wish_id')
+              .in('wish_id', wishIds)
+              .eq('chef_id', user.id)
+          : { data: [], error: null }
+      ]);
+
+      const userLikedWishIds = new Set(
+        (userLikesResult.data || []).map((like) => like.wish_id)
+      );
+
+      const commentsByWish: Record<string, WishComment[]> = {};
+      (commentsResult.data || []).forEach((comment) => {
+        if (!commentsByWish[comment.wish_id]) {
+          commentsByWish[comment.wish_id] = [];
+        }
+        commentsByWish[comment.wish_id].push(comment);
+      });
+
+      const enrichedWishes: FoodWish[] = wishesData.map((wish) => ({
+        ...wish,
+        isLikedByCurrentUser: userLikedWishIds.has(wish.id),
+        comments: commentsByWish[wish.id] || []
+      }));
+
+      setWishes(enrichedWishes);
     } catch (err) {
       console.error('Error fetching wishes:', err);
     }
@@ -138,29 +194,89 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
       return;
     }
 
+    const wish = wishes.find((w) => w.id === wishId);
+    if (!wish) return;
+
+    const isLiked = wish.isLikedByCurrentUser;
+
+    setWishes((prev) =>
+      prev.map((w) =>
+        w.id === wishId
+          ? {
+              ...w,
+              isLikedByCurrentUser: !isLiked,
+              likes_count: isLiked ? w.likes_count - 1 : w.likes_count + 1
+            }
+          : w
+      )
+    );
+
     try {
-      const { error } = await supabase
-        .from('food_wish_likes')
-        .insert({
+      if (isLiked) {
+        const { error } = await supabase
+          .from('food_wish_likes')
+          .delete()
+          .eq('wish_id', wishId)
+          .eq('chef_id', user.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from('food_wish_likes').insert({
           wish_id: wishId,
           chef_id: user.id
         });
 
-      if (error) {
-        if (error.code === '23505') {
-          await supabase
-            .from('food_wish_likes')
-            .delete()
-            .eq('wish_id', wishId)
-            .eq('chef_id', user.id);
-        } else {
-          throw error;
-        }
+        if (error) throw error;
       }
-
-      fetchWishes();
     } catch (err) {
       console.error('Error toggling like:', err);
+      setWishes((prev) =>
+        prev.map((w) =>
+          w.id === wishId
+            ? {
+                ...w,
+                isLikedByCurrentUser: isLiked,
+                likes_count: isLiked ? w.likes_count + 1 : w.likes_count - 1
+              }
+            : w
+        )
+      );
+      alert('Kunde inte uppdatera gilla. Försök igen.');
+    }
+  };
+
+  const handleCommentSubmit = async (wishId: string) => {
+    if (!user || !commentText.trim()) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('food_wish_comments')
+        .insert({
+          wish_id: wishId,
+          user_id: user.id,
+          comment_text: commentText.trim()
+        })
+        .select('*, profiles(full_name)')
+        .single();
+
+      if (error) throw error;
+
+      setWishes((prev) =>
+        prev.map((w) =>
+          w.id === wishId
+            ? {
+                ...w,
+                comments: [...(w.comments || []), data]
+              }
+            : w
+        )
+      );
+
+      setCommentText('');
+      setCommentingWishId(null);
+    } catch (err) {
+      console.error('Error posting comment:', err);
+      alert('Kunde inte skicka kommentar. Försök igen.');
     }
   };
 
@@ -420,7 +536,7 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
                     <div
                       key={wish.id}
                       className="bg-white rounded-lg shadow-md p-3 hover:shadow-lg transition-shadow flex flex-col justify-between"
-                      style={{ aspectRatio: '2 / 1' }}
+                      style={{ minHeight: '200px' }}
                     >
                       <div>
                         <p className="text-xs font-medium text-gray-900 mb-1 line-clamp-2">{wish.dish_name}</p>
@@ -433,20 +549,82 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
                         <div className="flex items-center gap-2 mb-2">
                           <button
                             onClick={() => handleLike(wish.id)}
-                            className="flex items-center gap-1 text-gray-600 hover:text-[#a1c798] transition-colors text-xs"
+                            disabled={!user}
+                            className={`flex items-center gap-1 transition-colors text-xs ${
+                              wish.isLikedByCurrentUser
+                                ? 'text-red-500 hover:text-red-600'
+                                : 'text-gray-600 hover:text-[#a1c798]'
+                            } disabled:opacity-50 disabled:cursor-not-allowed`}
                           >
-                            <Heart className="w-3 h-3" />
+                            <Heart
+                              className="w-3 h-3"
+                              fill={wish.isLikedByCurrentUser ? 'currentColor' : 'none'}
+                            />
                             <span>{wish.likes_count}</span>
                           </button>
-                          <button className="flex items-center gap-1 text-gray-600 hover:text-[#a1c798] transition-colors text-xs">
-                            <MessageCircle className="w-3 h-3" />
-                          </button>
+                          {userRole === 'seller' && (
+                            <button
+                              onClick={() => {
+                                if (commentingWishId === wish.id) {
+                                  setCommentingWishId(null);
+                                  setCommentText('');
+                                } else {
+                                  setCommentingWishId(wish.id);
+                                }
+                              }}
+                              className="flex items-center gap-1 text-gray-600 hover:text-[#a1c798] transition-colors text-xs"
+                            >
+                              <MessageCircle className="w-3 h-3" />
+                              <span>{(wish.comments || []).length}</span>
+                            </button>
+                          )}
                         </div>
-                        <div className="flex flex-wrap gap-1">
-                          <span className="text-xs bg-gray-100 text-gray-700 px-1.5 py-0.5 rounded-full">
-                            Snart...
-                          </span>
-                        </div>
+
+                        {wish.comments && wish.comments.length > 0 && (
+                          <div className="mb-2 space-y-1 max-h-20 overflow-y-auto">
+                            {wish.comments.map((comment) => (
+                              <div
+                                key={comment.id}
+                                className="bg-gray-100 rounded-lg px-2 py-1 text-xs"
+                              >
+                                <p className="font-medium text-gray-700">
+                                  {comment.profiles?.full_name || 'Kock'}
+                                </p>
+                                <p className="text-gray-600">{comment.comment_text}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {commentingWishId === wish.id && (
+                          <div className="mt-2 space-y-1">
+                            <textarea
+                              value={commentText}
+                              onChange={(e) => setCommentText(e.target.value)}
+                              placeholder="Skriv en kommentar..."
+                              className="w-full px-2 py-1 text-xs border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#a1c798] focus:border-transparent resize-none"
+                              rows={2}
+                            />
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() => handleCommentSubmit(wish.id)}
+                                disabled={!commentText.trim()}
+                                className="px-2 py-1 bg-[#a1c798] text-white text-xs rounded-lg hover:bg-[#8fb386] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                Skicka
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setCommentingWishId(null);
+                                  setCommentText('');
+                                }}
+                                className="px-2 py-1 bg-gray-200 text-gray-700 text-xs rounded-lg hover:bg-gray-300 transition-colors"
+                              >
+                                Avbryt
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
