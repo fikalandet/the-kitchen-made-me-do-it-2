@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Upload } from 'lucide-react';
+import { Plus, Trash2, Upload, X } from 'lucide-react';
 import CollapsibleCard from './CollapsibleCard';
 import ColorPicker from './ColorPicker';
 import { supabase } from '../../../lib/supabase';
@@ -55,11 +55,23 @@ interface WishFoodEditorProps {
   onSettingsChange: (settings: WishFoodSettings) => void;
 }
 
+interface FoodWish {
+  id: string;
+  dish_name: string;
+  description?: string;
+  likes_count: number;
+  customer_id: string;
+  status: string;
+  created_at: string;
+}
+
 export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodEditorProps) {
   const { user } = useAuth();
   const [uploadingMainImage, setUploadingMainImage] = useState(false);
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
+  const [wishes, setWishes] = useState<FoodWish[]>([]);
+  const [removingWishId, setRemovingWishId] = useState<string | null>(null);
 
   const updateSetting = (key: keyof WishFoodSettings, value: any) => {
     onSettingsChange({ ...settings, [key]: value });
@@ -83,6 +95,10 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
   };
 
   useEffect(() => {
+    fetchWishes();
+  }, []);
+
+  useEffect(() => {
     const subtitleTexts = settings.subtitleTexts || [];
     if (subtitleTexts.length <= 1) return;
 
@@ -97,6 +113,55 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
 
     return () => clearInterval(interval);
   }, [settings.subtitleTexts, settings.subtitleRotationInterval]);
+
+  const fetchWishes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('food_wishes')
+        .select('*')
+        .eq('status', 'pending')
+        .order('created_at', { ascending: false })
+        .limit(9);
+
+      if (error) throw error;
+      setWishes(data || []);
+    } catch (err) {
+      console.error('Error fetching wishes:', err);
+    }
+  };
+
+  const handleRemoveWish = async (wishId: string) => {
+    if (!user) {
+      alert('Du måste vara inloggad för att ta bort önskningar');
+      return;
+    }
+
+    if (!confirm('Är du säker på att du vill ta bort denna önskning?')) {
+      return;
+    }
+
+    setRemovingWishId(wishId);
+
+    try {
+      const { error } = await supabase
+        .from('food_wishes')
+        .update({
+          status: 'removed_by_admin',
+          removed_by_admin_id: user.id,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', wishId);
+
+      if (error) throw error;
+
+      setWishes(wishes.filter(w => w.id !== wishId));
+    } catch (err) {
+      console.error('Error removing wish:', err);
+      alert('Kunde inte ta bort önskning, försök igen.');
+    } finally {
+      setRemovingWishId(null);
+    }
+  };
 
   const handleMainImageUpload = async (file: File) => {
     if (!user) {
@@ -1107,96 +1172,38 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
                   settings.mainImagePosition === 'right' ? 'order-1' : ''
                 }`}
               >
-                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
-                  <div>
-                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Thailändsk massaman-curry</p>
-                    <p className="text-xs text-gray-500">Önskat av Anna</p>
+                {wishes.length > 0 ? (
+                  wishes.map((wish) => (
+                    <div
+                      key={wish.id}
+                      className="relative aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between hover:shadow-md transition-shadow"
+                    >
+                      <button
+                        onClick={() => handleRemoveWish(wish.id)}
+                        disabled={removingWishId === wish.id}
+                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors disabled:opacity-50"
+                        title="Ta bort önskning"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                      <div>
+                        <p className="text-xs text-gray-800 mb-1 line-clamp-2">{wish.dish_name}</p>
+                        {wish.description && (
+                          <p className="text-xs text-gray-600 mb-1 line-clamp-1">{wish.description}</p>
+                        )}
+                        <p className="text-xs text-gray-500">Önskat av användare</p>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <span>💛 {wish.likes_count}</span>
+                        <span>💬 0</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-3 flex items-center justify-center h-[400px] text-gray-500 text-sm">
+                    Inga önskningar att visa
                   </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>💛 5</span>
-                    <span>💬 2</span>
-                  </div>
-                </div>
-                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
-                  <div>
-                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Vegetarisk lasagne</p>
-                    <p className="text-xs text-gray-500">Önskat av Erik</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>💛 3</span>
-                    <span>💬 1</span>
-                  </div>
-                </div>
-                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
-                  <div>
-                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Hemlagad pizza</p>
-                    <p className="text-xs text-gray-500">Önskat av Sara</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>💛 7</span>
-                    <span>💬 3</span>
-                  </div>
-                </div>
-                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
-                  <div>
-                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Sushi</p>
-                    <p className="text-xs text-gray-500">Önskat av Lisa</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>💛 2</span>
-                    <span>💬 0</span>
-                  </div>
-                </div>
-                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
-                  <div>
-                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Pasta carbonara</p>
-                    <p className="text-xs text-gray-500">Önskat av John</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>💛 4</span>
-                    <span>💬 1</span>
-                  </div>
-                </div>
-                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
-                  <div>
-                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Tacos</p>
-                    <p className="text-xs text-gray-500">Önskat av Maria</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>💛 6</span>
-                    <span>💬 2</span>
-                  </div>
-                </div>
-                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
-                  <div>
-                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Pad thai</p>
-                    <p className="text-xs text-gray-500">Önskat av David</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>💛 1</span>
-                    <span>💬 0</span>
-                  </div>
-                </div>
-                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
-                  <div>
-                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Köttbullar med mos</p>
-                    <p className="text-xs text-gray-500">Önskat av Emma</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>💛 8</span>
-                    <span>💬 4</span>
-                  </div>
-                </div>
-                <div className="aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between">
-                  <div>
-                    <p className="text-xs text-gray-800 mb-1 line-clamp-2">Grillad lax</p>
-                    <p className="text-xs text-gray-500">Önskat av Peter</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-gray-500">
-                    <span>💛 5</span>
-                    <span>💬 1</span>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           </div>
