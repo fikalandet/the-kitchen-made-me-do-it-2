@@ -14,6 +14,8 @@ import SchysstaDealsEditor from './SchysstaDealsEditor';
 import EventsEditor from './EventsEditor';
 import ContestsEditor from './ContestsEditor';
 import TjuvkikEditor from './TjuvkikEditor';
+import WishFoodEditor from './WishFoodEditor';
+import TestEatEditor from './TestEatEditor';
 import { Save, Loader } from 'lucide-react';
 
 interface SectionEditorProps {
@@ -102,6 +104,14 @@ const sectionConfigs: Record<string, SectionConfig> = {
   'tjuvkik-i-koket': {
     supportsStandardContent: false,
     customPanels: [TjuvkikEditor],
+  },
+  'onska-kak': {
+    supportsStandardContent: false,
+    customPanels: [WishFoodEditor],
+  },
+  'testkaka-tyck-till': {
+    supportsStandardContent: false,
+    customPanels: [TestEatEditor],
   },
 }
 

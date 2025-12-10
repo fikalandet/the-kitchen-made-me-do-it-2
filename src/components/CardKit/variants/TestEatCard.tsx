@@ -2,13 +2,30 @@ import { TestEatProps } from '../../../lib/types/card';
 import { shadows, transitions } from '../../../theme/tokens';
 import { CardHeader } from '../atoms/CardHeader';
 import { TitlePriceRow } from '../atoms/TitlePriceRow';
-import { CenteredSectionLabel } from '../atoms/CenteredSectionLabel';
 import { CTAGroup } from '../atoms/CTAGroup';
 
-export function TestEatCard(props: TestEatProps) {
+interface ExtendedTestEatProps extends TestEatProps {
+  testPrice?: number;
+  totalSpots?: number;
+  spotsRemaining?: number;
+  description?: string;
+}
+
+export function TestEatCard(props: ExtendedTestEatProps) {
+  if (!props || !props.chef) {
+    return null;
+  }
+
+  const testPrice = props.testPrice || props.price;
+  const totalSpots = props.totalSpots || props.testPortions || 10;
+  const spotsRemaining = props.spotsRemaining || props.testPortions || 10;
+
+  const spotsPercentage = (spotsRemaining / totalSpots) * 100;
+  const urgency = spotsPercentage < 30 ? 'high' : spotsPercentage < 60 ? 'medium' : 'low';
+
   return (
     <div
-      className="bg-white rounded-2xl overflow-hidden cursor-pointer flex flex-col h-full"
+      className="bg-white rounded-2xl overflow-hidden cursor-pointer flex flex-col h-full relative"
       style={{
         boxShadow: shadows.card,
         transition: `transform ${transitions.fast}, box-shadow ${transitions.fast}`,
@@ -22,6 +39,10 @@ export function TestEatCard(props: TestEatProps) {
         e.currentTarget.style.boxShadow = shadows.card;
       }}
     >
+      <div className="absolute top-4 left-4 bg-[#a1c798] text-white px-3 py-1 rounded-full text-sm font-semibold z-10">
+        TEST-KÄKA
+      </div>
+
       <CardHeader
         imageUrl={props.imageUrl}
         hasGallery={props.hasGallery}
@@ -31,22 +52,43 @@ export function TestEatCard(props: TestEatProps) {
         chef={props.chef}
       />
 
-      <div className="flex flex-col flex-grow">
-        <TitlePriceRow title={props.title} price={props.price} discountedPrice={props.discountedPrice} />
+      <div className="flex flex-col flex-grow p-4">
+        <TitlePriceRow title={props.title} price={testPrice} discountedPrice={props.discountedPrice} />
 
-        <CenteredSectionLabel label="Tillgänglig" />
+        {props.description && (
+          <p className="text-sm text-gray-600 mt-2 line-clamp-2">{props.description}</p>
+        )}
 
-        <div className="px-4 py-2">
-          <p className="text-sm text-center text-gray-700">
-            {props.testPortions} portioner tillgängliga för testare
-          </p>
+        <div className="mt-4 mb-2">
+          <div className="flex justify-between text-sm mb-2">
+            <span className="text-gray-600">Platser kvar</span>
+            <span className={`font-semibold ${
+              urgency === 'high' ? 'text-red-600' :
+              urgency === 'medium' ? 'text-orange-600' :
+              'text-green-600'
+            }`}>
+              {spotsRemaining} / {totalSpots}
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className={`h-2 rounded-full transition-all ${
+                urgency === 'high' ? 'bg-red-500' :
+                urgency === 'medium' ? 'bg-orange-500' :
+                'bg-green-500'
+              }`}
+              style={{ width: `${spotsPercentage}%` }}
+            />
+          </div>
         </div>
 
-        <div className="mt-auto">
+        <div className="mt-auto pt-4">
           <CTAGroup
+            onInfo={props.onInfo}
+            infoLabel="Mer info"
             onPrimary={props.onPrimary}
-            primaryLabel="Anmäl intresse"
-            gp={props.gp || 30}
+            primaryLabel="Tjinga plats"
+            gp={props.gp || 10}
           />
         </div>
       </div>

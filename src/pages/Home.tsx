@@ -17,7 +17,8 @@ import { TjuvkikSection } from '../components/homepage/TjuvkikSection';
 import { TasteTagsSection } from '../components/homepage/TasteTagsSection';
 import { ContestsSection } from '../components/homepage/ContestsSection';
 import { FeedbackDishesSection } from '../components/homepage/FeedbackDishesSection';
-import { WishesSection } from '../components/homepage/WishesSection';
+import { WishFoodSection } from '../components/homepage/WishFoodSection';
+import { TestEatSection } from '../components/homepage/TestEatSection';
 import { EventsSection } from '../components/homepage/EventsSection';
 import { ChefSpotlightSection } from '../components/homepage/ChefSpotlightSection';
 import { MoodDishesSection } from '../components/homepage/MoodDishesSection';
@@ -67,6 +68,8 @@ export const Home: React.FC = () => {
   const [dealsSettings, setDealsSettings] = useState<any>({});
   const [eventsSettings, setEventsSettings] = useState<any>({});
   const [contestsSettings, setContestsSettings] = useState<any>({});
+  const [wishFoodSettings, setWishFoodSettings] = useState<any>({});
+  const [testEatSettings, setTestEatSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
   const [brattomDishes, setBrattomDishes] = useState<any[]>([]);
   const [tjuvkikDishes, setTjuvkikDishes] = useState<any[]>([]);
@@ -194,6 +197,26 @@ export const Home: React.FC = () => {
 
     if (contestsSection) {
       setContestsSettings(contestsSection.settings || {});
+    }
+
+    const { data: wishFoodSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'onska-kak')
+      .maybeSingle();
+
+    if (wishFoodSection) {
+      setWishFoodSettings(wishFoodSection.settings || {});
+    }
+
+    const { data: testEatSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'testkaka-tyck-till')
+      .maybeSingle();
+
+    if (testEatSection) {
+      setTestEatSettings(testEatSection.settings || {});
     }
 
     const mockChef = {
@@ -981,7 +1004,9 @@ export const Home: React.FC = () => {
         )}
       </SectionWrapper>
 
-      <WishesSection wishes={wishes} />
+      <WishFoodSection settings={wishFoodSettings} />
+
+      <TestEatSection settings={testEatSettings} />
 
       <EventsSection
         settings={eventsSettings}
