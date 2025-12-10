@@ -945,131 +945,159 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {imageItems.map((image, index) => (
                   <div key={image.id} className="p-3 bg-white border border-gray-200 rounded-lg">
-                    {editingImage?.id === image.id ? (
-                      <div className="space-y-3">
-                        <img
-                          src={image.image_url}
-                          alt="Preview"
-                          className="w-full h-32 object-cover rounded"
-                        />
+                    <div className="space-y-2">
+                      <img
+                        src={image.image_url}
+                        alt="Preview"
+                        className="w-full h-32 object-cover rounded mb-2"
+                      />
 
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="text-xs text-gray-600">Position</label>
-                            <select
-                              value={editingImage.position_preset}
-                              onChange={(e) => setEditingImage({ ...editingImage, position_preset: e.target.value })}
-                              className="w-full px-2 py-1 text-sm border rounded"
-                            >
-                              <option value="top-left">Uppe vänster</option>
-                              <option value="top-right">Uppe höger</option>
-                              <option value="bottom-left">Nere vänster</option>
-                              <option value="bottom-right">Nere höger</option>
-                              <option value="center">Center</option>
-                            </select>
-                          </div>
-
-                          <div>
-                            <label className="text-xs text-gray-600">Form</label>
-                            <select
-                              value={editingImage.shape}
-                              onChange={(e) => setEditingImage({ ...editingImage, shape: e.target.value })}
-                              className="w-full px-2 py-1 text-sm border rounded"
-                            >
-                              <option value="rectangular">Rektangulär</option>
-                              <option value="rounded">Rundade hörn</option>
-                              <option value="circle">Helrund</option>
-                            </select>
-                          </div>
+                      <div className="space-y-2">
+                        <div>
+                          <label className="text-xs text-gray-600 block mb-1">Position</label>
+                          <select
+                            value={image.position_preset}
+                            onChange={(e) => {
+                              const updated = { ...image, position_preset: e.target.value };
+                              handleSaveImage(updated);
+                            }}
+                            className="w-full px-2 py-1 text-xs border rounded"
+                          >
+                            <option value="top-left">Uppe vänster</option>
+                            <option value="top-right">Uppe höger</option>
+                            <option value="bottom-left">Nere vänster</option>
+                            <option value="bottom-right">Nere höger</option>
+                            <option value="center">Center</option>
+                          </select>
                         </div>
 
                         <div>
-                          <label className="text-xs text-gray-600">Rotation: {editingImage.rotation}°</label>
+                          <label className="text-xs text-gray-600 block mb-1">Form</label>
+                          <select
+                            value={image.shape}
+                            onChange={(e) => {
+                              const updated = { ...image, shape: e.target.value };
+                              handleSaveImage(updated);
+                            }}
+                            className="w-full px-2 py-1 text-xs border rounded"
+                          >
+                            <option value="rectangular">Rektangulär</option>
+                            <option value="rounded">Rundade hörn</option>
+                            <option value="circle">Helrund</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-gray-600 block mb-1">Rotation: {image.rotation}°</label>
                           <input
                             type="range"
                             min="-45"
                             max="45"
-                            value={editingImage.rotation}
-                            onChange={(e) => setEditingImage({ ...editingImage, rotation: parseInt(e.target.value) })}
+                            value={image.rotation}
+                            onChange={(e) => {
+                              const updated = { ...image, rotation: parseInt(e.target.value) };
+                              handleSaveImage(updated);
+                            }}
                             className="w-full"
                           />
                         </div>
 
                         <div>
-                          <label className="text-xs text-gray-600">Skala: {editingImage.scale}x</label>
+                          <label className="text-xs text-gray-600 block mb-1">Skala: {image.scale}x</label>
                           <input
                             type="range"
                             min="0.5"
                             max="2"
                             step="0.1"
-                            value={editingImage.scale}
-                            onChange={(e) => setEditingImage({ ...editingImage, scale: parseFloat(e.target.value) })}
+                            value={image.scale}
+                            onChange={(e) => {
+                              const updated = { ...image, scale: parseFloat(e.target.value) };
+                              handleSaveImage(updated);
+                            }}
                             className="w-full"
                           />
                         </div>
 
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleSaveImage(editingImage)}
-                            className="px-3 py-1 bg-[#a1c798] text-white text-sm rounded"
-                          >
-                            Spara
-                          </button>
-                          <button
-                            onClick={() => setEditingImage(null)}
-                            className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded"
-                          >
-                            Avbryt
-                          </button>
+                        <div>
+                          <label className="text-xs text-gray-600 block mb-1">Z-index (lager)</label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="100"
+                            value={image.z_index}
+                            onChange={(e) => {
+                              const updated = { ...image, z_index: parseInt(e.target.value) };
+                              handleSaveImage(updated);
+                            }}
+                            className="w-full px-2 py-1 text-xs border rounded"
+                          />
                         </div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-3">
-                        <img
-                          src={image.image_url}
-                          alt="Preview"
-                          className="w-16 h-16 object-cover rounded"
-                        />
-                        <div className="flex-1 text-sm text-gray-600">
-                          Lager {image.z_index} • {image.position_preset}
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-xs text-gray-600 block mb-1">Offset X: {image.offset_x}px</label>
+                            <input
+                              type="range"
+                              min="-100"
+                              max="100"
+                              value={image.offset_x}
+                              onChange={(e) => {
+                                const updated = { ...image, offset_x: parseInt(e.target.value) };
+                                handleSaveImage(updated);
+                              }}
+                              className="w-full"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-xs text-gray-600 block mb-1">Offset Y: {image.offset_y}px</label>
+                            <input
+                              type="range"
+                              min="-100"
+                              max="100"
+                              value={image.offset_y}
+                              onChange={(e) => {
+                                const updated = { ...image, offset_y: parseInt(e.target.value) };
+                                handleSaveImage(updated);
+                              }}
+                              className="w-full"
+                            />
+                          </div>
                         </div>
-                        <div className="flex gap-1">
+
+                        <div className="flex gap-1 pt-2">
                           <button
                             onClick={() => handleMoveImage(image, 'up')}
                             disabled={index === 0}
                             className="p-1 text-gray-600 hover:bg-gray-100 rounded disabled:opacity-30"
+                            title="Flytta upp"
                           >
-                            <MoveUp className="w-4 h-4" />
+                            <MoveUp className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => handleMoveImage(image, 'down')}
                             disabled={index === imageItems.length - 1}
                             className="p-1 text-gray-600 hover:bg-gray-100 rounded disabled:opacity-30"
+                            title="Flytta ner"
                           >
-                            <MoveDown className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => setEditingImage(image)}
-                            className="p-1 text-blue-600 hover:bg-blue-50 rounded"
-                          >
-                            <Edit2 className="w-4 h-4" />
+                            <MoveDown className="w-3 h-3" />
                           </button>
                           <button
                             onClick={() => handleDeleteImage(image.id)}
-                            className="p-1 text-red-600 hover:bg-red-50 rounded"
+                            className="p-1 text-red-600 hover:bg-red-50 rounded ml-auto"
+                            title="Ta bort"
                           >
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-3 h-3" />
                           </button>
                         </div>
                       </div>
-                    )}
+                    </div>
                   </div>
                 ))}
                 {imageItems.length === 0 && (
-                  <p className="text-center text-gray-500 py-8">Inga bilder uppladdade ännu</p>
+                  <p className="col-span-full text-center text-gray-500 py-8">Inga bilder uppladdade ännu</p>
                 )}
               </div>
             </div>
