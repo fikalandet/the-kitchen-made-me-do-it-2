@@ -4,11 +4,16 @@ import { supabase } from '../../lib/supabase';
 import { EmptyState } from './EmptyState';
 
 interface NewsSettings {
+  backgroundColor?: string;
+  backgroundOpacity?: number;
+  sectionPaddingTop?: number;
+  sectionPaddingBottom?: number;
   heading?: string;
   headingFont?: string;
   headingFontSize?: number;
   headingColor?: string;
   headingBold?: boolean;
+  headingItalic?: boolean;
   headingAlignment?: 'left' | 'center';
   headingEmojiPrefix?: string;
   headingEmojiSuffix?: string;
@@ -20,48 +25,64 @@ interface NewsSettings {
   subtitleColor?: string;
   subtitleBold?: boolean;
   subtitleItalic?: boolean;
-  backgroundColor?: string;
-  displayMode?: 'standard' | 'hero' | 'three-cards';
-  newsToShow?: number;
-  layoutForm?: 'grid' | 'horizontal';
-  featuredCardLarger?: boolean;
-  featuredCardSize?: '1.5x' | '2x';
-  ctaButtons?: Array<{
-    text: string;
-    link: string;
-    color: string;
-    size: string;
-    font: string;
-    placement: 'left' | 'center' | 'right';
-  }>;
-  sectionPaddingTop?: number;
-  sectionPaddingBottom?: number;
+  displayMode?: 'big-image-text' | 'card-flow';
+  imageBlockPlacement?: 'left' | 'right';
+  imageLayout?: 'layered' | 'grid';
+  textSectionHeading?: string;
+  textSectionIngress?: string;
+  textSectionBody?: string;
+  textSectionCtaText?: string;
+  textSectionCtaLink?: string;
+  textSectionCtaColor?: string;
+  cardType?: 'product' | 'editorial';
+  cardLayout?: 'horizontal' | 'grid';
+  cardSize?: 'small' | 'normal' | 'large';
+  cardsVisible?: number;
+  [key: string]: any;
 }
 
 interface NewsSectionProps {
   settings: NewsSettings;
 }
 
-interface NewsArticle {
+interface ImageItem {
+  id: string;
+  image_url: string;
+  display_order: number;
+  z_index: number;
+  position_preset: string;
+  offset_x: number;
+  offset_y: number;
+  rotation: number;
+  scale: number;
+  shape: string;
+}
+
+interface EditorialCard {
   id: string;
   title: string;
-  ingress?: string;
-  main_image_url?: string;
-  full_text?: string;
-  link_url?: string;
-  category_tag?: string;
-  is_featured: boolean;
-  created_at: string;
+  subtitle?: string;
+  image_url?: string;
+  cta_text?: string;
+  cta_link?: string;
+  background_color: string;
+  opacity: number;
+  border_radius: number;
+  padding: number;
+  is_hero: boolean;
+  display_order: number;
 }
 
 export function NewsSection({ settings }: NewsSectionProps) {
-  const [articles, setArticles] = useState<NewsArticle[]>([]);
+  const [imageItems, setImageItems] = useState<ImageItem[]>([]);
+  const [editorialCards, setEditorialCards] = useState<EditorialCard[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
 
   useEffect(() => {
-    fetchArticles();
-  }, [settings.newsToShow]);
+    fetchData();
+  }, [settings.displayMode, settings.cardType]);
 
   useEffect(() => {
     const subtitleTexts = settings.subtitleTexts || [];
@@ -79,69 +100,152 @@ export function NewsSection({ settings }: NewsSectionProps) {
     return () => clearInterval(interval);
   }, [settings.subtitleTexts, settings.subtitleRotationInterval]);
 
-  const fetchArticles = async () => {
+  const fetchData = async () => {
     try {
-      const { data, error } = await supabase
-        .from('news_articles')
-        .select('*')
-        .eq('is_hidden', false)
-        .order('is_featured', { ascending: false })
-        .order('display_order', { ascending: true })
-        .order('created_at', { ascending: false })
-        .limit(settings.newsToShow || 6);
+      if (settings.displayMode === 'big-image-text' || !settings.displayMode) {
+        const { data } = await supabase
+          .from('news_image_items')
+          .select('*')
+          .order('display_order', { ascending: true });
 
-      if (error) throw error;
-      setArticles(data || []);
+        if (data) setImageItems(data);
+      }
+
+      if (settings.displayMode === 'card-flow') {
+        if (settings.cardType === 'editorial') {
+          const { data } = await supabase
+            .from('news_editorial_cards')
+            .select('*')
+            .eq('is_hidden', false)
+            .order('is_hero', { ascending: false })
+            .order('display_order', { ascending: true })
+            .limit(settings.cardsVisible || 6);
+
+          if (data) setEditorialCards(data);
+        } else {
+          const { data } = await supabase
+            .from('products')
+            .select('*')
+            .eq('available', true)
+            .order('created_at', { ascending: false })
+            .limit(settings.cardsVisible || 6);
+
+          if (data) setProducts(data);
+        }
+      }
     } catch (err) {
-      console.error('Error fetching articles:', err);
+      console.error('Error fetching data:', err);
     }
   };
 
-  const subtitleTexts = settings.subtitleTexts || [];
-  const headingFontClass = settings.headingFont === 'lobster' ? 'font-lobster' : '';
-  const headingFontFamily =
-    settings.headingFont === 'serif' ? 'serif' :
-    settings.headingFont === 'sans' ? 'sans-serif' :
-    undefined;
+  const getPositionStyle = (preset: string, offsetX: number, offsetY: number) => {
+    const basePositions: Record<string, any> = {
+      'top-left': { top: '10%', left: '10%' },
+      'top-right': { top: '10%', right: '10%' },
+      'bottom-left': { bottom: '10%', left: '10%' },
+      'bottom-right': { bottom: '10%', right: '10%' },
+      'center': { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }
+    };
 
-  const subtitleFontClass = settings.subtitleFont === 'lobster' ? 'font-lobster' : '';
-  const subtitleFontFamily =
-    settings.subtitleFont === 'serif' ? 'serif' :
-    settings.subtitleFont === 'sans' ? 'sans-serif' :
-    undefined;
+    const base = basePositions[preset] || basePositions['center'];
 
-  const displayMode = settings.displayMode || 'standard';
+    if (preset === 'center') {
+      return {
+        ...base,
+        transform: `translate(calc(-50% + ${offsetX}px), calc(-50% + ${offsetY}px))`
+      };
+    }
 
-  const renderHeading = () => (
-    <div
-      className={`mb-8 ${
-        settings.headingAlignment === 'center' || !settings.headingAlignment
-          ? 'text-center'
-          : 'text-left'
-      }`}
-    >
-      {settings.subtitlePlacement === 'inline' || !settings.subtitlePlacement ? (
-        <div className={`flex items-center gap-3 ${settings.headingAlignment === 'center' || !settings.headingAlignment ? 'justify-center' : ''}`}>
-          {settings.headingEmojiPrefix && (
-            <span className="text-3xl">{settings.headingEmojiPrefix}</span>
-          )}
-          <h2
-            className={`text-3xl ${headingFontClass} ${settings.headingBold ? 'font-bold' : ''}`}
-            style={{
-              fontFamily: headingFontFamily,
-              fontSize: `${settings.headingFontSize || 32}px`,
-              color: settings.headingColor || '#374151'
-            }}
-          >
-            {settings.heading || 'Nyheter'}
-          </h2>
-          {settings.headingEmojiSuffix && (
-            <span className="text-3xl">{settings.headingEmojiSuffix}</span>
-          )}
-          {subtitleTexts.length > 0 && subtitleTexts[0] && (
-            <>
-              <span className="text-gray-400 text-2xl">|</span>
-              <div className="min-h-[24px] flex items-center">
+    return {
+      ...base,
+      transform: `translate(${offsetX}px, ${offsetY}px)`
+    };
+  };
+
+  const getShapeClass = (shape: string) => {
+    switch (shape) {
+      case 'circle':
+        return 'rounded-full';
+      case 'rounded':
+        return 'rounded-2xl';
+      default:
+        return 'rounded-lg';
+    }
+  };
+
+  const renderHeading = () => {
+    const subtitleTexts = settings.subtitleTexts || [];
+    const headingFontClass = settings.headingFont === 'lobster' ? 'font-lobster' : '';
+    const headingFontFamily =
+      settings.headingFont === 'serif' ? 'serif' :
+      settings.headingFont === 'sans' ? 'sans-serif' :
+      undefined;
+
+    const subtitleFontClass = settings.subtitleFont === 'lobster' ? 'font-lobster' : '';
+    const subtitleFontFamily =
+      settings.subtitleFont === 'serif' ? 'serif' :
+      settings.subtitleFont === 'sans' ? 'sans-serif' :
+      undefined;
+
+    return (
+      <div
+        className={`mb-8 ${
+          settings.headingAlignment === 'center' || !settings.headingAlignment
+            ? 'text-center'
+            : 'text-left'
+        }`}
+      >
+        {settings.subtitlePlacement === 'inline' || !settings.subtitlePlacement ? (
+          <div className={`flex items-center gap-3 ${settings.headingAlignment === 'center' || !settings.headingAlignment ? 'justify-center' : ''}`}>
+            {settings.headingEmojiPrefix && <span className="text-3xl">{settings.headingEmojiPrefix}</span>}
+            <h2
+              className={`text-3xl ${headingFontClass} ${settings.headingBold ? 'font-bold' : ''} ${settings.headingItalic ? 'italic' : ''}`}
+              style={{
+                fontFamily: headingFontFamily,
+                fontSize: `${settings.headingFontSize || 32}px`,
+                color: settings.headingColor || '#374151'
+              }}
+            >
+              {settings.heading || 'Nyheter'}
+            </h2>
+            {settings.headingEmojiSuffix && <span className="text-3xl">{settings.headingEmojiSuffix}</span>}
+            {subtitleTexts.length > 0 && subtitleTexts[0] && (
+              <>
+                <span className="text-gray-400 text-2xl">|</span>
+                <div className="min-h-[24px] flex items-center">
+                  <p
+                    className={`transition-opacity duration-300 ${subtitleFontClass} ${settings.subtitleBold ? 'font-bold' : ''} ${settings.subtitleItalic ? 'italic' : ''}`}
+                    style={{
+                      opacity: fadeIn ? 1 : 0,
+                      fontFamily: subtitleFontFamily,
+                      fontSize: `${settings.subtitleFontSize || 16}px`,
+                      color: settings.subtitleColor || '#6b7280'
+                    }}
+                  >
+                    {subtitleTexts[currentSubtitleIndex]}
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <div>
+            <div className={`flex items-center gap-3 ${settings.headingAlignment === 'center' || !settings.headingAlignment ? 'justify-center' : ''}`}>
+              {settings.headingEmojiPrefix && <span className="text-3xl">{settings.headingEmojiPrefix}</span>}
+              <h2
+                className={`text-3xl ${headingFontClass} ${settings.headingBold ? 'font-bold' : ''} ${settings.headingItalic ? 'italic' : ''}`}
+                style={{
+                  fontFamily: headingFontFamily,
+                  fontSize: `${settings.headingFontSize || 32}px`,
+                  color: settings.headingColor || '#374151'
+                }}
+              >
+                {settings.heading || 'Nyheter'}
+              </h2>
+              {settings.headingEmojiSuffix && <span className="text-3xl">{settings.headingEmojiSuffix}</span>}
+            </div>
+            {subtitleTexts.length > 0 && subtitleTexts[currentSubtitleIndex] && (
+              <div className={`min-h-[24px] flex items-center mt-2 ${settings.headingAlignment === 'center' || !settings.headingAlignment ? 'justify-center' : ''}`}>
                 <p
                   className={`transition-opacity duration-300 ${subtitleFontClass} ${settings.subtitleBold ? 'font-bold' : ''} ${settings.subtitleItalic ? 'italic' : ''}`}
                   style={{
@@ -154,79 +258,92 @@ export function NewsSection({ settings }: NewsSectionProps) {
                   {subtitleTexts[currentSubtitleIndex]}
                 </p>
               </div>
-            </>
-          )}
-        </div>
-      ) : (
-        <div>
-          <div className={`flex items-center gap-3 ${settings.headingAlignment === 'center' || !settings.headingAlignment ? 'justify-center' : ''}`}>
-            {settings.headingEmojiPrefix && (
-              <span className="text-3xl">{settings.headingEmojiPrefix}</span>
-            )}
-            <h2
-              className={`text-3xl ${headingFontClass} ${settings.headingBold ? 'font-bold' : ''}`}
-              style={{
-                fontFamily: headingFontFamily,
-                fontSize: `${settings.headingFontSize || 32}px`,
-                color: settings.headingColor || '#374151'
-              }}
-            >
-              {settings.heading || 'Nyheter'}
-            </h2>
-            {settings.headingEmojiSuffix && (
-              <span className="text-3xl">{settings.headingEmojiSuffix}</span>
             )}
           </div>
-          {subtitleTexts.length > 0 && subtitleTexts[currentSubtitleIndex] && (
-            <div className={`min-h-[24px] flex items-center mt-2 ${settings.headingAlignment === 'center' || !settings.headingAlignment ? 'justify-center' : ''}`}>
-              <p
-                className={`transition-opacity duration-300 ${subtitleFontClass} ${settings.subtitleBold ? 'font-bold' : ''} ${settings.subtitleItalic ? 'italic' : ''}`}
-                style={{
-                  opacity: fadeIn ? 1 : 0,
-                  fontFamily: subtitleFontFamily,
-                  fontSize: `${settings.subtitleFontSize || 16}px`,
-                  color: settings.subtitleColor || '#6b7280'
-                }}
-              >
-                {subtitleTexts[currentSubtitleIndex]}
-              </p>
+        )}
+      </div>
+    );
+  };
+
+  const renderBigImageText = () => {
+    const isImageLeft = settings.imageBlockPlacement === 'left' || !settings.imageBlockPlacement;
+
+    return (
+      <div className={`grid md:grid-cols-2 gap-12 items-center ${isImageLeft ? '' : 'md:flex-row-reverse'}`}>
+        <div className={`relative h-[500px] ${isImageLeft ? 'order-1' : 'order-2'}`}>
+          {settings.imageLayout === 'grid' && imageItems.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4 h-full">
+              {imageItems.slice(0, 4).map((image) => (
+                <div
+                  key={image.id}
+                  className={`relative overflow-hidden ${getShapeClass(image.shape)}`}
+                  style={{
+                    transform: `rotate(${image.rotation}deg) scale(${image.scale})`
+                  }}
+                >
+                  <img
+                    src={image.image_url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="relative w-full h-full">
+              {imageItems.map((image) => (
+                <div
+                  key={image.id}
+                  className={`absolute overflow-hidden ${getShapeClass(image.shape)}`}
+                  style={{
+                    ...getPositionStyle(image.position_preset, image.offset_x, image.offset_y),
+                    width: '300px',
+                    height: '300px',
+                    zIndex: image.z_index,
+                    transform: `${getPositionStyle(image.position_preset, image.offset_x, image.offset_y).transform} rotate(${image.rotation}deg) scale(${image.scale})`
+                  }}
+                >
+                  <img
+                    src={image.image_url}
+                    alt=""
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          {imageItems.length === 0 && (
+            <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+              Inga bilder uppladdade
             </div>
           )}
         </div>
-      )}
-    </div>
-  );
 
-  const renderHeroMode = () => {
-    const article = articles[0];
-    if (!article) return <EmptyState text="Inga nyheter att visa" />;
-
-    return (
-      <div className="relative w-full h-[500px] rounded-2xl overflow-hidden group cursor-pointer">
-        {article.main_image_url && (
-          <img
-            src={article.main_image_url}
-            alt={article.title}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-        <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
-          {article.category_tag && (
-            <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-4 w-fit">
-              {article.category_tag}
-            </span>
+        <div className={isImageLeft ? 'order-2' : 'order-1'}>
+          {settings.textSectionHeading && (
+            <h3 className="text-4xl font-bold text-gray-900 mb-4">
+              {settings.textSectionHeading}
+            </h3>
           )}
-          <h3 className="text-4xl font-bold mb-3">{article.title}</h3>
-          {article.ingress && (
-            <p className="text-lg text-white/90 mb-6 max-w-3xl">{article.ingress}</p>
+          {settings.textSectionIngress && (
+            <p className="text-xl text-gray-700 mb-4">
+              {settings.textSectionIngress}
+            </p>
           )}
-          {article.link_url && (
+          {settings.textSectionBody && (
+            <p className="text-gray-600 mb-6">
+              {settings.textSectionBody}
+            </p>
+          )}
+          {settings.textSectionCtaText && settings.textSectionCtaLink && (
             <a
-              href={article.link_url}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-900 rounded-lg font-medium hover:bg-gray-100 transition-colors w-fit"
+              href={settings.textSectionCtaLink}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium hover:opacity-90 transition-opacity"
+              style={{
+                backgroundColor: settings.textSectionCtaColor || '#a1c798'
+              }}
             >
-              Läs mer
+              {settings.textSectionCtaText}
               <ArrowRight className="w-5 h-5" />
             </a>
           )}
@@ -235,190 +352,112 @@ export function NewsSection({ settings }: NewsSectionProps) {
     );
   };
 
-  const renderThreeCards = () => {
-    const displayArticles = articles.slice(0, 3);
-    if (displayArticles.length === 0) return <EmptyState text="Inga nyheter att visa" />;
+  const renderCardFlow = () => {
+    if (settings.cardType === 'editorial') {
+      const cardSizeClass =
+        settings.cardSize === 'small' ? 'w-64' :
+        settings.cardSize === 'large' ? 'w-96' :
+        'w-80';
 
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {displayArticles.map((article) => (
-          <div
-            key={article.id}
-            className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group"
-          >
-            {article.main_image_url && (
-              <div className="relative h-48 overflow-hidden">
-                <img
-                  src={article.main_image_url}
-                  alt={article.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                {article.category_tag && (
-                  <span className="absolute top-3 left-3 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-gray-800">
-                    {article.category_tag}
-                  </span>
+      const layoutClass = settings.cardLayout === 'horizontal'
+        ? 'flex overflow-x-auto gap-6 pb-4'
+        : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+
+      return (
+        <div className={layoutClass}>
+          {editorialCards.map((card) => (
+            <div
+              key={card.id}
+              className={`${settings.cardLayout === 'horizontal' ? `flex-shrink-0 ${cardSizeClass}` : ''} bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow ${
+                card.is_hero ? 'md:col-span-2 md:row-span-2' : ''
+              }`}
+              style={{
+                backgroundColor: card.background_color,
+                opacity: card.opacity / 100,
+                borderRadius: `${card.border_radius}px`,
+                padding: `${card.padding}px`
+              }}
+            >
+              {card.image_url && (
+                <div className={`relative overflow-hidden ${card.is_hero ? 'h-96' : 'h-48'}`}>
+                  <img
+                    src={card.image_url}
+                    alt={card.title}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
+                  {card.is_hero && (
+                    <div className="absolute top-4 left-4 px-3 py-1 bg-yellow-400 text-white rounded-full text-sm font-medium">
+                      Featured
+                    </div>
+                  )}
+                </div>
+              )}
+              <div className="p-6">
+                <h3 className={`font-bold text-gray-900 mb-2 ${card.is_hero ? 'text-3xl' : 'text-xl'}`}>
+                  {card.title}
+                </h3>
+                {card.subtitle && (
+                  <p className="text-gray-600 mb-4">{card.subtitle}</p>
+                )}
+                {card.cta_text && card.cta_link && (
+                  <a
+                    href={card.cta_link}
+                    className="inline-flex items-center gap-2 text-[#a1c798] hover:text-[#8fb386] font-medium transition-colors"
+                  >
+                    {card.cta_text}
+                    <ArrowRight className="w-4 h-4" />
+                  </a>
                 )}
               </div>
-            )}
-            <div className="p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
-                {article.title}
-              </h3>
-              {article.ingress && (
-                <p className="text-gray-600 mb-4 line-clamp-3">{article.ingress}</p>
-              )}
-              {article.link_url && (
-                <a
-                  href={article.link_url}
-                  className="inline-flex items-center gap-2 text-[#a1c798] hover:text-[#8fb386] font-medium transition-colors"
-                >
-                  Läs mer
-                  <ArrowRight className="w-4 h-4" />
-                </a>
-              )}
             </div>
-          </div>
-        ))}
-      </div>
-    );
-  };
+          ))}
+          {editorialCards.length === 0 && (
+            <EmptyState text="Inga kort att visa" />
+          )}
+        </div>
+      );
+    }
 
-  const renderStandardMode = () => {
-    const featuredArticle = articles.find(a => a.is_featured);
-    const otherArticles = articles.filter(a => !a.is_featured);
+    const cardSizeClass =
+      settings.cardSize === 'small' ? 'w-64' :
+      settings.cardSize === 'large' ? 'w-96' :
+      'w-80';
 
-    if (articles.length === 0) return <EmptyState text="Inga nyheter att visa" />;
-
-    const layoutClass = settings.layoutForm === 'horizontal'
+    const layoutClass = settings.cardLayout === 'horizontal'
       ? 'flex overflow-x-auto gap-6 pb-4'
       : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
 
     return (
-      <div className="space-y-6">
-        {featuredArticle && settings.featuredCardLarger !== false && (
+      <div className={layoutClass}>
+        {products.map((product) => (
           <div
-            className={`bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group ${
-              settings.featuredCardSize === '2x' ? 'grid md:grid-cols-2 gap-6' : ''
-            }`}
-            style={settings.featuredCardSize === '1.5x' ? { minHeight: '400px' } : undefined}
+            key={product.id}
+            className={`${settings.cardLayout === 'horizontal' ? `flex-shrink-0 ${cardSizeClass}` : ''} bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow`}
           >
-            {featuredArticle.main_image_url && (
-              <div className={`relative overflow-hidden ${settings.featuredCardSize === '2x' ? 'h-full' : 'h-64'}`}>
+            {product.image_url && (
+              <div className="relative h-48 overflow-hidden">
                 <img
-                  src={featuredArticle.main_image_url}
-                  alt={featuredArticle.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  src={product.image_url}
+                  alt={product.name}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 />
-                {featuredArticle.category_tag && (
-                  <span className="absolute top-4 left-4 px-4 py-2 bg-white/90 backdrop-blur-sm rounded-full text-sm font-medium text-gray-800">
-                    {featuredArticle.category_tag}
-                  </span>
-                )}
               </div>
             )}
-            <div className="p-8 flex flex-col justify-between">
-              <div>
-                <h3 className="text-3xl font-bold text-gray-900 mb-3">
-                  {featuredArticle.title}
-                </h3>
-                {featuredArticle.ingress && (
-                  <p className="text-lg text-gray-600 mb-4">{featuredArticle.ingress}</p>
-                )}
-              </div>
-              {featuredArticle.link_url && (
-                <a
-                  href={featuredArticle.link_url}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-[#a1c798] text-white rounded-lg font-medium hover:bg-[#8fb386] transition-colors w-fit"
-                >
-                  Läs mer
-                  <ArrowRight className="w-5 h-5" />
-                </a>
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                {product.name}
+              </h3>
+              {product.price && (
+                <p className="text-lg font-semibold text-[#a1c798] mb-4">
+                  {product.price} kr
+                </p>
               )}
             </div>
           </div>
+        ))}
+        {products.length === 0 && (
+          <EmptyState text="Inga produkter att visa" />
         )}
-
-        {otherArticles.length > 0 && (
-          <div className={layoutClass}>
-            {otherArticles.map((article) => (
-              <div
-                key={article.id}
-                className={`bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow cursor-pointer group ${
-                  settings.layoutForm === 'horizontal' ? 'flex-shrink-0 w-80' : ''
-                }`}
-              >
-                {article.main_image_url && (
-                  <div className="relative h-48 overflow-hidden">
-                    <img
-                      src={article.main_image_url}
-                      alt={article.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    {article.category_tag && (
-                      <span className="absolute top-3 left-3 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-gray-800">
-                        {article.category_tag}
-                      </span>
-                    )}
-                  </div>
-                )}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
-                    {article.title}
-                  </h3>
-                  {article.ingress && (
-                    <p className="text-gray-600 mb-4 line-clamp-3">{article.ingress}</p>
-                  )}
-                  {article.link_url && (
-                    <a
-                      href={article.link_url}
-                      className="inline-flex items-center gap-2 text-[#a1c798] hover:text-[#8fb386] font-medium transition-colors"
-                    >
-                      Läs mer
-                      <ArrowRight className="w-4 h-4" />
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  };
-
-  const renderCtaButtons = () => {
-    if (!settings.ctaButtons || settings.ctaButtons.length === 0) return null;
-
-    return (
-      <div className="mt-8 flex gap-4 justify-center">
-        {settings.ctaButtons.map((button, index) => {
-          const justifyClass =
-            button.placement === 'left' ? 'justify-start' :
-            button.placement === 'right' ? 'justify-end' :
-            'justify-center';
-
-          const sizeClass =
-            button.size === 'small' ? 'px-4 py-2 text-sm' :
-            button.size === 'large' ? 'px-8 py-4 text-lg' :
-            'px-6 py-3 text-base';
-
-          const fontClass =
-            button.font === 'lobster' ? 'font-lobster' :
-            button.font === 'serif' ? 'font-serif' :
-            'font-sans';
-
-          return (
-            <div key={index} className={`flex ${justifyClass}`}>
-              <a
-                href={button.link}
-                className={`${sizeClass} ${fontClass} rounded-lg font-medium hover:opacity-80 transition-opacity`}
-                style={{ backgroundColor: button.color, color: '#ffffff' }}
-              >
-                {button.text}
-              </a>
-            </div>
-          );
-        })}
       </div>
     );
   };
@@ -428,6 +467,7 @@ export function NewsSection({ settings }: NewsSectionProps) {
       className="px-4"
       style={{
         backgroundColor: settings.backgroundColor || '#ffffff',
+        opacity: (settings.backgroundOpacity || 100) / 100,
         paddingTop: `${settings.sectionPaddingTop || 12}rem`,
         paddingBottom: `${settings.sectionPaddingBottom || 12}rem`
       }}
@@ -435,11 +475,8 @@ export function NewsSection({ settings }: NewsSectionProps) {
       <div className="max-w-7xl mx-auto">
         {renderHeading()}
 
-        {displayMode === 'hero' && renderHeroMode()}
-        {displayMode === 'three-cards' && renderThreeCards()}
-        {displayMode === 'standard' && renderStandardMode()}
-
-        {renderCtaButtons()}
+        {(settings.displayMode === 'big-image-text' || !settings.displayMode) && renderBigImageText()}
+        {settings.displayMode === 'card-flow' && renderCardFlow()}
       </div>
     </section>
   );
