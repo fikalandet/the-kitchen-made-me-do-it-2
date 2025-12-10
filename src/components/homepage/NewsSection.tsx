@@ -34,6 +34,7 @@ interface NewsSettings {
   textSectionBody?: string;
   textSectionCtaText?: string;
   textSectionCtaLink?: string;
+  textSectionCtaLinkType?: 'internal' | 'external';
   textSectionCtaColor?: string;
   cardType?: 'product' | 'editorial';
   cardLayout?: 'horizontal' | 'grid';
@@ -338,16 +339,31 @@ export function NewsSection({ settings }: NewsSectionProps) {
             </p>
           )}
           {settings.textSectionCtaText && settings.textSectionCtaLink && (
-            <a
-              href={settings.textSectionCtaLink}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium hover:opacity-90 transition-opacity"
-              style={{
-                backgroundColor: settings.textSectionCtaColor || '#a1c798'
-              }}
-            >
-              {settings.textSectionCtaText}
-              <ArrowRight className="w-5 h-5" />
-            </a>
+            settings.textSectionCtaLinkType === 'internal' ? (
+              <Link
+                to={settings.textSectionCtaLink}
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium hover:opacity-90 transition-opacity"
+                style={{
+                  backgroundColor: settings.textSectionCtaColor || '#a1c798'
+                }}
+              >
+                {settings.textSectionCtaText}
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            ) : (
+              <a
+                href={settings.textSectionCtaLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium hover:opacity-90 transition-opacity"
+                style={{
+                  backgroundColor: settings.textSectionCtaColor || '#a1c798'
+                }}
+              >
+                {settings.textSectionCtaText}
+                <ArrowRight className="w-5 h-5" />
+              </a>
+            )
           )}
         </div>
       </div>

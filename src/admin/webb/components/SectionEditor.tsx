@@ -18,6 +18,7 @@ import WishFoodEditor from './WishFoodEditor';
 import TestEatEditor from './TestEatEditor';
 import TasteTagsEditor from './TasteTagsEditor';
 import NewsEditor from './NewsEditor';
+import EditorialCategoriesEditor from './EditorialCategoriesEditor';
 import { Save, Loader } from 'lucide-react';
 
 interface SectionEditorProps {
@@ -122,6 +123,10 @@ const sectionConfigs: Record<string, SectionConfig> = {
   'nyheter': {
     supportsStandardContent: false,
     customPanels: [NewsEditor],
+  },
+  'redaktionella-kategorier': {
+    supportsStandardContent: false,
+    customPanels: [EditorialCategoriesEditor],
   },
 }
 

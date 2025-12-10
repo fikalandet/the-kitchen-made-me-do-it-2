@@ -23,6 +23,7 @@ export default function SektionEditor() {
     'humorkak': 'Humörkäk',
     'onska-kak': 'Önska käk',
     'testkaka-tyck-till': 'Testkäka & Tyck till',
+    'redaktionella-kategorier': 'Redaktionella kategorier',
     'bli-kitchen-kock': 'Bli en kitchen-kock',
     'kundernas-tyckande': 'Så tycker våra kunder',
     'horoskop': 'Horoskop',
@@ -76,6 +77,8 @@ export default function SektionEditor() {
         <SectionEditor slug="smaketiketter" displayName="Smaketiketter" />
       ) : sectionSlug === 'nyheter' ? (
         <SectionEditor slug="nyheter" displayName="Nyheter" />
+      ) : sectionSlug === 'redaktionella-kategorier' ? (
+        <SectionEditor slug="redaktionella-kategorier" displayName="Redaktionella kategorier" />
       ) : (
         <>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Sektion: {sectionName}</h2>

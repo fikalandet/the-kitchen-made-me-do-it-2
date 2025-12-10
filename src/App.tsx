@@ -10,6 +10,7 @@ import { ProductForm } from './pages/ProductForm';
 import { Membership } from './pages/Membership';
 import { BecomeChef } from './pages/BecomeChef';
 import { GoldenSpoon } from './pages/GoldenSpoon';
+import { EditorialCategory } from './pages/EditorialCategory';
 import AdminLayout from './admin/AdminLayout';
 import AdminGuard from './admin/AdminGuard';
 import Dashboard from './admin/dashboard';
@@ -87,6 +88,12 @@ const AppContent = () => {
           <PublicLayout>
             <GoldenSpoon />
           </PublicLayout>
+        }
+      />
+      <Route
+        path="/redaktion/:slug"
+        element={
+          <EditorialCategory />
         }
       />
       <Route

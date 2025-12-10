@@ -36,6 +36,7 @@ interface NewsSettings {
   textSectionBody?: string;
   textSectionCtaText?: string;
   textSectionCtaLink?: string;
+  textSectionCtaLinkType?: 'internal' | 'external';
   textSectionCtaColor?: string;
   cardType?: 'product' | 'editorial';
   cardLayout?: 'horizontal' | 'grid';
@@ -769,24 +770,59 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    CTA-text
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.textSectionCtaText || ''}
-                    onChange={(e) => updateSetting('textSectionCtaText', e.target.value)}
-                    placeholder="Läs mer"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  CTA-text
+                </label>
+                <input
+                  type="text"
+                  value={settings.textSectionCtaText || ''}
+                  onChange={(e) => updateSetting('textSectionCtaText', e.target.value)}
+                  placeholder="Läs mer"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    CTA-länk
-                  </label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Länktyp
+                </label>
+                <div className="flex gap-3 mb-2">
+                  <button
+                    onClick={() => updateSetting('textSectionCtaLinkType', 'internal')}
+                    className={`px-4 py-2 rounded-lg border-2 ${
+                      settings.textSectionCtaLinkType === 'internal'
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300'
+                    }`}
+                  >
+                    Intern sida
+                  </button>
+                  <button
+                    onClick={() => updateSetting('textSectionCtaLinkType', 'external')}
+                    className={`px-4 py-2 rounded-lg border-2 ${
+                      settings.textSectionCtaLinkType === 'external' || !settings.textSectionCtaLinkType
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300'
+                    }`}
+                  >
+                    Extern URL
+                  </button>
+                </div>
+                {settings.textSectionCtaLinkType === 'internal' ? (
+                  <select
+                    value={settings.textSectionCtaLink || ''}
+                    onChange={(e) => updateSetting('textSectionCtaLink', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="">Välj sida</option>
+                    <option value="/">Startsida</option>
+                    <option value="/marketplace">Marknadsplats</option>
+                    <option value="/bli-kock">Bli kock</option>
+                    <option value="/membership">Medlemskap</option>
+                    <option value="/golden-spoon">Guldsleven</option>
+                  </select>
+                ) : (
                   <input
                     type="text"
                     value={settings.textSectionCtaLink || ''}
@@ -794,7 +830,7 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
                     placeholder="https://..."
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                   />
-                </div>
+                )}
               </div>
 
               <ColorPicker
