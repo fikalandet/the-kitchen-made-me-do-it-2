@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Heart, MessageCircle, Trash2 } from 'lucide-react';
+import { Heart, MessageCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 import { EmptyState } from './EmptyState';
@@ -10,26 +10,43 @@ interface WishFoodSettings {
   headingFontSize?: number;
   headingColor?: string;
   headingBold?: boolean;
-  headingItalic?: boolean;
-  subtitle?: string;
+  headingAlignment?: 'left' | 'center';
+  subtitleTexts?: string[];
+  subtitleRotationInterval?: number;
+  subtitlePlacement?: 'inline' | 'below';
   subtitleFont?: string;
   subtitleFontSize?: number;
   subtitleColor?: string;
   subtitleBold?: boolean;
   subtitleItalic?: boolean;
-  subtitleTexts?: string[];
-  subtitleRotationInterval?: number;
-  textPosition?: 'top' | 'center' | 'bottom';
-  textAlign?: 'left' | 'center' | 'right';
-  backgroundType?: 'color' | 'image' | 'image-overlay';
+  mainImagePosition?: 'left' | 'right';
+  mainImageType?: 'image' | 'color';
+  mainImageUrl?: string;
+  mainImageBackgroundColor?: string;
+  mainImageTitle?: string;
+  mainImageTitleFont?: string;
+  mainImageTitleSize?: number;
+  mainImageTitleColor?: string;
+  mainImageTitleBold?: boolean;
+  mainImageTitleItalic?: boolean;
+  mainImageText?: string;
+  mainImageTextFont?: string;
+  mainImageTextSize?: number;
+  mainImageTextColor?: string;
+  mainImageTextBold?: boolean;
+  mainImageTextItalic?: boolean;
+  mainImageTextPosition?: 'top' | 'center' | 'bottom';
+  mainImageTextAlign?: 'left' | 'center' | 'right';
+  mainImageTextBackgroundEnabled?: boolean;
+  mainImageTextBackgroundColor?: string;
+  mainImageTextBackgroundOpacity?: number;
+  mainImageButtonText?: string;
+  mainImageButtonBackgroundColor?: string;
+  mainImageButtonTextColor?: string;
+  inputFieldWidth?: 'short' | 'medium' | 'long';
+  customerCardsLayout?: 'grid' | 'list';
+  customerCardsMaxCount?: number;
   backgroundColor?: string;
-  backgroundImage?: string;
-  overlayColor?: string;
-  overlayOpacity?: number;
-  textBackgroundColor?: string;
-  textBackgroundOpacity?: number;
-  textBackgroundEnabled?: boolean;
-  leftColumnImage?: string;
 }
 
 interface WishFoodSectionProps {
@@ -49,7 +66,6 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
   const { user } = useAuth();
   const [wishes, setWishes] = useState<FoodWish[]>([]);
   const [newWish, setNewWish] = useState('');
-  const [newDescription, setNewDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
@@ -80,7 +96,8 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
         .from('food_wishes')
         .select('*')
         .eq('status', 'pending')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(settings.customerCardsMaxCount || 10);
 
       if (error) throw error;
       setWishes(data || []);
@@ -99,14 +116,12 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
         .insert({
           customer_id: user.id,
           dish_name: newWish.trim(),
-          description: newDescription.trim() || null,
           status: 'pending'
         });
 
       if (error) throw error;
 
       setNewWish('');
-      setNewDescription('');
       fetchWishes();
     } catch (err) {
       console.error('Error submitting wish:', err);
@@ -149,139 +164,256 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
   };
 
   const subtitleTexts = settings.subtitleTexts || [];
-  const rotationInterval = settings.subtitleRotationInterval || 10000;
+  const headingFontClass = settings.headingFont === 'lobster' ? 'font-lobster' : '';
+  const headingFontFamily =
+    settings.headingFont === 'serif' ? 'serif' :
+    settings.headingFont === 'sans' ? 'sans-serif' :
+    undefined;
+
+  const subtitleFontClass = settings.subtitleFont === 'lobster' ? 'font-lobster' : '';
+  const subtitleFontFamily =
+    settings.subtitleFont === 'serif' ? 'serif' :
+    settings.subtitleFont === 'sans' ? 'sans-serif' :
+    undefined;
 
   return (
     <section
-      className="relative py-12 px-4"
+      className="py-12 px-4"
       style={{
-        backgroundColor: settings.backgroundColor || '#ffffff',
-        backgroundImage: (settings.backgroundType === 'image' || settings.backgroundType === 'image-overlay') && settings.backgroundImage ? `url(${settings.backgroundImage})` : 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
+        backgroundColor: settings.backgroundColor || '#ffffff'
       }}
     >
-      {settings.backgroundType === 'image-overlay' && settings.backgroundImage && (
+      <div className="max-w-7xl mx-auto">
         <div
-          className="absolute inset-0"
-          style={{
-            backgroundColor: settings.overlayColor || '#000000',
-            opacity: (settings.overlayOpacity || 30) / 100
-          }}
-        />
-      )}
-
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="mb-8 text-center">
-          <h2
-            className={`${settings.headingFont === 'lobster' ? 'font-lobster' : ''} ${settings.headingBold ? 'font-bold' : ''} ${settings.headingItalic ? 'italic' : ''}`}
-            style={{
-              fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
-              fontSize: `${settings.headingFontSize || 32}px`,
-              color: settings.headingColor || '#374151'
-            }}
-          >
-            {settings.heading || 'Önska käk'}
-          </h2>
-          {subtitleTexts.length > 0 && subtitleTexts[0] && (
-            <div className="min-h-[24px] flex items-center justify-center mt-2">
-              <p
-                className={`transition-opacity duration-300 ${settings.subtitleFont === 'lobster' ? 'font-lobster' : ''} ${settings.subtitleBold ? 'font-bold' : ''} ${settings.subtitleItalic ? 'italic' : ''}`}
+          className={`mb-8 ${
+            settings.headingAlignment === 'center' || !settings.headingAlignment
+              ? 'text-center'
+              : 'text-left'
+          }`}
+        >
+          {settings.subtitlePlacement === 'inline' || !settings.subtitlePlacement ? (
+            <div className={`flex items-center gap-3 ${settings.headingAlignment === 'center' || !settings.headingAlignment ? 'justify-center' : ''}`}>
+              <h2
+                className={`text-3xl ${headingFontClass} ${settings.headingBold ? 'font-bold' : ''}`}
                 style={{
-                  opacity: fadeIn ? 1 : 0,
-                  fontFamily: settings.subtitleFont === 'serif' ? 'serif' : settings.subtitleFont === 'sans' ? 'sans-serif' : undefined,
-                  fontSize: `${settings.subtitleFontSize || 16}px`,
-                  color: settings.subtitleColor || '#6b7280'
+                  fontFamily: headingFontFamily,
+                  fontSize: `${settings.headingFontSize || 32}px`,
+                  color: settings.headingColor || '#374151'
                 }}
               >
-                {subtitleTexts[currentSubtitleIndex]}
-              </p>
+                {settings.heading || 'Önska käk'}
+              </h2>
+              {subtitleTexts.length > 0 && subtitleTexts[0] && (
+                <>
+                  <span className="text-gray-400 text-2xl">|</span>
+                  <div className="min-h-[24px] flex items-center">
+                    <p
+                      className={`transition-opacity duration-300 ${subtitleFontClass} ${settings.subtitleBold ? 'font-bold' : ''} ${settings.subtitleItalic ? 'italic' : ''}`}
+                      style={{
+                        opacity: fadeIn ? 1 : 0,
+                        fontFamily: subtitleFontFamily,
+                        fontSize: `${settings.subtitleFontSize || 16}px`,
+                        color: settings.subtitleColor || '#6b7280'
+                      }}
+                    >
+                      {subtitleTexts[currentSubtitleIndex]}
+                    </p>
+                  </div>
+                </>
+              )}
+            </div>
+          ) : (
+            <div>
+              <h2
+                className={`text-3xl ${headingFontClass} ${settings.headingBold ? 'font-bold' : ''}`}
+                style={{
+                  fontFamily: headingFontFamily,
+                  fontSize: `${settings.headingFontSize || 32}px`,
+                  color: settings.headingColor || '#374151'
+                }}
+              >
+                {settings.heading || 'Önska käk'}
+              </h2>
+              {subtitleTexts.length > 0 && subtitleTexts[currentSubtitleIndex] && (
+                <div className="min-h-[24px] flex items-center mt-2">
+                  <p
+                    className={`transition-opacity duration-300 ${subtitleFontClass} ${settings.subtitleBold ? 'font-bold' : ''} ${settings.subtitleItalic ? 'italic' : ''}`}
+                    style={{
+                      opacity: fadeIn ? 1 : 0,
+                      fontFamily: subtitleFontFamily,
+                      fontSize: `${settings.subtitleFontSize || 16}px`,
+                      color: settings.subtitleColor || '#6b7280'
+                    }}
+                  >
+                    {subtitleTexts[currentSubtitleIndex]}
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div
-            className="relative rounded-lg overflow-hidden min-h-[500px] flex"
+            className={`relative rounded-lg overflow-hidden min-h-[500px] flex ${
+              settings.mainImagePosition === 'right' ? 'order-2' : ''
+            }`}
             style={{
-              backgroundImage: settings.leftColumnImage ? `url(${settings.leftColumnImage})` : 'linear-gradient(135deg, #a1c798 0%, #8fb386 100%)',
+              backgroundImage:
+                settings.mainImageType === 'image' || !settings.mainImageType
+                  ? settings.mainImageUrl
+                    ? `url(${settings.mainImageUrl})`
+                    : 'linear-gradient(135deg, #a1c798 0%, #8fb386 100%)'
+                  : 'none',
+              backgroundColor:
+                settings.mainImageType === 'color'
+                  ? settings.mainImageBackgroundColor || '#a1c798'
+                  : 'transparent',
               backgroundSize: 'cover',
               backgroundPosition: 'center'
             }}
           >
             <div
               className={`w-full flex ${
-                settings.textPosition === 'top' ? 'items-start' :
-                settings.textPosition === 'bottom' ? 'items-end' :
-                'items-center'
+                settings.mainImageTextPosition === 'top' || !settings.mainImageTextPosition
+                  ? 'items-start'
+                  : settings.mainImageTextPosition === 'bottom'
+                  ? 'items-end'
+                  : 'items-center'
               } ${
-                settings.textAlign === 'left' ? 'justify-start' :
-                settings.textAlign === 'right' ? 'justify-end' :
-                'justify-center'
+                settings.mainImageTextAlign === 'left'
+                  ? 'justify-start'
+                  : settings.mainImageTextAlign === 'right'
+                  ? 'justify-end'
+                  : 'justify-center'
               } p-8`}
             >
               <div
-                className={`w-full max-w-md ${settings.textBackgroundEnabled ? 'p-6 rounded-lg' : ''}`}
+                className={`w-full max-w-md ${settings.mainImageTextBackgroundEnabled ? 'p-6 rounded-lg' : ''}`}
                 style={{
-                  backgroundColor: settings.textBackgroundEnabled ? settings.textBackgroundColor || '#ffffff' : 'transparent',
-                  opacity: settings.textBackgroundEnabled ? (settings.textBackgroundOpacity || 80) / 100 : 1
+                  backgroundColor: settings.mainImageTextBackgroundEnabled
+                    ? settings.mainImageTextBackgroundColor || '#ffffff'
+                    : 'transparent',
+                  opacity: settings.mainImageTextBackgroundEnabled
+                    ? (settings.mainImageTextBackgroundOpacity || 80) / 100
+                    : 1
                 }}
               >
                 <div className="space-y-4">
+                  {settings.mainImageTitle && (
+                    <h3
+                      className={`${
+                        settings.mainImageTitleFont === 'lobster' ? 'font-lobster' : ''
+                      } ${settings.mainImageTitleBold ? 'font-bold' : ''} ${
+                        settings.mainImageTitleItalic ? 'italic' : ''
+                      }`}
+                      style={{
+                        fontFamily:
+                          settings.mainImageTitleFont === 'serif'
+                            ? 'serif'
+                            : settings.mainImageTitleFont === 'sans'
+                            ? 'sans-serif'
+                            : undefined,
+                        fontSize: `${settings.mainImageTitleSize || 24}px`,
+                        color: settings.mainImageTitleColor || '#ffffff'
+                      }}
+                    >
+                      {settings.mainImageTitle}
+                    </h3>
+                  )}
+                  {settings.mainImageText && (
+                    <p
+                      className={`${
+                        settings.mainImageTextFont === 'lobster' ? 'font-lobster' : ''
+                      } ${settings.mainImageTextBold ? 'font-bold' : ''} ${
+                        settings.mainImageTextItalic ? 'italic' : ''
+                      }`}
+                      style={{
+                        fontFamily:
+                          settings.mainImageTextFont === 'serif'
+                            ? 'serif'
+                            : settings.mainImageTextFont === 'sans'
+                            ? 'sans-serif'
+                            : undefined,
+                        fontSize: `${settings.mainImageTextSize || 16}px`,
+                        color: settings.mainImageTextColor || '#ffffff'
+                      }}
+                    >
+                      {settings.mainImageText}
+                    </p>
+                  )}
                   <input
                     type="text"
                     value={newWish}
                     onChange={(e) => setNewWish(e.target.value)}
                     placeholder="Skriv in ditt önskemål"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent text-lg"
-                  />
-                  <textarea
-                    value={newDescription}
-                    onChange={(e) => setNewDescription(e.target.value)}
-                    placeholder="Eventuell kommentar (valfritt)"
-                    rows={2}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+                    className={`px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent text-lg ${
+                      settings.inputFieldWidth === 'short'
+                        ? 'w-1/2'
+                        : settings.inputFieldWidth === 'long'
+                        ? 'w-full'
+                        : 'w-3/4'
+                    }`}
                   />
                   <button
                     onClick={handleSubmitWish}
                     disabled={loading || !newWish.trim()}
-                    className="w-full px-6 py-3 bg-[#a1c798] text-white rounded-lg hover:bg-[#8fb386] transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                    className="px-6 py-3 rounded-lg font-medium transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{
+                      backgroundColor: settings.mainImageButtonBackgroundColor || '#a1c798',
+                      color: settings.mainImageButtonTextColor || '#ffffff'
+                    }}
                   >
-                    {loading ? 'Skickar...' : 'Skicka önskning'}
+                    {loading ? 'Skickar...' : settings.mainImageButtonText || 'Skicka önskning'}
                   </button>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col">
+          <div
+            className={`flex flex-col ${
+              settings.mainImagePosition === 'right' ? 'order-1' : ''
+            }`}
+          >
             {wishes.length > 0 ? (
-              <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+              <div
+                className={`${
+                  settings.customerCardsLayout === 'list'
+                    ? 'space-y-4'
+                    : 'grid grid-cols-1 md:grid-cols-2 gap-4'
+                } max-h-[500px] overflow-y-auto pr-2`}
+              >
                 {wishes.map((wish) => (
-                  <div key={wish.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">{wish.dish_name}</h3>
-                    {wish.description && (
-                      <p className="text-gray-600 mb-4">{wish.description}</p>
-                    )}
-                    <div className="flex items-center gap-4 pt-4 border-t border-gray-200">
-                      <button
-                        onClick={() => handleLike(wish.id)}
-                        className="flex items-center gap-2 text-gray-600 hover:text-[#a1c798] transition-colors"
-                      >
-                        <Heart className="w-5 h-5" />
-                        <span>{wish.likes_count}</span>
-                      </button>
-                      <button className="flex items-center gap-2 text-gray-600 hover:text-[#a1c798] transition-colors">
-                        <MessageCircle className="w-5 h-5" />
-                        <span>Kommentera</span>
-                      </button>
+                  <div
+                    key={wish.id}
+                    className="aspect-square bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow flex flex-col justify-between"
+                  >
+                    <div>
+                      <p className="text-base font-medium text-gray-900 mb-2">{wish.dish_name}</p>
+                      {wish.description && (
+                        <p className="text-sm text-gray-600 mb-2">{wish.description}</p>
+                      )}
+                      <p className="text-xs text-gray-500">Önskat av användare</p>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-gray-100">
-                      <p className="text-sm text-gray-500 mb-2">Kockarnas kommentarer:</p>
-                      <div className="flex flex-wrap gap-2">
-                        <div className="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full">
+                    <div>
+                      <div className="flex items-center gap-4 mb-3">
+                        <button
+                          onClick={() => handleLike(wish.id)}
+                          className="flex items-center gap-2 text-gray-600 hover:text-[#a1c798] transition-colors text-sm"
+                        >
+                          <Heart className="w-4 h-4" />
+                          <span>{wish.likes_count}</span>
+                        </button>
+                        <button className="flex items-center gap-2 text-gray-600 hover:text-[#a1c798] transition-colors text-sm">
+                          <MessageCircle className="w-4 h-4" />
+                          <span>Kommentera</span>
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
                           Kommer snart...
-                        </div>
+                        </span>
                       </div>
                     </div>
                   </div>

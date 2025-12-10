@@ -11,26 +11,43 @@ interface WishFoodSettings {
   headingFontSize?: number;
   headingColor?: string;
   headingBold?: boolean;
-  headingItalic?: boolean;
-  subtitle?: string;
+  headingAlignment?: 'left' | 'center';
+  subtitleTexts?: string[];
+  subtitleRotationInterval?: number;
+  subtitlePlacement?: 'inline' | 'below';
   subtitleFont?: string;
   subtitleFontSize?: number;
   subtitleColor?: string;
   subtitleBold?: boolean;
   subtitleItalic?: boolean;
-  subtitleTexts?: string[];
-  subtitleRotationInterval?: number;
-  textPosition?: 'top' | 'center' | 'bottom';
-  textAlign?: 'left' | 'center' | 'right';
-  backgroundType?: 'color' | 'image' | 'image-overlay';
+  mainImagePosition?: 'left' | 'right';
+  mainImageType?: 'image' | 'color';
+  mainImageUrl?: string;
+  mainImageBackgroundColor?: string;
+  mainImageTitle?: string;
+  mainImageTitleFont?: string;
+  mainImageTitleSize?: number;
+  mainImageTitleColor?: string;
+  mainImageTitleBold?: boolean;
+  mainImageTitleItalic?: boolean;
+  mainImageText?: string;
+  mainImageTextFont?: string;
+  mainImageTextSize?: number;
+  mainImageTextColor?: string;
+  mainImageTextBold?: boolean;
+  mainImageTextItalic?: boolean;
+  mainImageTextPosition?: 'top' | 'center' | 'bottom';
+  mainImageTextAlign?: 'left' | 'center' | 'right';
+  mainImageTextBackgroundEnabled?: boolean;
+  mainImageTextBackgroundColor?: string;
+  mainImageTextBackgroundOpacity?: number;
+  mainImageButtonText?: string;
+  mainImageButtonBackgroundColor?: string;
+  mainImageButtonTextColor?: string;
+  inputFieldWidth?: 'short' | 'medium' | 'long';
+  customerCardsLayout?: 'grid' | 'list';
+  customerCardsMaxCount?: number;
   backgroundColor?: string;
-  backgroundImage?: string;
-  overlayColor?: string;
-  overlayOpacity?: number;
-  textBackgroundColor?: string;
-  textBackgroundOpacity?: number;
-  textBackgroundEnabled?: boolean;
-  leftColumnImage?: string;
 }
 
 interface WishFoodEditorProps {
@@ -40,8 +57,7 @@ interface WishFoodEditorProps {
 
 export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodEditorProps) {
   const { user } = useAuth();
-  const [uploadingImage, setUploadingImage] = useState(false);
-  const [uploadingLeftImage, setUploadingLeftImage] = useState(false);
+  const [uploadingMainImage, setUploadingMainImage] = useState(false);
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
 
@@ -82,17 +98,17 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
     return () => clearInterval(interval);
   }, [settings.subtitleTexts, settings.subtitleRotationInterval]);
 
-  const handleImageUpload = async (file: File) => {
+  const handleMainImageUpload = async (file: File) => {
     if (!user) {
       alert('Du måste vara inloggad för att ladda upp filer');
       return;
     }
 
-    setUploadingImage(true);
+    setUploadingMainImage(true);
 
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `wishfood-bg-${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const fileName = `wishfood-main-${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = `${user.id}/wishfood/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
@@ -105,44 +121,12 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
         .from('product-images')
         .getPublicUrl(filePath);
 
-      updateSetting('backgroundImage', data.publicUrl);
+      updateSetting('mainImageUrl', data.publicUrl);
     } catch (err) {
       console.error('Error uploading file:', err);
       alert('Kunde inte ladda upp filen. Försök igen.');
     } finally {
-      setUploadingImage(false);
-    }
-  };
-
-  const handleLeftImageUpload = async (file: File) => {
-    if (!user) {
-      alert('Du måste vara inloggad för att ladda upp filer');
-      return;
-    }
-
-    setUploadingLeftImage(true);
-
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `wishfood-left-${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-      const filePath = `${user.id}/wishfood/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(filePath);
-
-      updateSetting('leftColumnImage', data.publicUrl);
-    } catch (err) {
-      console.error('Error uploading file:', err);
-      alert('Kunde inte ladda upp filen. Försök igen.');
-    } finally {
-      setUploadingLeftImage(false);
+      setUploadingMainImage(false);
     }
   };
 
@@ -155,7 +139,7 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
         </div>
       </div>
 
-      <CollapsibleCard title="Rubrik" defaultExpanded={true}>
+      <CollapsibleCard title="Huvudrubrik" defaultExpanded={true}>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -207,7 +191,7 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
             onChange={(color) => updateSetting('headingColor', color)}
           />
 
-          <div className="flex gap-4">
+          <div>
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
@@ -215,23 +199,41 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
                 onChange={(e) => updateSetting('headingBold', e.target.checked)}
                 className="w-4 h-4 rounded"
               />
-              <span className="text-sm font-medium text-gray-700">Fet</span>
+              <span className="text-sm font-medium text-gray-700">Fet stil</span>
             </label>
+          </div>
 
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.headingItalic || false}
-                onChange={(e) => updateSetting('headingItalic', e.target.checked)}
-                className="w-4 h-4 rounded"
-              />
-              <span className="text-sm font-medium text-gray-700">Kursiv</span>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Placering
             </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('headingAlignment', 'left')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.headingAlignment === 'left'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Vänster
+              </button>
+              <button
+                onClick={() => updateSetting('headingAlignment', 'center')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.headingAlignment === 'center' || !settings.headingAlignment
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Centrerad
+              </button>
+            </div>
           </div>
         </div>
       </CollapsibleCard>
 
-      <CollapsibleCard title="Roterande textrader (under rubrik)" defaultExpanded={true}>
+      <CollapsibleCard title="Textrader" defaultExpanded={true}>
         <div className="space-y-4">
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -267,6 +269,34 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Placering av textrad
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('subtitlePlacement', 'inline')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.subtitlePlacement === 'inline' || !settings.subtitlePlacement
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Efter huvudrubrik
+              </button>
+              <button
+                onClick={() => updateSetting('subtitlePlacement', 'below')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.subtitlePlacement === 'below'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Under huvudrubrik
+              </button>
             </div>
           </div>
 
@@ -348,110 +378,17 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
         </div>
       </CollapsibleCard>
 
-      <CollapsibleCard title="Vänster kolumn - Bakgrundsbild" defaultExpanded={true}>
+      <CollapsibleCard title="Sektion: Huvudbild" defaultExpanded={true}>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Bakgrundsbild för vänster kolumn
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="file"
-                id="wishfood-left-upload"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleLeftImageUpload(file);
-                }}
-                className="hidden"
-              />
-              <label
-                htmlFor="wishfood-left-upload"
-                className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                  uploadingLeftImage ? 'opacity-50' : ''
-                }`}
-              >
-                <Upload className="w-4 h-4" />
-                {uploadingLeftImage ? 'Laddar upp...' : 'Ladda upp bild'}
-              </label>
-              {settings.leftColumnImage && (
-                <button
-                  onClick={() => updateSetting('leftColumnImage', '')}
-                  className="px-3 py-2 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-lg hover:bg-red-50"
-                >
-                  Ta bort
-                </button>
-              )}
-            </div>
-            <input
-              type="text"
-              value={settings.leftColumnImage || ''}
-              onChange={(e) => updateSetting('leftColumnImage', e.target.value)}
-              placeholder="Eller ange bild-URL..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent mt-2"
-            />
-            {settings.leftColumnImage && (
-              <div className="mt-2">
-                <img
-                  src={settings.leftColumnImage}
-                  alt="Vänster kolumn bakgrund"
-                  className="w-full h-48 object-cover rounded-lg"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      </CollapsibleCard>
-
-      <CollapsibleCard title="Placering av text" defaultExpanded={true}>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Vertikal placering
+              Placering av bildhalvan
             </label>
             <div className="flex gap-3">
               <button
-                onClick={() => updateSetting('textPosition', 'top')}
+                onClick={() => updateSetting('mainImagePosition', 'left')}
                 className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                  (settings.textPosition || 'top') === 'top'
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                Överst
-              </button>
-              <button
-                onClick={() => updateSetting('textPosition', 'center')}
-                className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                  settings.textPosition === 'center'
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                Mitten
-              </button>
-              <button
-                onClick={() => updateSetting('textPosition', 'bottom')}
-                className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                  settings.textPosition === 'bottom'
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                Nederst
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Horisontell placering
-            </label>
-            <div className="flex gap-3">
-              <button
-                onClick={() => updateSetting('textAlign', 'left')}
-                className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                  (settings.textAlign || 'center') === 'left'
+                  settings.mainImagePosition === 'left' || !settings.mainImagePosition
                     ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
                     : 'border-gray-300 hover:border-gray-400'
                 }`}
@@ -459,19 +396,9 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
                 Vänster
               </button>
               <button
-                onClick={() => updateSetting('textAlign', 'center')}
+                onClick={() => updateSetting('mainImagePosition', 'right')}
                 className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                  (settings.textAlign || 'center') === 'center'
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                Centrerad
-              </button>
-              <button
-                onClick={() => updateSetting('textAlign', 'right')}
-                className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                  settings.textAlign === 'right'
+                  settings.mainImagePosition === 'right'
                     ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
                     : 'border-gray-300 hover:border-gray-400'
                 }`}
@@ -480,63 +407,59 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
               </button>
             </div>
           </div>
-        </div>
-      </CollapsibleCard>
 
-      <CollapsibleCard title="Bakgrund" defaultExpanded={true}>
-        <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Bakgrundstyp
+              Bakgrund för bildhalvan
             </label>
-            <select
-              value={settings.backgroundType || 'color'}
-              onChange={(e) => updateSetting('backgroundType', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
-            >
-              <option value="color">Endast färg</option>
-              <option value="image">Bild</option>
-              <option value="image-overlay">Bild med färg-overlay</option>
-            </select>
-          </div>
+            <div className="flex gap-3 mb-3">
+              <button
+                onClick={() => updateSetting('mainImageType', 'image')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.mainImageType === 'image' || !settings.mainImageType
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Bild
+              </button>
+              <button
+                onClick={() => updateSetting('mainImageType', 'color')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.mainImageType === 'color'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Enfärgad
+              </button>
+            </div>
 
-          {(settings.backgroundType === 'color' || settings.backgroundType === 'image-overlay' || !settings.backgroundType) && (
-            <ColorPicker
-              label="Bakgrundsfärg"
-              value={settings.backgroundColor || '#ffffff'}
-              onChange={(color) => updateSetting('backgroundColor', color)}
-            />
-          )}
-
-          {(settings.backgroundType === 'image' || settings.backgroundType === 'image-overlay') && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bakgrundsbild
-                </label>
+            {settings.mainImageType === 'image' || !settings.mainImageType ? (
+              <>
                 <div className="flex gap-2">
                   <input
                     type="file"
-                    id="wishfood-bg-upload"
+                    id="wishfood-main-upload"
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) handleImageUpload(file);
+                      if (file) handleMainImageUpload(file);
                     }}
                     className="hidden"
                   />
                   <label
-                    htmlFor="wishfood-bg-upload"
+                    htmlFor="wishfood-main-upload"
                     className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                      uploadingImage ? 'opacity-50' : ''
+                      uploadingMainImage ? 'opacity-50' : ''
                     }`}
                   >
                     <Upload className="w-4 h-4" />
-                    {uploadingImage ? 'Laddar upp...' : 'Ladda upp bild'}
+                    {uploadingMainImage ? 'Laddar upp...' : 'Ladda upp bild'}
                   </label>
-                  {settings.backgroundImage && (
+                  {settings.mainImageUrl && (
                     <button
-                      onClick={() => updateSetting('backgroundImage', '')}
+                      onClick={() => updateSetting('mainImageUrl', '')}
                       className="px-3 py-2 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-lg hover:bg-red-50"
                     >
                       Ta bort
@@ -545,76 +468,406 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
                 </div>
                 <input
                   type="text"
-                  value={settings.backgroundImage || ''}
-                  onChange={(e) => updateSetting('backgroundImage', e.target.value)}
+                  value={settings.mainImageUrl || ''}
+                  onChange={(e) => updateSetting('mainImageUrl', e.target.value)}
                   placeholder="Eller ange bild-URL..."
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent mt-2"
                 />
-              </div>
-
-              {settings.backgroundType === 'image-overlay' && (
-                <>
-                  <ColorPicker
-                    label="Overlay-färg"
-                    value={settings.overlayColor || '#000000'}
-                    onChange={(color) => updateSetting('overlayColor', color)}
-                  />
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Overlay-opacitet: {settings.overlayOpacity || 30}%
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={settings.overlayOpacity || 30}
-                      onChange={(e) => updateSetting('overlayOpacity', parseInt(e.target.value))}
-                      className="w-full"
+                {settings.mainImageUrl && (
+                  <div className="mt-2">
+                    <img
+                      src={settings.mainImageUrl}
+                      alt="Huvudbild"
+                      className="w-full h-48 object-cover rounded-lg"
                     />
                   </div>
-                </>
-              )}
-            </>
-          )}
-        </div>
-      </CollapsibleCard>
-
-      <CollapsibleCard title="Bakgrund bakom text" defaultExpanded={true}>
-        <div className="space-y-4">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.textBackgroundEnabled || false}
-              onChange={(e) => updateSetting('textBackgroundEnabled', e.target.checked)}
-              className="w-4 h-4 rounded"
-            />
-            <span className="text-sm font-medium text-gray-700">Aktivera bakgrund bakom text</span>
-          </label>
-
-          {settings.textBackgroundEnabled && (
-            <>
+                )}
+              </>
+            ) : (
               <ColorPicker
                 label="Bakgrundsfärg"
-                value={settings.textBackgroundColor || '#ffffff'}
-                onChange={(color) => updateSetting('textBackgroundColor', color)}
+                value={settings.mainImageBackgroundColor || '#a1c798'}
+                onChange={(color) => updateSetting('mainImageBackgroundColor', color)}
+              />
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Rubrik på bilden/bakgrunden
+            </label>
+            <input
+              type="text"
+              value={settings.mainImageTitle || ''}
+              onChange={(e) => updateSetting('mainImageTitle', e.target.value)}
+              placeholder="T.ex. Vad vill du äta?"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Typsnitt (rubrik)
+              </label>
+              <select
+                value={settings.mainImageTitleFont || 'lobster'}
+                onChange={(e) => updateSetting('mainImageTitleFont', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              >
+                <option value="lobster">Lobster</option>
+                <option value="sans">Sans Serif</option>
+                <option value="serif">Serif</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Storlek (rubrik, px)
+              </label>
+              <input
+                type="number"
+                min="12"
+                max="72"
+                value={settings.mainImageTitleSize || 24}
+                onChange={(e) => updateSetting('mainImageTitleSize', parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <ColorPicker
+            label="Textfärg (rubrik)"
+            value={settings.mainImageTitleColor || '#ffffff'}
+            onChange={(color) => updateSetting('mainImageTitleColor', color)}
+          />
+
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.mainImageTitleBold || false}
+                onChange={(e) => updateSetting('mainImageTitleBold', e.target.checked)}
+                className="w-4 h-4 rounded"
+              />
+              <span className="text-sm font-medium text-gray-700">Fet (rubrik)</span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.mainImageTitleItalic || false}
+                onChange={(e) => updateSetting('mainImageTitleItalic', e.target.checked)}
+                className="w-4 h-4 rounded"
+              />
+              <span className="text-sm font-medium text-gray-700">Kursiv (rubrik)</span>
+            </label>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Brödtext/ingress
+            </label>
+            <textarea
+              value={settings.mainImageText || ''}
+              onChange={(e) => updateSetting('mainImageText', e.target.value)}
+              placeholder="Beskriv vad användaren ska göra..."
+              rows={2}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Typsnitt (brödtext)
+              </label>
+              <select
+                value={settings.mainImageTextFont || 'sans'}
+                onChange={(e) => updateSetting('mainImageTextFont', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              >
+                <option value="lobster">Lobster</option>
+                <option value="sans">Sans Serif</option>
+                <option value="serif">Serif</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Storlek (brödtext, px)
+              </label>
+              <input
+                type="number"
+                min="12"
+                max="48"
+                value={settings.mainImageTextSize || 16}
+                onChange={(e) => updateSetting('mainImageTextSize', parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <ColorPicker
+            label="Textfärg (brödtext)"
+            value={settings.mainImageTextColor || '#ffffff'}
+            onChange={(color) => updateSetting('mainImageTextColor', color)}
+          />
+
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.mainImageTextBold || false}
+                onChange={(e) => updateSetting('mainImageTextBold', e.target.checked)}
+                className="w-4 h-4 rounded"
+              />
+              <span className="text-sm font-medium text-gray-700">Fet (brödtext)</span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.mainImageTextItalic || false}
+                onChange={(e) => updateSetting('mainImageTextItalic', e.target.checked)}
+                className="w-4 h-4 rounded"
+              />
+              <span className="text-sm font-medium text-gray-700">Kursiv (brödtext)</span>
+            </label>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Placering av textblock
+            </label>
+            <div className="grid grid-cols-3 gap-3 mb-2">
+              <button
+                onClick={() => updateSetting('mainImageTextPosition', 'top')}
+                className={`px-3 py-2 rounded-lg border-2 transition-all ${
+                  settings.mainImageTextPosition === 'top' || !settings.mainImageTextPosition
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Överst
+              </button>
+              <button
+                onClick={() => updateSetting('mainImageTextPosition', 'center')}
+                className={`px-3 py-2 rounded-lg border-2 transition-all ${
+                  settings.mainImageTextPosition === 'center'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Mitten
+              </button>
+              <button
+                onClick={() => updateSetting('mainImageTextPosition', 'bottom')}
+                className={`px-3 py-2 rounded-lg border-2 transition-all ${
+                  settings.mainImageTextPosition === 'bottom'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Nederst
+              </button>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <button
+                onClick={() => updateSetting('mainImageTextAlign', 'left')}
+                className={`px-3 py-2 rounded-lg border-2 transition-all ${
+                  settings.mainImageTextAlign === 'left'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Vänster
+              </button>
+              <button
+                onClick={() => updateSetting('mainImageTextAlign', 'center')}
+                className={`px-3 py-2 rounded-lg border-2 transition-all ${
+                  settings.mainImageTextAlign === 'center' || !settings.mainImageTextAlign
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Centrerad
+              </button>
+              <button
+                onClick={() => updateSetting('mainImageTextAlign', 'right')}
+                className={`px-3 py-2 rounded-lg border-2 transition-all ${
+                  settings.mainImageTextAlign === 'right'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Höger
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={settings.mainImageTextBackgroundEnabled || false}
+                onChange={(e) => updateSetting('mainImageTextBackgroundEnabled', e.target.checked)}
+                className="w-4 h-4 rounded"
+              />
+              <span className="text-sm font-medium text-gray-700">Aktivera bakgrund bakom text</span>
+            </label>
+          </div>
+
+          {settings.mainImageTextBackgroundEnabled && (
+            <>
+              <ColorPicker
+                label="Bakgrundsfärg bakom text"
+                value={settings.mainImageTextBackgroundColor || '#ffffff'}
+                onChange={(color) => updateSetting('mainImageTextBackgroundColor', color)}
               />
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Opacitet: {settings.textBackgroundOpacity || 80}%
+                  Opacitet: {settings.mainImageTextBackgroundOpacity || 80}%
                 </label>
                 <input
                   type="range"
                   min="0"
                   max="100"
-                  value={settings.textBackgroundOpacity || 80}
-                  onChange={(e) => updateSetting('textBackgroundOpacity', parseInt(e.target.value))}
+                  value={settings.mainImageTextBackgroundOpacity || 80}
+                  onChange={(e) => updateSetting('mainImageTextBackgroundOpacity', parseInt(e.target.value))}
                   className="w-full"
                 />
               </div>
             </>
           )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Knapptext
+            </label>
+            <input
+              type="text"
+              value={settings.mainImageButtonText || ''}
+              onChange={(e) => updateSetting('mainImageButtonText', e.target.value)}
+              placeholder="Skicka önskning"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+            />
+          </div>
+
+          <ColorPicker
+            label="Knapp - bakgrundsfärg"
+            value={settings.mainImageButtonBackgroundColor || '#a1c798'}
+            onChange={(color) => updateSetting('mainImageButtonBackgroundColor', color)}
+          />
+
+          <ColorPicker
+            label="Knapp - textfärg"
+            value={settings.mainImageButtonTextColor || '#ffffff'}
+            onChange={(color) => updateSetting('mainImageButtonTextColor', color)}
+          />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Bredd på önskemålsfält
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('inputFieldWidth', 'short')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.inputFieldWidth === 'short'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Kort
+              </button>
+              <button
+                onClick={() => updateSetting('inputFieldWidth', 'medium')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.inputFieldWidth === 'medium' || !settings.inputFieldWidth
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Mellan
+              </button>
+              <button
+                onClick={() => updateSetting('inputFieldWidth', 'long')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.inputFieldWidth === 'long'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Lång
+              </button>
+            </div>
+          </div>
+        </div>
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Sektion: kundkort/önskekort" defaultExpanded={true}>
+        <div className="space-y-4">
+          <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              Kundkorten placeras automatiskt på motsatt sida från huvudbilden.
+              {settings.mainImagePosition === 'right' ? ' Placering: Vänster' : ' Placering: Höger'}
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Layout för kundkort
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('customerCardsLayout', 'grid')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.customerCardsLayout === 'grid' || !settings.customerCardsLayout
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Grid
+              </button>
+              <button
+                onClick={() => updateSetting('customerCardsLayout', 'list')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.customerCardsLayout === 'list'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Lista
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Maxantal önskningar att visa
+            </label>
+            <input
+              type="number"
+              min="1"
+              max="50"
+              value={settings.customerCardsMaxCount || 10}
+              onChange={(e) => updateSetting('customerCardsMaxCount', parseInt(e.target.value))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+            />
+          </div>
+
+          <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+            <p className="text-sm text-gray-700 font-medium mb-2">Kundkorten visar:</p>
+            <ul className="text-sm text-gray-600 space-y-1 list-disc list-inside">
+              <li>Kundens önskemålstext</li>
+              <li>"Önskat av" + kundens namn</li>
+              <li>Gilla-ikon med antal gillningar</li>
+              <li>Kommentar-ikon</li>
+              <li>Kockarnas svarsbubblor</li>
+            </ul>
+          </div>
         </div>
       </CollapsibleCard>
 
@@ -622,112 +875,252 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
         <div
           className="relative min-h-[600px] rounded-lg overflow-hidden p-8"
           style={{
-            backgroundColor: settings.backgroundColor || '#ffffff',
-            backgroundImage: (settings.backgroundType === 'image' || settings.backgroundType === 'image-overlay') && settings.backgroundImage ? `url(${settings.backgroundImage})` : 'none',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
+            backgroundColor: settings.backgroundColor || '#ffffff'
           }}
         >
-          {settings.backgroundType === 'image-overlay' && settings.backgroundImage && (
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundColor: settings.overlayColor || '#000000',
-                opacity: (settings.overlayOpacity || 30) / 100
-              }}
-            />
-          )}
-
           <div className="relative z-10">
-            <div className="mb-8 text-center">
-              <h2
-                className={`${settings.headingFont === 'lobster' ? 'font-lobster' : ''} ${settings.headingBold ? 'font-bold' : ''} ${settings.headingItalic ? 'italic' : ''}`}
-                style={{
-                  fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
-                  fontSize: `${settings.headingFontSize || 32}px`,
-                  color: settings.headingColor || '#374151'
-                }}
-              >
-                {settings.heading || 'Önska käk'}
-              </h2>
-              {(settings.subtitleTexts || []).length > 0 && (settings.subtitleTexts || [''])[0] && (
-                <div className="min-h-[24px] flex items-center justify-center mt-2">
-                  <p
-                    className={`transition-opacity duration-300 ${settings.subtitleFont === 'lobster' ? 'font-lobster' : ''} ${settings.subtitleBold ? 'font-bold' : ''} ${settings.subtitleItalic ? 'italic' : ''}`}
+            <div
+              className={`mb-8 ${
+                settings.headingAlignment === 'center' || !settings.headingAlignment
+                  ? 'text-center'
+                  : 'text-left'
+              }`}
+            >
+              {settings.subtitlePlacement === 'inline' || !settings.subtitlePlacement ? (
+                <div className={`flex items-center gap-3 ${settings.headingAlignment === 'center' || !settings.headingAlignment ? 'justify-center' : ''}`}>
+                  <h2
+                    className={`text-3xl ${
+                      settings.headingFont === 'lobster' ? 'font-lobster' : ''
+                    } ${settings.headingBold ? 'font-bold' : ''}`}
                     style={{
-                      opacity: fadeIn ? 1 : 0,
-                      fontFamily: settings.subtitleFont === 'serif' ? 'serif' : settings.subtitleFont === 'sans' ? 'sans-serif' : undefined,
-                      fontSize: `${settings.subtitleFontSize || 16}px`,
-                      color: settings.subtitleColor || '#6b7280'
+                      fontFamily:
+                        settings.headingFont === 'serif'
+                          ? 'serif'
+                          : settings.headingFont === 'sans'
+                          ? 'sans-serif'
+                          : undefined,
+                      color: settings.headingColor || '#374151'
                     }}
                   >
-                    {(settings.subtitleTexts || [''])[currentSubtitleIndex]}
-                  </p>
+                    {settings.heading || 'Önska käk'}
+                  </h2>
+                  {(settings.subtitleTexts || []).length > 0 && (settings.subtitleTexts || [''])[0] && (
+                    <>
+                      <span className="text-gray-400 text-2xl">|</span>
+                      <div className="min-h-[24px] flex items-center">
+                        <p
+                          className={`transition-opacity duration-300 ${
+                            settings.subtitleFont === 'lobster' ? 'font-lobster' : ''
+                          } ${settings.subtitleBold ? 'font-bold' : ''} ${
+                            settings.subtitleItalic ? 'italic' : ''
+                          }`}
+                          style={{
+                            opacity: fadeIn ? 1 : 0,
+                            fontFamily:
+                              settings.subtitleFont === 'serif'
+                                ? 'serif'
+                                : settings.subtitleFont === 'sans'
+                                ? 'sans-serif'
+                                : undefined,
+                            fontSize: `${settings.subtitleFontSize || 16}px`,
+                            color: settings.subtitleColor || '#6b7280'
+                          }}
+                        >
+                          {(settings.subtitleTexts || [''])[currentSubtitleIndex]}
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <div>
+                  <h2
+                    className={`text-3xl ${
+                      settings.headingFont === 'lobster' ? 'font-lobster' : ''
+                    } ${settings.headingBold ? 'font-bold' : ''}`}
+                    style={{
+                      fontFamily:
+                        settings.headingFont === 'serif'
+                          ? 'serif'
+                          : settings.headingFont === 'sans'
+                          ? 'sans-serif'
+                          : undefined,
+                      color: settings.headingColor || '#374151'
+                    }}
+                  >
+                    {settings.heading || 'Önska käk'}
+                  </h2>
+                  {(settings.subtitleTexts || []).length > 0 && (settings.subtitleTexts || [''])[currentSubtitleIndex] && (
+                    <div className="min-h-[24px] flex items-center mt-2">
+                      <p
+                        className={`transition-opacity duration-300 ${
+                          settings.subtitleFont === 'lobster' ? 'font-lobster' : ''
+                        } ${settings.subtitleBold ? 'font-bold' : ''} ${
+                          settings.subtitleItalic ? 'italic' : ''
+                        }`}
+                        style={{
+                          opacity: fadeIn ? 1 : 0,
+                          fontFamily:
+                            settings.subtitleFont === 'serif'
+                              ? 'serif'
+                              : settings.subtitleFont === 'sans'
+                              ? 'sans-serif'
+                              : undefined,
+                          fontSize: `${settings.subtitleFontSize || 16}px`,
+                          color: settings.subtitleColor || '#6b7280'
+                        }}
+                      >
+                        {(settings.subtitleTexts || [''])[currentSubtitleIndex]}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-6">
               <div
-                className="relative rounded-lg overflow-hidden min-h-[400px] flex"
+                className={`relative rounded-lg overflow-hidden min-h-[400px] flex ${
+                  settings.mainImagePosition === 'right' ? 'order-2' : ''
+                }`}
                 style={{
-                  backgroundImage: settings.leftColumnImage ? `url(${settings.leftColumnImage})` : 'linear-gradient(135deg, #a1c798 0%, #8fb386 100%)',
+                  backgroundImage:
+                    settings.mainImageType === 'image' || !settings.mainImageType
+                      ? settings.mainImageUrl
+                        ? `url(${settings.mainImageUrl})`
+                        : 'linear-gradient(135deg, #a1c798 0%, #8fb386 100%)'
+                      : 'none',
+                  backgroundColor:
+                    settings.mainImageType === 'color'
+                      ? settings.mainImageBackgroundColor || '#a1c798'
+                      : 'transparent',
                   backgroundSize: 'cover',
                   backgroundPosition: 'center'
                 }}
               >
                 <div
                   className={`w-full flex ${
-                    settings.textPosition === 'top' ? 'items-start' :
-                    settings.textPosition === 'bottom' ? 'items-end' :
-                    'items-center'
+                    settings.mainImageTextPosition === 'top' || !settings.mainImageTextPosition
+                      ? 'items-start'
+                      : settings.mainImageTextPosition === 'bottom'
+                      ? 'items-end'
+                      : 'items-center'
                   } ${
-                    settings.textAlign === 'left' ? 'justify-start' :
-                    settings.textAlign === 'right' ? 'justify-end' :
-                    'justify-center'
+                    settings.mainImageTextAlign === 'left'
+                      ? 'justify-start'
+                      : settings.mainImageTextAlign === 'right'
+                      ? 'justify-end'
+                      : 'justify-center'
                   } p-6`}
                 >
                   <div
-                    className={`w-full ${settings.textBackgroundEnabled ? 'p-4 rounded-lg' : ''}`}
+                    className={`w-full ${
+                      settings.mainImageTextBackgroundEnabled ? 'p-4 rounded-lg' : ''
+                    }`}
                     style={{
-                      backgroundColor: settings.textBackgroundEnabled ? settings.textBackgroundColor || '#ffffff' : 'transparent',
-                      opacity: settings.textBackgroundEnabled ? (settings.textBackgroundOpacity || 80) / 100 : 1
+                      backgroundColor: settings.mainImageTextBackgroundEnabled
+                        ? settings.mainImageTextBackgroundColor || '#ffffff'
+                        : 'transparent',
+                      opacity: settings.mainImageTextBackgroundEnabled
+                        ? (settings.mainImageTextBackgroundOpacity || 80) / 100
+                        : 1
                     }}
                   >
                     <div className="space-y-3">
+                      {settings.mainImageTitle && (
+                        <h3
+                          className={`${
+                            settings.mainImageTitleFont === 'lobster' ? 'font-lobster' : ''
+                          } ${settings.mainImageTitleBold ? 'font-bold' : ''} ${
+                            settings.mainImageTitleItalic ? 'italic' : ''
+                          }`}
+                          style={{
+                            fontFamily:
+                              settings.mainImageTitleFont === 'serif'
+                                ? 'serif'
+                                : settings.mainImageTitleFont === 'sans'
+                                ? 'sans-serif'
+                                : undefined,
+                            fontSize: `${settings.mainImageTitleSize || 24}px`,
+                            color: settings.mainImageTitleColor || '#ffffff'
+                          }}
+                        >
+                          {settings.mainImageTitle}
+                        </h3>
+                      )}
+                      {settings.mainImageText && (
+                        <p
+                          className={`${
+                            settings.mainImageTextFont === 'lobster' ? 'font-lobster' : ''
+                          } ${settings.mainImageTextBold ? 'font-bold' : ''} ${
+                            settings.mainImageTextItalic ? 'italic' : ''
+                          }`}
+                          style={{
+                            fontFamily:
+                              settings.mainImageTextFont === 'serif'
+                                ? 'serif'
+                                : settings.mainImageTextFont === 'sans'
+                                ? 'sans-serif'
+                                : undefined,
+                            fontSize: `${settings.mainImageTextSize || 16}px`,
+                            color: settings.mainImageTextColor || '#ffffff'
+                          }}
+                        >
+                          {settings.mainImageText}
+                        </p>
+                      )}
                       <input
                         type="text"
                         placeholder="Skriv in ditt önskemål"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                        className={`px-3 py-2 border border-gray-300 rounded-lg text-sm ${
+                          settings.inputFieldWidth === 'short'
+                            ? 'w-1/2'
+                            : settings.inputFieldWidth === 'long'
+                            ? 'w-full'
+                            : 'w-3/4'
+                        }`}
                         readOnly
                       />
-                      <textarea
-                        placeholder="Eventuell kommentar (valfritt)"
-                        rows={2}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                        readOnly
-                      />
-                      <button className="w-full px-4 py-2 bg-[#a1c798] text-white rounded-lg text-sm">
-                        Skicka önskning
+                      <button
+                        className="px-4 py-2 rounded-lg text-sm font-medium"
+                        style={{
+                          backgroundColor: settings.mainImageButtonBackgroundColor || '#a1c798',
+                          color: settings.mainImageButtonTextColor || '#ffffff'
+                        }}
+                      >
+                        {settings.mainImageButtonText || 'Skicka önskning'}
                       </button>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                <div className="bg-white rounded-lg shadow p-4">
-                  <h3 className="font-semibold text-sm mb-1">Önskad rätt</h3>
-                  <p className="text-xs text-gray-600 mb-2">Beskrivning av önskan...</p>
-                  <div className="text-xs text-gray-500 pt-2 border-t">
-                    Kockarnas kommentarer: Kommer snart...
+              <div
+                className={`flex flex-col space-y-3 max-h-[400px] overflow-y-auto pr-2 ${
+                  settings.mainImagePosition === 'right' ? 'order-1' : ''
+                }`}
+              >
+                <div className="aspect-square bg-white rounded-lg shadow p-4 flex flex-col justify-between">
+                  <div>
+                    <p className="text-sm text-gray-800 mb-2">Jag önskar mig thailändsk massaman-curry!</p>
+                    <p className="text-xs text-gray-500">Önskat av Anna</p>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span>💛 5</span>
+                    <span>💬 2</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">Kock: Låter gott!</span>
                   </div>
                 </div>
-                <div className="bg-white rounded-lg shadow p-4">
-                  <h3 className="font-semibold text-sm mb-1">Önskad rätt 2</h3>
-                  <p className="text-xs text-gray-600 mb-2">Beskrivning av önskan...</p>
-                  <div className="text-xs text-gray-500 pt-2 border-t">
-                    Kockarnas kommentarer: Kommer snart...
+                <div className="aspect-square bg-white rounded-lg shadow p-4 flex flex-col justify-between">
+                  <div>
+                    <p className="text-sm text-gray-800 mb-2">Vegetarisk lasagne</p>
+                    <p className="text-xs text-gray-500">Önskat av Erik</p>
+                  </div>
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span>💛 3</span>
+                    <span>💬 1</span>
                   </div>
                 </div>
               </div>
