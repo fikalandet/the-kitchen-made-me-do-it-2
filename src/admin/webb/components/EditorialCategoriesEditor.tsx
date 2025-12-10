@@ -358,6 +358,7 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               >
                 <option value="lobster">Lobster</option>
+                <option value="poppins">Poppins</option>
                 <option value="sans">Sans Serif</option>
                 <option value="serif">Serif</option>
               </select>
@@ -506,6 +507,7 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               >
                 <option value="lobster">Lobster</option>
+                <option value="poppins">Poppins</option>
                 <option value="sans">Sans Serif</option>
                 <option value="serif">Serif</option>
               </select>
@@ -704,6 +706,7 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
                       className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
                     >
                       <option value="lobster">Lobster</option>
+                      <option value="poppins">Poppins</option>
                       <option value="sans">Sans Serif</option>
                       <option value="serif">Serif</option>
                     </select>
@@ -808,6 +811,7 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
                       className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
                     >
                       <option value="lobster">Lobster</option>
+                      <option value="poppins">Poppins</option>
                       <option value="sans">Sans Serif</option>
                       <option value="serif">Serif</option>
                     </select>
@@ -931,6 +935,7 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
                     className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:border-[#56c5c5] focus:outline-none"
                   >
                     <option value="lobster">Lobster</option>
+                    <option value="poppins">Poppins</option>
                     <option value="sans">Sans Serif</option>
                     <option value="serif">Serif</option>
                   </select>
@@ -1094,7 +1099,7 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
                     settings.headingFont === 'lobster' ? 'font-lobster' : ''
                   } ${settings.headingBold ? 'font-bold' : ''} ${settings.headingItalic ? 'italic' : ''}`}
                   style={{
-                    fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+                    fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : settings.headingFont === 'poppins' ? 'Poppins, sans-serif' : undefined,
                     fontSize: `${settings.headingFontSize || 32}px`,
                     color: settings.headingColor || '#374151'
                   }}
@@ -1106,7 +1111,13 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {categories.map((category) => (
+              {(() => {
+                const previewCategories = editingCategory && editingCategory.id
+                  ? categories.map(cat => cat.id === editingCategory.id ? { ...editingCategory as EditorialCategory } : cat)
+                  : editingCategory
+                  ? [...categories, { ...editingCategory, id: 'preview-new', display_order: categories.length } as EditorialCategory]
+                  : categories;
+                return previewCategories.map((category) => (
                 <div
                   key={category.id}
                   className={`rounded-xl shadow-md overflow-hidden hover:shadow-xl transition-shadow ${
@@ -1132,7 +1143,7 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
                     <h3
                       className={`mb-2 ${category.is_featured ? 'text-2xl' : 'text-xl'} ${category.title_bold ? 'font-bold' : ''} ${category.title_italic ? 'italic' : ''}`}
                       style={{
-                        fontFamily: category.title_font === 'serif' ? 'serif' : category.title_font === 'sans' ? 'sans-serif' : category.title_font === 'lobster' ? 'Lobster' : undefined,
+                        fontFamily: category.title_font === 'serif' ? 'serif' : category.title_font === 'sans' ? 'sans-serif' : category.title_font === 'lobster' ? 'Lobster' : category.title_font === 'poppins' ? 'Poppins, sans-serif' : undefined,
                         fontSize: `${category.title_size}px`,
                         color: category.title_color,
                         textAlign: category.title_alignment as any
@@ -1143,7 +1154,7 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
                     <p
                       className={`mb-4 ${category.description_bold ? 'font-bold' : ''} ${category.description_italic ? 'italic' : ''}`}
                       style={{
-                        fontFamily: category.description_font === 'serif' ? 'serif' : category.description_font === 'sans' ? 'sans-serif' : category.description_font === 'lobster' ? 'Lobster' : undefined,
+                        fontFamily: category.description_font === 'serif' ? 'serif' : category.description_font === 'sans' ? 'sans-serif' : category.description_font === 'lobster' ? 'Lobster' : category.description_font === 'poppins' ? 'Poppins, sans-serif' : undefined,
                         fontSize: `${category.description_size}px`,
                         color: category.description_color,
                         textAlign: category.description_alignment as any
@@ -1155,7 +1166,7 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
                       <button
                         className={`inline-block px-4 py-2 rounded-lg ${category.cta_bold ? 'font-bold' : ''}`}
                         style={{
-                          fontFamily: category.cta_font === 'serif' ? 'serif' : category.cta_font === 'sans' ? 'sans-serif' : category.cta_font === 'lobster' ? 'Lobster' : undefined,
+                          fontFamily: category.cta_font === 'serif' ? 'serif' : category.cta_font === 'sans' ? 'sans-serif' : category.cta_font === 'lobster' ? 'Lobster' : category.cta_font === 'poppins' ? 'Poppins, sans-serif' : undefined,
                           backgroundColor: category.cta_bg_color,
                           color: category.cta_text_color
                         }}
@@ -1165,7 +1176,8 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
                     </div>
                   </div>
                 </div>
-              ))}
+              ));
+              })()}
             </div>
           </div>
         </div>

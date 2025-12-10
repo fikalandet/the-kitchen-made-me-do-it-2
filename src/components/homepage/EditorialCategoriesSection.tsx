@@ -244,7 +244,7 @@ export function EditorialCategoriesSection({ settings }: EditorialCategoriesSect
                 <h3
                   className={`mb-2 ${category.is_featured ? 'text-2xl' : 'text-xl'} ${category.title_bold ? 'font-bold' : ''} ${category.title_italic ? 'italic' : ''}`}
                   style={{
-                    fontFamily: category.title_font === 'serif' ? 'serif' : category.title_font === 'sans' ? 'sans-serif' : category.title_font === 'lobster' ? 'Lobster' : undefined,
+                    fontFamily: category.title_font === 'serif' ? 'serif' : category.title_font === 'sans' ? 'sans-serif' : category.title_font === 'lobster' ? 'Lobster' : category.title_font === 'poppins' ? 'Poppins, sans-serif' : undefined,
                     fontSize: `${category.title_size}px`,
                     color: category.title_color,
                     textAlign: category.title_alignment as any
@@ -255,7 +255,7 @@ export function EditorialCategoriesSection({ settings }: EditorialCategoriesSect
                 <p
                   className={`mb-4 ${category.description_bold ? 'font-bold' : ''} ${category.description_italic ? 'italic' : ''}`}
                   style={{
-                    fontFamily: category.description_font === 'serif' ? 'serif' : category.description_font === 'sans' ? 'sans-serif' : category.description_font === 'lobster' ? 'Lobster' : undefined,
+                    fontFamily: category.description_font === 'serif' ? 'serif' : category.description_font === 'sans' ? 'sans-serif' : category.description_font === 'lobster' ? 'Lobster' : category.description_font === 'poppins' ? 'Poppins, sans-serif' : undefined,
                     fontSize: `${category.description_size}px`,
                     color: category.description_color,
                     textAlign: category.description_alignment as any
@@ -267,7 +267,7 @@ export function EditorialCategoriesSection({ settings }: EditorialCategoriesSect
                   <span
                     className={`inline-flex items-center gap-2 transition-opacity hover:opacity-80 ${category.cta_bold ? 'font-bold' : ''}`}
                     style={{
-                      fontFamily: category.cta_font === 'serif' ? 'serif' : category.cta_font === 'sans' ? 'sans-serif' : category.cta_font === 'lobster' ? 'Lobster' : undefined,
+                      fontFamily: category.cta_font === 'serif' ? 'serif' : category.cta_font === 'sans' ? 'sans-serif' : category.cta_font === 'lobster' ? 'Lobster' : category.cta_font === 'poppins' ? 'Poppins, sans-serif' : undefined,
                       backgroundColor: category.cta_bg_color,
                       color: category.cta_text_color,
                       padding: '0.5rem 1rem',
