@@ -974,36 +974,6 @@ export const Home: React.FC = () => {
         contests={contests}
       />
 
-      <SectionWrapper title="Testkäka & Tyck till" subtitle="Hjälp kockarna att förbättra sina recept">
-        {feedbackDishes.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {feedbackDishes.map((dish) => {
-              const chef = transformChef({ id: dish.seller_id, display_name: 'Kock' });
-              return (
-                <TestEatCard
-                  key={dish.id}
-                  id={dish.id}
-                  imageUrl={dish.image_url}
-                  hasGallery={false}
-                  title={dish.name}
-                  price={{ currency: 'SEK', price: dish.price }}
-                  discountedPrice={dish.price}
-                  testPortions={10}
-                  chef={chef}
-                  gp={30}
-                  onShare={() => console.log('Share:', dish.id)}
-                  onFavToggle={() => console.log('Favorite toggle:', dish.id)}
-                  isFaved={false}
-                  onPrimary={() => console.log('Anmäl intresse:', dish.id)}
-                />
-              );
-            })}
-          </div>
-        ) : (
-          <EmptyState text="Inget här ännu" />
-        )}
-      </SectionWrapper>
-
       <WishFoodSection settings={wishFoodSettings} />
 
       <TestEatSection settings={testEatSettings} />
