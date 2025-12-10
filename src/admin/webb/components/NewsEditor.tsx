@@ -69,6 +69,7 @@ interface EditorialCard {
   image_url?: string;
   cta_text?: string;
   cta_link?: string;
+  cta_link_type?: string;
   background_color: string;
   opacity: number;
   border_radius: number;
@@ -84,6 +85,7 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
   const [editingImage, setEditingImage] = useState<ImageItem | null>(null);
   const [editingCard, setEditingCard] = useState<EditorialCard | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingCardImage, setUploadingCardImage] = useState(false);
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
 
@@ -184,6 +186,34 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
       alert('Kunde inte ladda upp. Försök igen.');
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  const handleCardImageUpload = async (file: File) => {
+    if (!user || !editingCard) return;
+    setUploadingCardImage(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `card-${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/news/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+
+      setEditingCard({ ...editingCard, image_url: data.publicUrl });
+    } catch (err) {
+      console.error('Error uploading:', err);
+      alert('Kunde inte ladda upp. Försök igen.');
+    } finally {
+      setUploadingCardImage(false);
     }
   };
 
@@ -1052,7 +1082,7 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
                   Redaktionella kort ({editorialCards.length})
                 </h4>
                 <button
-                  onClick={() => setEditingCard({ id: '', title: '', background_color: '#ffffff', opacity: 100, border_radius: 12, padding: 16, is_hero: false, display_order: 0 } as EditorialCard)}
+                  onClick={() => setEditingCard({ id: '', title: '', background_color: '#ffffff', opacity: 100, border_radius: 12, padding: 16, is_hero: false, display_order: 0, cta_link_type: 'external' } as EditorialCard)}
                   className="flex items-center gap-2 px-4 py-2 bg-[#56c5c5] text-white rounded-lg"
                 >
                   <Plus className="w-4 h-4" />
@@ -1080,30 +1110,116 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
                     className="w-full px-3 py-2 border rounded"
                   />
 
-                  <input
-                    type="text"
-                    value={editingCard.image_url || ''}
-                    onChange={(e) => setEditingCard({ ...editingCard, image_url: e.target.value })}
-                    placeholder="Bild-URL"
-                    className="w-full px-3 py-2 border rounded"
-                  />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Bild
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="file"
+                        id="card-image-upload"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleCardImageUpload(file);
+                        }}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="card-image-upload"
+                        className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 ${
+                          uploadingCardImage ? 'opacity-50' : ''
+                        }`}
+                      >
+                        <Upload className="w-4 h-4" />
+                        {uploadingCardImage ? 'Laddar upp...' : 'Ladda upp bild'}
+                      </label>
+                      {editingCard.image_url && (
+                        <button
+                          onClick={() => setEditingCard({ ...editingCard, image_url: '' })}
+                          className="px-3 py-2 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-lg hover:bg-red-50"
+                        >
+                          Ta bort
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      value={editingCard.image_url || ''}
+                      onChange={(e) => setEditingCard({ ...editingCard, image_url: e.target.value })}
+                      placeholder="Eller ange bild-URL..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg mt-2"
+                    />
+                    {editingCard.image_url && (
+                      <img
+                        src={editingCard.image_url}
+                        alt="Preview"
+                        className="w-full h-48 object-cover rounded-lg mt-2"
+                      />
+                    )}
+                  </div>
 
-                  <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      CTA-text
+                    </label>
                     <input
                       type="text"
                       value={editingCard.cta_text || ''}
                       onChange={(e) => setEditingCard({ ...editingCard, cta_text: e.target.value })}
-                      placeholder="CTA-text"
+                      placeholder="Läs mer"
                       className="w-full px-3 py-2 border rounded"
                     />
+                  </div>
 
-                    <input
-                      type="text"
-                      value={editingCard.cta_link || ''}
-                      onChange={(e) => setEditingCard({ ...editingCard, cta_link: e.target.value })}
-                      placeholder="CTA-länk"
-                      className="w-full px-3 py-2 border rounded"
-                    />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Länktyp
+                    </label>
+                    <div className="flex gap-3 mb-2">
+                      <button
+                        onClick={() => setEditingCard({ ...editingCard, cta_link_type: 'internal' })}
+                        className={`px-4 py-2 rounded-lg border-2 ${
+                          editingCard.cta_link_type === 'internal'
+                            ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                            : 'border-gray-300'
+                        }`}
+                      >
+                        Intern sida
+                      </button>
+                      <button
+                        onClick={() => setEditingCard({ ...editingCard, cta_link_type: 'external' })}
+                        className={`px-4 py-2 rounded-lg border-2 ${
+                          editingCard.cta_link_type === 'external' || !editingCard.cta_link_type
+                            ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                            : 'border-gray-300'
+                        }`}
+                      >
+                        Extern URL
+                      </button>
+                    </div>
+                    {editingCard.cta_link_type === 'internal' ? (
+                      <select
+                        value={editingCard.cta_link || ''}
+                        onChange={(e) => setEditingCard({ ...editingCard, cta_link: e.target.value })}
+                        className="w-full px-3 py-2 border rounded"
+                      >
+                        <option value="">Välj sida</option>
+                        <option value="/">Startsida</option>
+                        <option value="/marketplace">Marknadsplats</option>
+                        <option value="/bli-kock">Bli kock</option>
+                        <option value="/membership">Medlemskap</option>
+                        <option value="/golden-spoon">Guldsleven</option>
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={editingCard.cta_link || ''}
+                        onChange={(e) => setEditingCard({ ...editingCard, cta_link: e.target.value })}
+                        placeholder="https://..."
+                        className="w-full px-3 py-2 border rounded"
+                      />
+                    )}
                   </div>
 
                   <div className="flex gap-2">
@@ -1280,9 +1396,174 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
               )}
             </div>
 
-            <div className="text-center text-gray-500 py-12">
-              Preview visar rubrik och textrader. Innehåll renderas på frontend.
-            </div>
+            {(settings.displayMode === 'big-image-text' || !settings.displayMode) && (
+              <div className={`grid md:grid-cols-2 gap-12 items-center ${settings.imageBlockPlacement === 'right' ? 'md:flex-row-reverse' : ''}`}>
+                <div className={`relative h-[400px] ${settings.imageBlockPlacement === 'right' ? 'order-2' : 'order-1'}`}>
+                  {settings.imageLayout === 'grid' && imageItems.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-4 h-full">
+                      {imageItems.slice(0, 4).map((image) => (
+                        <div
+                          key={image.id}
+                          className={`relative overflow-hidden ${
+                            image.shape === 'circle' ? 'rounded-full' : image.shape === 'rounded' ? 'rounded-2xl' : 'rounded-lg'
+                          }`}
+                          style={{
+                            transform: `rotate(${image.rotation}deg) scale(${image.scale})`
+                          }}
+                        >
+                          <img
+                            src={image.image_url}
+                            alt=""
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="relative w-full h-full">
+                      {imageItems.map((image) => {
+                        const basePositions: Record<string, any> = {
+                          'top-left': { top: '10%', left: '10%' },
+                          'top-right': { top: '10%', right: '10%' },
+                          'bottom-left': { bottom: '10%', left: '10%' },
+                          'bottom-right': { bottom: '10%', right: '10%' },
+                          'center': { top: '50%', left: '50%' }
+                        };
+                        const base = basePositions[image.position_preset] || basePositions['center'];
+
+                        return (
+                          <div
+                            key={image.id}
+                            className={`absolute overflow-hidden ${
+                              image.shape === 'circle' ? 'rounded-full' : image.shape === 'rounded' ? 'rounded-2xl' : 'rounded-lg'
+                            }`}
+                            style={{
+                              ...base,
+                              width: '200px',
+                              height: '200px',
+                              zIndex: image.z_index,
+                              transform: `translate(${image.offset_x}px, ${image.offset_y}px) rotate(${image.rotation}deg) scale(${image.scale})`
+                            }}
+                          >
+                            <img
+                              src={image.image_url}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {imageItems.length === 0 && (
+                    <div className="w-full h-full bg-gray-100 rounded-lg flex items-center justify-center text-gray-400">
+                      Inga bilder uppladdade
+                    </div>
+                  )}
+                </div>
+
+                <div className={settings.imageBlockPlacement === 'right' ? 'order-1' : 'order-2'}>
+                  {settings.textSectionHeading && (
+                    <h3 className="text-3xl font-bold text-gray-900 mb-4">
+                      {settings.textSectionHeading}
+                    </h3>
+                  )}
+                  {settings.textSectionIngress && (
+                    <p className="text-lg text-gray-700 mb-4">
+                      {settings.textSectionIngress}
+                    </p>
+                  )}
+                  {settings.textSectionBody && (
+                    <p className="text-gray-600 mb-6">
+                      {settings.textSectionBody}
+                    </p>
+                  )}
+                  {settings.textSectionCtaText && (
+                    <button
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium"
+                      style={{
+                        backgroundColor: settings.textSectionCtaColor || '#a1c798'
+                      }}
+                    >
+                      {settings.textSectionCtaText}
+                      <ArrowRight className="w-5 h-5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {settings.displayMode === 'card-flow' && (
+              <div>
+                {settings.cardType === 'editorial' ? (
+                  <div className={`${
+                    settings.cardLayout === 'horizontal'
+                      ? 'flex overflow-x-auto gap-6 pb-4'
+                      : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
+                  }`}>
+                    {editorialCards.slice(0, settings.cardsVisible || 6).map((card) => {
+                      const cardSizeClass =
+                        settings.cardSize === 'small' ? 'w-64' :
+                        settings.cardSize === 'large' ? 'w-96' :
+                        'w-80';
+
+                      return (
+                        <div
+                          key={card.id}
+                          className={`${settings.cardLayout === 'horizontal' ? `flex-shrink-0 ${cardSizeClass}` : ''} bg-white rounded-xl shadow-md overflow-hidden ${
+                            card.is_hero ? 'md:col-span-2 md:row-span-2' : ''
+                          }`}
+                          style={{
+                            backgroundColor: card.background_color,
+                            opacity: card.opacity / 100,
+                            borderRadius: `${card.border_radius}px`,
+                            padding: `${card.padding}px`
+                          }}
+                        >
+                          {card.image_url && (
+                            <div className={`relative overflow-hidden ${card.is_hero ? 'h-96' : 'h-48'}`}>
+                              <img
+                                src={card.image_url}
+                                alt={card.title}
+                                className="w-full h-full object-cover"
+                              />
+                              {card.is_hero && (
+                                <div className="absolute top-4 left-4 px-3 py-1 bg-yellow-400 text-white rounded-full text-sm font-medium">
+                                  Featured
+                                </div>
+                              )}
+                            </div>
+                          )}
+                          <div className="p-6">
+                            <h3 className={`font-bold text-gray-900 mb-2 ${card.is_hero ? 'text-3xl' : 'text-xl'}`}>
+                              {card.title}
+                            </h3>
+                            {card.subtitle && (
+                              <p className="text-gray-600 mb-4">{card.subtitle}</p>
+                            )}
+                            {card.cta_text && (
+                              <button className="inline-flex items-center gap-2 text-[#a1c798] font-medium">
+                                {card.cta_text}
+                                <ArrowRight className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {editorialCards.length === 0 && (
+                      <div className="col-span-full text-center text-gray-500 py-8">
+                        Inga kort skapade ännu
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center text-gray-500 py-8">
+                    Produktkort hämtas automatiskt från produktdatabasen
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </CollapsibleCard>

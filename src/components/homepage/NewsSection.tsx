@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { EmptyState } from './EmptyState';
@@ -65,6 +66,7 @@ interface EditorialCard {
   image_url?: string;
   cta_text?: string;
   cta_link?: string;
+  cta_link_type?: string;
   background_color: string;
   opacity: number;
   border_radius: number;
@@ -400,13 +402,25 @@ export function NewsSection({ settings }: NewsSectionProps) {
                   <p className="text-gray-600 mb-4">{card.subtitle}</p>
                 )}
                 {card.cta_text && card.cta_link && (
-                  <a
-                    href={card.cta_link}
-                    className="inline-flex items-center gap-2 text-[#a1c798] hover:text-[#8fb386] font-medium transition-colors"
-                  >
-                    {card.cta_text}
-                    <ArrowRight className="w-4 h-4" />
-                  </a>
+                  card.cta_link_type === 'internal' ? (
+                    <Link
+                      to={card.cta_link}
+                      className="inline-flex items-center gap-2 text-[#a1c798] hover:text-[#8fb386] font-medium transition-colors"
+                    >
+                      {card.cta_text}
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+                  ) : (
+                    <a
+                      href={card.cta_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 text-[#a1c798] hover:text-[#8fb386] font-medium transition-colors"
+                    >
+                      {card.cta_text}
+                      <ArrowRight className="w-4 h-4" />
+                    </a>
+                  )
                 )}
               </div>
             </div>
