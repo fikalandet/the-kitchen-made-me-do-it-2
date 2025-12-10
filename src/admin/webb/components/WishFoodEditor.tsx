@@ -1176,7 +1176,8 @@ export default function WishFoodEditor({ settings, onSettingsChange }: WishFoodE
                   wishes.map((wish) => (
                     <div
                       key={wish.id}
-                      className="relative aspect-square bg-white rounded-lg shadow p-2 flex flex-col justify-between hover:shadow-md transition-shadow"
+                      className="relative bg-white rounded-lg shadow p-2 flex flex-col justify-between hover:shadow-md transition-shadow"
+                      style={{ aspectRatio: '2 / 1' }}
                     >
                       <button
                         onClick={() => handleRemoveWish(wish.id)}

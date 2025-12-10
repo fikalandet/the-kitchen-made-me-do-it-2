@@ -419,7 +419,8 @@ export function WishFoodSection({ settings }: WishFoodSectionProps) {
                   {currentWishes.map((wish) => (
                     <div
                       key={wish.id}
-                      className="aspect-square bg-white rounded-lg shadow-md p-3 hover:shadow-lg transition-shadow flex flex-col justify-between"
+                      className="bg-white rounded-lg shadow-md p-3 hover:shadow-lg transition-shadow flex flex-col justify-between"
+                      style={{ aspectRatio: '2 / 1' }}
                     >
                       <div>
                         <p className="text-xs font-medium text-gray-900 mb-1 line-clamp-2">{wish.dish_name}</p>
