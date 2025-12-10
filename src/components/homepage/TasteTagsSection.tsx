@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { EmptyState } from './EmptyState';
 import { Zap } from 'lucide-react';
 
 interface TasteTagsSettings {
@@ -19,6 +18,30 @@ interface TasteTagsSettings {
   subtitleBold?: boolean;
   subtitleItalic?: boolean;
   backgroundColor?: string;
+  flowVisibleCount?: number;
+  imageShape?: 'round' | 'rounded-square';
+  imageBorderEnabled?: boolean;
+  imageBorderColor?: string;
+  imageBorderWidth?: number;
+  labelBackgroundColor?: string;
+  labelOpacity?: number;
+  labelBorderRadius?: string;
+  labelPlacement?: 'horizontal' | 'diagonal-left' | 'diagonal-right';
+  labelWidth?: string;
+  labelHeight?: string;
+  labelTextFont?: string;
+  labelTextColor?: string;
+  labelTextBold?: boolean;
+  labelTextItalic?: boolean;
+  labelTextSize?: number;
+  buttonBackgroundColor?: string;
+  buttonOpacity?: number;
+  buttonText?: string;
+  buttonTextFont?: string;
+  buttonTextColor?: string;
+  buttonTextBold?: boolean;
+  buttonTextItalic?: boolean;
+  buttonTextSize?: number;
 }
 
 interface TasteTagsSectionProps {
@@ -79,13 +102,24 @@ export function TasteTagsSection({ settings }: TasteTagsSectionProps) {
         .eq('is_removed_by_admin', false)
         .order('is_boosted', { ascending: false })
         .order('created_at', { ascending: false })
-        .limit(12);
+        .limit(settings.flowVisibleCount || 12);
 
       if (error) throw error;
       setDishes(data || []);
     } catch (err) {
       console.error('Error fetching taste label dishes:', err);
     }
+  };
+
+  const hexToRgba = (hex: string, opacity: number) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    if (result) {
+      const r = parseInt(result[1], 16);
+      const g = parseInt(result[2], 16);
+      const b = parseInt(result[3], 16);
+      return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    return hex;
   };
 
   const subtitleTexts = settings.subtitleTexts || [];
@@ -104,6 +138,19 @@ export function TasteTagsSection({ settings }: TasteTagsSectionProps) {
   if (dishes.length === 0) {
     return null;
   }
+
+  const borderRadiusMap = {
+    light: '8px',
+    medium: '16px',
+    pill: '9999px'
+  };
+  const labelBorderRadius = borderRadiusMap[settings.labelBorderRadius as keyof typeof borderRadiusMap] || '16px';
+
+  const imageRadius = settings.imageShape === 'rounded-square' ? '12px' : '50%';
+
+  let labelRotation = 0;
+  if (settings.labelPlacement === 'diagonal-left') labelRotation = -45;
+  if (settings.labelPlacement === 'diagonal-right') labelRotation = 45;
 
   return (
     <section
@@ -195,29 +242,83 @@ export function TasteTagsSection({ settings }: TasteTagsSectionProps) {
                   }
                 }}
               >
-                <div className="relative w-40 h-40 mx-auto mb-3 rounded-full overflow-hidden bg-gray-100 shadow-md group-hover:shadow-xl transition-shadow">
-                  {dish.products?.image_url ? (
-                    <img
-                      src={dish.products.image_url}
-                      alt={dish.products.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <span className="text-4xl">🍽️</span>
-                    </div>
-                  )}
+                <div className="relative w-40 h-40 mx-auto mb-3 bg-gray-100">
+                  <div
+                    className="w-full h-full overflow-hidden"
+                    style={{
+                      borderRadius: imageRadius,
+                      border: settings.imageBorderEnabled
+                        ? `${settings.imageBorderWidth || 2}px solid ${settings.imageBorderColor || '#a1c798'}`
+                        : 'none'
+                    }}
+                  >
+                    {dish.products?.image_url ? (
+                      <img
+                        src={dish.products.image_url}
+                        alt={dish.products.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">
+                        <span className="text-4xl">🍽️</span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div
+                    className="absolute flex items-center justify-center overflow-hidden"
+                    style={{
+                      top: '50%',
+                      left: '50%',
+                      width: settings.labelWidth || '80%',
+                      height: settings.labelHeight || '32px',
+                      transform: `translate(-50%, -50%) rotate(${labelRotation}deg)`,
+                      backgroundColor: hexToRgba(settings.labelBackgroundColor || '#a1c798', (settings.labelOpacity || 80) / 100),
+                      borderRadius: labelBorderRadius
+                    }}
+                  >
+                    <p
+                      className={`text-xs px-2 truncate ${
+                        settings.labelTextFont === 'lobster' ? 'font-lobster' : ''
+                      } ${settings.labelTextBold ? 'font-bold' : ''} ${
+                        settings.labelTextItalic ? 'italic' : ''
+                      }`}
+                      style={{
+                        fontFamily:
+                          settings.labelTextFont === 'serif'
+                            ? 'serif'
+                            : settings.labelTextFont === 'sans'
+                            ? 'sans-serif'
+                            : undefined,
+                        fontSize: `${settings.labelTextSize || 14}px`,
+                        color: settings.labelTextColor || '#ffffff'
+                      }}
+                    >
+                      {dish.taste_label_text}
+                    </p>
+                  </div>
+
                   {dish.is_boosted && (
                     <div className="absolute top-2 right-2 bg-yellow-400 rounded-full p-1.5 shadow-md">
                       <Zap className="w-4 h-4 text-white fill-current" />
                     </div>
                   )}
                 </div>
-                <p className="text-sm text-gray-600 italic mb-2 px-2 line-clamp-2 min-h-[40px]">
-                  "{dish.taste_label_text}"
-                </p>
                 <button
-                  className="text-sm px-4 py-2 bg-[#a1c798] text-white rounded-full hover:bg-[#8fb386] transition-colors shadow-sm"
+                  className="text-sm px-4 py-2 rounded-full transition-colors shadow-sm mx-auto block"
+                  style={{
+                    backgroundColor: hexToRgba(settings.buttonBackgroundColor || '#a1c798', (settings.buttonOpacity || 100) / 100),
+                    color: settings.buttonTextColor || '#ffffff',
+                    fontFamily:
+                      settings.buttonTextFont === 'serif'
+                        ? 'serif'
+                        : settings.buttonTextFont === 'sans'
+                        ? 'sans-serif'
+                        : undefined,
+                    fontSize: `${settings.buttonTextSize || 14}px`,
+                    fontWeight: settings.buttonTextBold ? 'bold' : 'normal',
+                    fontStyle: settings.buttonTextItalic ? 'italic' : 'normal'
+                  }}
                   onClick={(e) => {
                     e.stopPropagation();
                     if (dish.products?.id) {
@@ -225,7 +326,7 @@ export function TasteTagsSection({ settings }: TasteTagsSectionProps) {
                     }
                   }}
                 >
-                  Se mer
+                  {settings.buttonText || 'Se mer'}
                 </button>
               </div>
             ))}
