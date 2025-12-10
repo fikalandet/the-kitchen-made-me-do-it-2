@@ -29,6 +29,7 @@ interface TasteTagsSettings {
   labelPlacement?: 'horizontal' | 'diagonal-left' | 'diagonal-right';
   labelWidth?: string;
   labelHeight?: string;
+  labelAngle?: number;
   labelTextFont?: string;
   labelTextColor?: string;
   labelTextBold?: boolean;
@@ -148,9 +149,7 @@ export function TasteTagsSection({ settings }: TasteTagsSectionProps) {
 
   const imageRadius = settings.imageShape === 'rounded-square' ? '12px' : '50%';
 
-  let labelRotation = 0;
-  if (settings.labelPlacement === 'diagonal-left') labelRotation = -45;
-  if (settings.labelPlacement === 'diagonal-right') labelRotation = 45;
+  const labelRotation = settings.labelAngle ?? 0;
 
   return (
     <section

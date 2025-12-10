@@ -8,9 +8,12 @@ interface ContestsSectionProps {
     backgroundColor?: string;
     heading?: string;
     headingFont?: string;
+    headingFontSize?: number;
     headingBold?: boolean;
     headingAlignment?: 'left' | 'center';
     headingColor?: string;
+    headingEmojiStart?: string;
+    headingEmojiEnd?: string;
     subtitleTexts?: string[];
     subtitleRotationInterval?: number;
     subtitlePlacement?: 'inline' | 'below';
@@ -129,13 +132,16 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
               <h2
                 className={`text-3xl ${headingFontClass} ${
                   settings?.headingBold ? 'font-bold' : ''
-                }`}
+                } flex items-center gap-2`}
                 style={{
                   fontFamily: headingFontFamily,
+                  fontSize: `${settings?.headingFontSize || 32}px`,
                   color: settings?.headingColor || '#374151'
                 }}
               >
+                {settings?.headingEmojiStart && <span>{settings.headingEmojiStart}</span>}
                 {settings?.heading || 'Tävlingar'}
+                {settings?.headingEmojiEnd && <span>{settings.headingEmojiEnd}</span>}
               </h2>
               {subtitleTexts.length > 0 && subtitleTexts[0] && (
                 <>
@@ -159,13 +165,16 @@ export function ContestsSection({ settings, contests }: ContestsSectionProps) {
               <h2
                 className={`text-3xl ${headingFontClass} ${
                   settings?.headingBold ? 'font-bold' : ''
-                }`}
+                } flex items-center gap-2`}
                 style={{
                   fontFamily: headingFontFamily,
+                  fontSize: `${settings?.headingFontSize || 32}px`,
                   color: settings?.headingColor || '#374151'
                 }}
               >
+                {settings?.headingEmojiStart && <span>{settings.headingEmojiStart}</span>}
                 {settings?.heading || 'Tävlingar'}
+                {settings?.headingEmojiEnd && <span>{settings.headingEmojiEnd}</span>}
               </h2>
               {subtitleTexts.length > 0 && subtitleTexts[currentSubtitleIndex] && (
                 <div className="min-h-[24px] flex items-center mt-2">

@@ -589,39 +589,40 @@ export default function TasteTagsEditor({ settings, onSettingsChange }: TasteTag
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Placering av etiketterna
+              Etikettens vinkel (grader)
             </label>
-            <div className="space-y-2">
-              <button
-                onClick={() => updateSetting('labelPlacement', 'horizontal')}
-                className={`w-full px-4 py-2 rounded-lg border-2 transition-all ${
-                  settings.labelPlacement === 'horizontal' || !settings.labelPlacement
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                Horisontellt över produktkortet
-              </button>
-              <button
-                onClick={() => updateSetting('labelPlacement', 'diagonal-left')}
-                className={`w-full px-4 py-2 rounded-lg border-2 transition-all ${
-                  settings.labelPlacement === 'diagonal-left'
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                45° vänster
-              </button>
-              <button
-                onClick={() => updateSetting('labelPlacement', 'diagonal-right')}
-                className={`w-full px-4 py-2 rounded-lg border-2 transition-all ${
-                  settings.labelPlacement === 'diagonal-right'
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                45° höger
-              </button>
+            <div className="space-y-3">
+              <input
+                type="number"
+                min="-90"
+                max="90"
+                value={settings.labelAngle ?? 0}
+                onChange={(e) => updateSetting('labelAngle', parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              />
+              <p className="text-xs text-gray-500">
+                Ange vinkel i grader (-90 till +90). 0° = horisontell, -45° = vänster, +45° = höger
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => updateSetting('labelAngle', 0)}
+                  className="px-3 py-1 text-xs rounded border border-gray-300 hover:bg-gray-50"
+                >
+                  0° (Horisontell)
+                </button>
+                <button
+                  onClick={() => updateSetting('labelAngle', -45)}
+                  className="px-3 py-1 text-xs rounded border border-gray-300 hover:bg-gray-50"
+                >
+                  -45° (Vänster)
+                </button>
+                <button
+                  onClick={() => updateSetting('labelAngle', 45)}
+                  className="px-3 py-1 text-xs rounded border border-gray-300 hover:bg-gray-50"
+                >
+                  45° (Höger)
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1011,9 +1012,7 @@ export default function TasteTagsEditor({ settings, onSettingsChange }: TasteTag
 
                 const imageRadius = settings.imageShape === 'rounded-square' ? '12px' : '50%';
 
-                let labelRotation = 0;
-                if (settings.labelPlacement === 'diagonal-left') labelRotation = -45;
-                if (settings.labelPlacement === 'diagonal-right') labelRotation = 45;
+                const labelRotation = settings.labelAngle ?? 0;
 
                 return (
                   <div

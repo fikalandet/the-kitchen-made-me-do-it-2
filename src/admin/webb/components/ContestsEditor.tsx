@@ -9,9 +9,12 @@ interface ContestsSettings {
   backgroundColor?: string;
   heading?: string;
   headingFont?: string;
+  headingFontSize?: number;
   headingBold?: boolean;
   headingAlignment?: 'left' | 'center';
   headingColor?: string;
+  headingEmojiStart?: string;
+  headingEmojiEnd?: string;
   subtitleTexts?: string[];
   subtitleRotationInterval?: number;
   subtitlePlacement?: 'inline' | 'below';
@@ -124,7 +127,7 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
         />
       </CollapsibleCard>
 
-      <CollapsibleCard title="Rubrik" defaultExpanded={true}>
+      <CollapsibleCard title="Huvudrubrik" defaultExpanded={true}>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -139,19 +142,63 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Typsnitt
-            </label>
-            <select
-              value={settings.headingFont || 'lobster'}
-              onChange={(e) => updateSetting('headingFont', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
-            >
-              <option value="lobster">Lobster</option>
-              <option value="sans">Sans Serif</option>
-              <option value="serif">Serif</option>
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Emoji före rubrik
+              </label>
+              <input
+                type="text"
+                value={settings.headingEmojiStart || ''}
+                onChange={(e) => updateSetting('headingEmojiStart', e.target.value)}
+                placeholder="🏆"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Emoji efter rubrik
+              </label>
+              <input
+                type="text"
+                value={settings.headingEmojiEnd || ''}
+                onChange={(e) => updateSetting('headingEmojiEnd', e.target.value)}
+                placeholder="🎉"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Typsnitt
+              </label>
+              <select
+                value={settings.headingFont || 'lobster'}
+                onChange={(e) => updateSetting('headingFont', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              >
+                <option value="lobster">Lobster</option>
+                <option value="sans">Sans Serif</option>
+                <option value="serif">Serif</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Storlek (px)
+              </label>
+              <input
+                type="number"
+                min="12"
+                max="72"
+                value={settings.headingFontSize || 32}
+                onChange={(e) => updateSetting('headingFontSize', parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              />
+            </div>
           </div>
 
           <div>
@@ -505,13 +552,16 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
                 <h2
                   className={`text-3xl ${
                     settings.headingFont === 'lobster' ? 'font-lobster' : ''
-                  } ${settings.headingBold ? 'font-bold' : ''}`}
+                  } ${settings.headingBold ? 'font-bold' : ''} flex items-center gap-2`}
                   style={{
                     fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+                    fontSize: `${settings.headingFontSize || 32}px`,
                     color: settings.headingColor || '#374151'
                   }}
                 >
+                  {settings.headingEmojiStart && <span>{settings.headingEmojiStart}</span>}
                   {settings.heading || 'Tävlingar'}
+                  {settings.headingEmojiEnd && <span>{settings.headingEmojiEnd}</span>}
                 </h2>
                 {subtitleTexts.length > 0 && subtitleTexts[0] && (
                   <>
@@ -535,13 +585,16 @@ export default function ContestsEditor({ settings, onSettingsChange }: ContestsE
                 <h2
                   className={`text-3xl ${
                     settings.headingFont === 'lobster' ? 'font-lobster' : ''
-                  } ${settings.headingBold ? 'font-bold' : ''}`}
+                  } ${settings.headingBold ? 'font-bold' : ''} flex items-center gap-2`}
                   style={{
                     fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+                    fontSize: `${settings.headingFontSize || 32}px`,
                     color: settings.headingColor || '#374151'
                   }}
                 >
+                  {settings.headingEmojiStart && <span>{settings.headingEmojiStart}</span>}
                   {settings.heading || 'Tävlingar'}
+                  {settings.headingEmojiEnd && <span>{settings.headingEmojiEnd}</span>}
                 </h2>
                 {subtitleTexts.length > 0 && subtitleTexts[0] && (
                   <div className="min-h-[24px] flex items-center mt-2">

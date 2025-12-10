@@ -82,7 +82,7 @@ export default function SchysstaDealsEditor({ settings, onSettingsChange }: Schy
         />
       </CollapsibleCard>
 
-      <CollapsibleCard title="Rubrik" defaultExpanded={true}>
+      <CollapsibleCard title="Huvudrubrik" defaultExpanded={true}>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
