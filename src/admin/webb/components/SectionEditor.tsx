@@ -134,7 +134,7 @@ const sectionConfigs: Record<string, SectionConfig> = {
     supportsStandardContent: false,
     customPanels: [ChefSpotlightEditor],
   },
-  'vad-vara-kunder-sager': {
+  'kundernas-tyckande': {
     supportsStandardContent: false,
     customPanels: [TestimonialsEditor],
   },

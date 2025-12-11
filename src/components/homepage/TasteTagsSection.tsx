@@ -233,7 +233,7 @@ export function TasteTagsSection({ settings }: TasteTagsSectionProps) {
             {dishes.map((dish) => (
               <div
                 key={dish.id}
-                className="flex-shrink-0 text-center group cursor-pointer"
+                className="flex-shrink-0 text-center group cursor-pointer transition-all duration-150 ease-in-out hover:-translate-y-1 hover:shadow-lg"
                 style={{ width: '160px' }}
                 onClick={() => {
                   if (dish.products?.id) {

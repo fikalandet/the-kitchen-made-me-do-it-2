@@ -62,10 +62,39 @@ interface HeroSettings {
 export const HeroSection = () => {
   const [settings, setSettings] = useState<HeroSettings | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
+  const [titleVisible, setTitleVisible] = useState(true);
 
   useEffect(() => {
     fetchHeroSettings();
   }, []);
+
+  useEffect(() => {
+    if (!settings?.hero_title_rotate_enabled) return;
+
+    const alternateTitles = settings.hero_alternate_titles || [];
+    if (alternateTitles.length === 0 || !alternateTitles[0]) return;
+
+    const allTitles = [settings.sectionHeading || '', ...alternateTitles].filter(t => t);
+    if (allTitles.length <= 1) return;
+
+    const interval = settings.hero_title_rotation_interval_ms || 3000;
+    const animationStyle = settings.hero_title_animation_style || 'fade';
+
+    const rotationInterval = setInterval(() => {
+      if (animationStyle === 'fade' || animationStyle === 'slide') {
+        setTitleVisible(false);
+        setTimeout(() => {
+          setCurrentTitleIndex((prev) => (prev + 1) % allTitles.length);
+          setTitleVisible(true);
+        }, 300);
+      } else {
+        setCurrentTitleIndex((prev) => (prev + 1) % allTitles.length);
+      }
+    }, interval);
+
+    return () => clearInterval(rotationInterval);
+  }, [settings]);
 
   const fetchHeroSettings = async () => {
     try {
@@ -149,13 +178,43 @@ export const HeroSection = () => {
     paddingBottom: settings.paddingBottom || '40px'
   };
 
+  const getCurrentTitle = () => {
+    if (!settings?.hero_title_rotate_enabled) {
+      return settings?.sectionHeading || '';
+    }
+
+    const alternateTitles = settings.hero_alternate_titles || [];
+    if (alternateTitles.length === 0 || !alternateTitles[0]) {
+      return settings.sectionHeading || '';
+    }
+
+    const allTitles = [settings.sectionHeading || '', ...alternateTitles].filter(t => t);
+    return allTitles[currentTitleIndex] || settings.sectionHeading || '';
+  };
+
+  const getAnimationClasses = () => {
+    if (!settings?.hero_title_rotate_enabled) return '';
+
+    const animationStyle = settings.hero_title_animation_style || 'fade';
+
+    if (animationStyle === 'fade') {
+      return `transition-opacity duration-300 ${titleVisible ? 'opacity-100' : 'opacity-0'}`;
+    } else if (animationStyle === 'slide') {
+      return `transition-all duration-300 ${titleVisible ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'}`;
+    } else if (animationStyle === 'typewriter') {
+      return 'animate-pulse';
+    }
+
+    return '';
+  };
+
   return (
     <section className="px-4" style={sectionStyle}>
       <div className="max-w-6xl mx-auto">
-        {settings.sectionHeading && (
+        {(settings?.sectionHeading || settings?.hero_title_rotate_enabled) && (
           <div className="text-center mb-4">
             <h2
-              className="font-lobster text-black font-bold mb-2"
+              className={`font-lobster text-black font-bold mb-2 ${getAnimationClasses()}`}
               style={{
                 fontSize:
                   settings.sectionHeadingSize === 'sm' ? '1.5rem' :
@@ -165,9 +224,9 @@ export const HeroSection = () => {
                   '2.5rem'
               }}
             >
-              {settings.sectionHeading}
+              {getCurrentTitle()}
             </h2>
-            {settings.sectionSubheading && (
+            {settings?.sectionSubheading && (
               <p className="text-gray-700">
                 {settings.sectionSubheading}
               </p>

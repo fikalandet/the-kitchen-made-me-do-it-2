@@ -25,6 +25,7 @@ import { ChefSpotlightSection } from '../components/homepage/ChefSpotlightSectio
 import { MoodDishesSection } from '../components/homepage/MoodDishesSection';
 import { HoroscopeSection } from '../components/homepage/HoroscopeSection';
 import { EditorialCategoriesSection } from '../components/homepage/EditorialCategoriesSection';
+import { TestimonialsSection } from '../components/homepage/TestimonialsSection';
 import { OnStoveNowCard } from '../components/CardKit/variants/OnStoveNowCard';
 import { PopularNewMoodCard } from '../components/CardKit/variants/PopularNewMoodCard';
 import { ChefOfWeekCard } from '../components/CardKit/variants/ChefOfWeekCard';
@@ -73,6 +74,7 @@ export const Home: React.FC = () => {
   const [newsSettings, setNewsSettings] = useState<any>({});
   const [editorialCategoriesSettings, setEditorialCategoriesSettings] = useState<any>({});
   const [chefSpotlightSettings, setChefSpotlightSettings] = useState<any>({});
+  const [testimonialsSettings, setTestimonialsSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
   const [brattomDishes, setBrattomDishes] = useState<any[]>([]);
   const [tjuvkikDishes, setTjuvkikDishes] = useState<any[]>([]);
@@ -257,6 +259,16 @@ export const Home: React.FC = () => {
 
     if (chefSpotlightSection) {
       setChefSpotlightSettings(chefSpotlightSection.settings || {});
+    }
+
+    const { data: testimonialsSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'kundernas-tyckande')
+      .maybeSingle();
+
+    if (testimonialsSection) {
+      setTestimonialsSettings(testimonialsSection.settings || {});
     }
 
     const mockChef = {
@@ -905,6 +917,8 @@ export const Home: React.FC = () => {
       <ChefSpotlightSection settings={chefSpotlightSettings} />
 
       <MoodDishesSection dishes={moodDishes} />
+
+      <TestimonialsSection settings={testimonialsSettings} />
 
       <section className="py-16 px-4">
         <div className="max-w-4xl mx-auto">

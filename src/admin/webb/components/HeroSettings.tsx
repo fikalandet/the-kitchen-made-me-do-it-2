@@ -91,6 +91,97 @@ export default function HeroSettings({ settings, onSettingsChange }: HeroSetting
       </div>
 
       <div>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={settings.hero_title_rotate_enabled || false}
+            onChange={(e) => updateSetting('hero_title_rotate_enabled', e.target.checked)}
+            className="w-4 h-4 rounded"
+          />
+          <span className="text-sm font-medium text-gray-700">Aktivera roterande rubrik</span>
+        </label>
+      </div>
+
+      {settings.hero_title_rotate_enabled && (
+        <>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Animationsstil för rubrik
+            </label>
+            <select
+              value={settings.hero_title_animation_style || 'fade'}
+              onChange={(e) => updateSetting('hero_title_animation_style', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#56c5c5] focus:border-transparent"
+            >
+              <option value="none">Ingen</option>
+              <option value="fade">Fade</option>
+              <option value="slide">Slide</option>
+              <option value="typewriter">Typewriter</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Alternativa rubriker att rotera mellan
+            </label>
+            <div className="space-y-2">
+              {(settings.hero_alternate_titles || ['']).map((title: string, index: number) => (
+                <div key={index} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => {
+                      const newTitles = [...(settings.hero_alternate_titles || [''])];
+                      newTitles[index] = e.target.value;
+                      updateSetting('hero_alternate_titles', newTitles);
+                    }}
+                    placeholder={`Alternativ rubrik ${index + 1}`}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#56c5c5] focus:border-transparent"
+                  />
+                  {(settings.hero_alternate_titles?.length || 0) > 1 && (
+                    <button
+                      onClick={() => {
+                        const newTitles = (settings.hero_alternate_titles || ['']).filter((_: any, i: number) => i !== index);
+                        updateSetting('hero_alternate_titles', newTitles);
+                      }}
+                      className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                onClick={() => {
+                  const newTitles = [...(settings.hero_alternate_titles || ['']), ''];
+                  updateSetting('hero_alternate_titles', newTitles);
+                }}
+                className="px-3 py-2 text-sm text-[#56c5c5] border border-[#56c5c5] rounded-lg hover:bg-[#56c5c5] hover:text-white transition-colors"
+              >
+                + Lägg till alternativ rubrik
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Tid mellan rubrikbyten (ms)
+            </label>
+            <input
+              type="number"
+              value={settings.hero_title_rotation_interval_ms || 3000}
+              onChange={(e) => updateSetting('hero_title_rotation_interval_ms', parseInt(e.target.value) || 3000)}
+              min="1000"
+              max="10000"
+              step="500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#56c5c5] focus:border-transparent"
+            />
+            <p className="text-xs text-gray-500 mt-1">Rekommenderat: 3000-5000 ms</p>
+          </div>
+        </>
+      )}
+
+      <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Brödtext ovanför alla kort
         </label>
