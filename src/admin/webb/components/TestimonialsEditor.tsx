@@ -618,8 +618,16 @@ export default function TestimonialsEditor({ settings, onSettingsChange }: Testi
               Färg på stjärnor
             </label>
             <ColorPicker
-              color={settings.testimonialStarColor || '#fbbf24'}
+              label=""
+              value={settings.testimonialStarColor || '#fbbf24'}
               onChange={(color) => updateSetting('testimonialStarColor', color)}
+              presets={[
+                { value: '#fbbf24', label: 'Klassisk guld' },
+                { value: '#f59e0b', label: 'Orange-guld' },
+                { value: '#eab308', label: 'Gul' },
+                { value: '#a1c798', label: 'Mintgrön' },
+                { value: '#56c5c5', label: 'Turkos' }
+              ]}
             />
           </div>
 

@@ -156,7 +156,7 @@ export default function HeroSettings({ settings, onSettingsChange }: HeroSetting
                   const newTitles = [...(settings.hero_alternate_titles || ['']), ''];
                   updateSetting('hero_alternate_titles', newTitles);
                 }}
-                className="px-3 py-2 text-sm text-[#56c5c5] border border-[#56c5c5] rounded-lg hover:bg-[#56c5c5] hover:text-white transition-colors"
+                className="px-3 py-2 text-sm bg-[#56c5c5] text-white rounded-lg hover:shadow-lg transition-all"
               >
                 + Lägg till alternativ rubrik
               </button>
@@ -165,18 +165,18 @@ export default function HeroSettings({ settings, onSettingsChange }: HeroSetting
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Tid mellan rubrikbyten (ms)
+              Tid mellan rubrikbyten (sekunder)
             </label>
             <input
               type="number"
-              value={settings.hero_title_rotation_interval_ms || 3000}
-              onChange={(e) => updateSetting('hero_title_rotation_interval_ms', parseInt(e.target.value) || 3000)}
-              min="1000"
-              max="10000"
-              step="500"
+              value={settings.hero_title_rotation_interval_seconds || 3}
+              onChange={(e) => updateSetting('hero_title_rotation_interval_seconds', parseInt(e.target.value) || 3)}
+              min="1"
+              max="30"
+              step="1"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#56c5c5] focus:border-transparent"
             />
-            <p className="text-xs text-gray-500 mt-1">Rekommenderat: 3000-5000 ms</p>
+            <p className="text-xs text-gray-500 mt-1">Rekommenderat: 3-5 sekunder</p>
           </div>
         </>
       )}

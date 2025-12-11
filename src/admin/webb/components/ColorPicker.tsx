@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface ColorPreset {
   value: string;
@@ -23,6 +23,12 @@ const DEFAULT_PRESETS: ColorPreset[] = [
 export default function ColorPicker({ label, value, onChange, presets }: ColorPickerProps) {
   const [hexInput, setHexInput] = useState(value || '');
   const colorPresets = presets || DEFAULT_PRESETS;
+
+  useEffect(() => {
+    if (value) {
+      setHexInput(value);
+    }
+  }, [value]);
 
   const handleHexChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;

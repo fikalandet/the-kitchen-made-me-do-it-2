@@ -64,6 +64,7 @@ export const HeroSection = () => {
   const [loading, setLoading] = useState(true);
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
   const [titleVisible, setTitleVisible] = useState(true);
+  const [typewriterText, setTypewriterText] = useState('');
 
   useEffect(() => {
     fetchHeroSettings();
@@ -78,7 +79,8 @@ export const HeroSection = () => {
     const allTitles = [settings.sectionHeading || '', ...alternateTitles].filter(t => t);
     if (allTitles.length <= 1) return;
 
-    const interval = settings.hero_title_rotation_interval_ms || 3000;
+    const intervalSeconds = settings.hero_title_rotation_interval_seconds || 3;
+    const interval = intervalSeconds * 1000;
     const animationStyle = settings.hero_title_animation_style || 'fade';
 
     const rotationInterval = setInterval(() => {
@@ -88,6 +90,8 @@ export const HeroSection = () => {
           setCurrentTitleIndex((prev) => (prev + 1) % allTitles.length);
           setTitleVisible(true);
         }, 300);
+      } else if (animationStyle === 'typewriter') {
+        setCurrentTitleIndex((prev) => (prev + 1) % allTitles.length);
       } else {
         setCurrentTitleIndex((prev) => (prev + 1) % allTitles.length);
       }
@@ -95,6 +99,30 @@ export const HeroSection = () => {
 
     return () => clearInterval(rotationInterval);
   }, [settings]);
+
+  useEffect(() => {
+    if (!settings?.hero_title_rotate_enabled) return;
+    const animationStyle = settings.hero_title_animation_style || 'fade';
+    if (animationStyle !== 'typewriter') return;
+
+    const alternateTitles = settings.hero_alternate_titles || [];
+    const allTitles = [settings.sectionHeading || '', ...alternateTitles].filter(t => t);
+    const targetText = allTitles[currentTitleIndex] || '';
+
+    setTypewriterText('');
+    let currentChar = 0;
+
+    const typewriterInterval = setInterval(() => {
+      if (currentChar < targetText.length) {
+        setTypewriterText(targetText.substring(0, currentChar + 1));
+        currentChar++;
+      } else {
+        clearInterval(typewriterInterval);
+      }
+    }, 100);
+
+    return () => clearInterval(typewriterInterval);
+  }, [currentTitleIndex, settings]);
 
   const fetchHeroSettings = async () => {
     try {
@@ -183,6 +211,11 @@ export const HeroSection = () => {
       return settings?.sectionHeading || '';
     }
 
+    const animationStyle = settings.hero_title_animation_style || 'fade';
+    if (animationStyle === 'typewriter') {
+      return typewriterText;
+    }
+
     const alternateTitles = settings.hero_alternate_titles || [];
     if (alternateTitles.length === 0 || !alternateTitles[0]) {
       return settings.sectionHeading || '';
@@ -200,9 +233,9 @@ export const HeroSection = () => {
     if (animationStyle === 'fade') {
       return `transition-opacity duration-300 ${titleVisible ? 'opacity-100' : 'opacity-0'}`;
     } else if (animationStyle === 'slide') {
-      return `transition-all duration-300 ${titleVisible ? 'translate-y-0 opacity-100' : '-translate-y-2 opacity-0'}`;
+      return `transition-all duration-300 ${titleVisible ? 'translate-x-0 opacity-100' : 'translate-x-5 opacity-0'}`;
     } else if (animationStyle === 'typewriter') {
-      return 'animate-pulse';
+      return '';
     }
 
     return '';

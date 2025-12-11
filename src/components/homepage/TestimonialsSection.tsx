@@ -128,24 +128,41 @@ export function TestimonialsSection({ settings }: TestimonialsSectionProps) {
           </h2>
 
           {subtitleTexts.length > 0 && subtitleTexts[0] && (
-            <p
-              className={`${
-                settings.subtitlePlacement === 'inline' ? 'inline-block ml-2' : 'block mt-2'
-              } ${settings.subtitleBold ? 'font-bold' : ''} ${
-                settings.subtitleItalic ? 'italic' : ''
-              } ${settings.subtitleFont === 'lobster' ? 'font-lobster' : ''} transition-opacity duration-300`}
-              style={{
-                fontSize: `${settings.subtitleFontSize || 18}px`,
-                color: settings.subtitleColor || '#6b7280',
-                opacity: fadeIn ? 1 : 0,
-                fontFamily: settings.subtitleFont === 'poppins' ? 'Poppins' :
-                            settings.subtitleFont === 'lobster' ? 'Lobster' :
-                            settings.subtitleFont === 'serif' ? 'serif' :
-                            'sans-serif'
-              }}
-            >
-              {subtitleTexts[currentSubtitleIndex]}
-            </p>
+            settings.subtitlePlacement === 'inline' ? (
+              <span
+                className={`inline-block ml-3 ${settings.subtitleBold ? 'font-bold' : ''} ${
+                  settings.subtitleItalic ? 'italic' : ''
+                } ${settings.subtitleFont === 'lobster' ? 'font-lobster' : ''} transition-opacity duration-300`}
+                style={{
+                  fontSize: `${settings.subtitleFontSize || 18}px`,
+                  color: settings.subtitleColor || '#6b7280',
+                  opacity: fadeIn ? 1 : 0,
+                  fontFamily: settings.subtitleFont === 'poppins' ? 'Poppins' :
+                              settings.subtitleFont === 'lobster' ? 'Lobster' :
+                              settings.subtitleFont === 'serif' ? 'serif' :
+                              'sans-serif'
+                }}
+              >
+                {subtitleTexts[currentSubtitleIndex]}
+              </span>
+            ) : (
+              <p
+                className={`block mt-4 ${settings.subtitleBold ? 'font-bold' : ''} ${
+                  settings.subtitleItalic ? 'italic' : ''
+                } ${settings.subtitleFont === 'lobster' ? 'font-lobster' : ''} transition-opacity duration-300`}
+                style={{
+                  fontSize: `${settings.subtitleFontSize || 18}px`,
+                  color: settings.subtitleColor || '#6b7280',
+                  opacity: fadeIn ? 1 : 0,
+                  fontFamily: settings.subtitleFont === 'poppins' ? 'Poppins' :
+                              settings.subtitleFont === 'lobster' ? 'Lobster' :
+                              settings.subtitleFont === 'serif' ? 'serif' :
+                              'sans-serif'
+                }}
+              >
+                {subtitleTexts[currentSubtitleIndex]}
+              </p>
+            )
           )}
         </div>
 
