@@ -129,10 +129,65 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
         .eq('role', 'chef')
         .order('display_name');
 
+      const mockChefs = [
+        {
+          id: 'mock-chef-1',
+          display_name: 'Sofia Andersson',
+          avatar_url: 'https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=200',
+          city: 'Stockholm',
+          membership_level: 'Gold',
+          bio: 'Passionerad kock med kärlek för italiensk matlagning'
+        },
+        {
+          id: 'mock-chef-2',
+          display_name: 'Marcus Berg',
+          avatar_url: 'https://images.pexels.com/photos/3748221/pexels-photo-3748221.jpeg?auto=compress&cs=tinysrgb&w=200',
+          city: 'Göteborg',
+          membership_level: 'Silver',
+          bio: 'Mästerkock med asiatisk specialitet'
+        },
+        {
+          id: 'mock-chef-3',
+          display_name: 'Emma Nilsson',
+          avatar_url: 'https://images.pexels.com/photos/3756681/pexels-photo-3756681.jpeg?auto=compress&cs=tinysrgb&w=200',
+          city: 'Malmö',
+          membership_level: 'Free',
+          bio: 'Vegansk matlagning med smak'
+        }
+      ];
+
       if (error) throw error;
-      if (data) setChefs(data);
+      const allChefs = data && data.length > 0 ? [...data, ...mockChefs] : mockChefs;
+      setChefs(allChefs);
     } catch (err) {
       console.error('Error fetching chefs:', err);
+      const mockChefs = [
+        {
+          id: 'mock-chef-1',
+          display_name: 'Sofia Andersson',
+          avatar_url: 'https://images.pexels.com/photos/3785077/pexels-photo-3785077.jpeg?auto=compress&cs=tinysrgb&w=200',
+          city: 'Stockholm',
+          membership_level: 'Gold',
+          bio: 'Passionerad kock med kärlek för italiensk matlagning'
+        },
+        {
+          id: 'mock-chef-2',
+          display_name: 'Marcus Berg',
+          avatar_url: 'https://images.pexels.com/photos/3748221/pexels-photo-3748221.jpeg?auto=compress&cs=tinysrgb&w=200',
+          city: 'Göteborg',
+          membership_level: 'Silver',
+          bio: 'Mästerkock med asiatisk specialitet'
+        },
+        {
+          id: 'mock-chef-3',
+          display_name: 'Emma Nilsson',
+          avatar_url: 'https://images.pexels.com/photos/3756681/pexels-photo-3756681.jpeg?auto=compress&cs=tinysrgb&w=200',
+          city: 'Malmö',
+          membership_level: 'Free',
+          bio: 'Vegansk matlagning med smak'
+        }
+      ];
+      setChefs(mockChefs);
     } finally {
       setLoading(false);
     }
@@ -491,206 +546,208 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
 
       <CollapsibleCard title="Bilder" defaultExpanded={true}>
         <div className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Huvudbild (stor)
-            </label>
-            <div className="space-y-3">
-              <div>
-                <input
-                  type="file"
-                  id="main-image-upload"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleImageUpload(file, 'main');
-                  }}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="main-image-upload"
-                  className={`flex items-center justify-center gap-2 px-4 py-3 bg-[#56c5c5] text-white rounded-lg cursor-pointer hover:bg-[#45b4b4] transition-colors ${
-                    uploadingMain ? 'opacity-50' : ''
-                  }`}
-                >
-                  <Upload className="w-5 h-5" />
-                  {uploadingMain ? 'Laddar upp...' : 'Ladda upp huvudbild'}
-                </label>
-              </div>
-              {settings.mainImageUrl && (
-                <div className="relative">
-                  <img
-                    src={settings.mainImageUrl}
-                    alt="Huvudbild"
-                    className="w-full h-48 object-cover rounded-lg"
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Huvudbild (stor)
+              </label>
+              <div className="space-y-3">
+                <div>
+                  <input
+                    type="file"
+                    id="main-image-upload"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload(file, 'main');
+                    }}
+                    className="hidden"
                   />
-                  <button
-                    onClick={() => updateSetting('mainImageUrl', '')}
-                    className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  <label
+                    htmlFor="main-image-upload"
+                    className={`inline-flex items-center justify-center gap-2 px-4 py-2 bg-black text-white text-sm rounded-lg cursor-pointer hover:bg-gray-800 transition-colors ${
+                      uploadingMain ? 'opacity-50' : ''
+                    }`}
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                    <Upload className="w-4 h-4" />
+                    {uploadingMain ? 'Laddar upp...' : 'Ladda upp'}
+                  </label>
                 </div>
-              )}
+                {settings.mainImageUrl && (
+                  <div className="relative">
+                    <img
+                      src={settings.mainImageUrl}
+                      alt="Huvudbild"
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                    <button
+                      onClick={() => updateSetting('mainImageUrl', '')}
+                      className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Bildbredd
-                </label>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => updateSetting('mainImageWidth', 'medium')}
-                    className={`px-4 py-2 rounded-lg border-2 ${
-                      settings.mainImageWidth === 'medium' || !settings.mainImageWidth
-                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    Medium
-                  </button>
-                  <button
-                    onClick={() => updateSetting('mainImageWidth', 'large')}
-                    className={`px-4 py-2 rounded-lg border-2 ${
-                      settings.mainImageWidth === 'large'
-                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    Stor
-                  </button>
-                  <button
-                    onClick={() => updateSetting('mainImageWidth', 'full')}
-                    className={`px-4 py-2 rounded-lg border-2 ${
-                      settings.mainImageWidth === 'full'
-                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    Full bredd
-                  </button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Bildbredd
+                  </label>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => updateSetting('mainImageWidth', 'medium')}
+                      className={`px-4 py-2 rounded-lg border-2 ${
+                        settings.mainImageWidth === 'medium' || !settings.mainImageWidth
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Medium
+                    </button>
+                    <button
+                      onClick={() => updateSetting('mainImageWidth', 'large')}
+                      className={`px-4 py-2 rounded-lg border-2 ${
+                        settings.mainImageWidth === 'large'
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Stor
+                    </button>
+                    <button
+                      onClick={() => updateSetting('mainImageWidth', 'full')}
+                      className={`px-4 py-2 rounded-lg border-2 ${
+                        settings.mainImageWidth === 'full'
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Full bredd
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Liten bild (omlott)
-            </label>
-            <div className="space-y-3">
-              <div>
-                <input
-                  type="file"
-                  id="small-image-upload"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleImageUpload(file, 'small');
-                  }}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="small-image-upload"
-                  className={`flex items-center justify-center gap-2 px-4 py-3 bg-[#56c5c5] text-white rounded-lg cursor-pointer hover:bg-[#45b4b4] transition-colors ${
-                    uploadingSmall ? 'opacity-50' : ''
-                  }`}
-                >
-                  <Upload className="w-5 h-5" />
-                  {uploadingSmall ? 'Laddar upp...' : 'Ladda upp liten bild'}
-                </label>
-              </div>
-              {settings.smallImageUrl && (
-                <div className="relative">
-                  <img
-                    src={settings.smallImageUrl}
-                    alt="Liten bild"
-                    className="w-full h-32 object-cover rounded-lg"
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Liten bild (omlott)
+              </label>
+              <div className="space-y-3">
+                <div>
+                  <input
+                    type="file"
+                    id="small-image-upload"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleImageUpload(file, 'small');
+                    }}
+                    className="hidden"
                   />
-                  <button
-                    onClick={() => updateSetting('smallImageUrl', '')}
-                    className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                  <label
+                    htmlFor="small-image-upload"
+                    className={`inline-flex items-center justify-center gap-2 px-4 py-2 bg-black text-white text-sm rounded-lg cursor-pointer hover:bg-gray-800 transition-colors ${
+                      uploadingSmall ? 'opacity-50' : ''
+                    }`}
                   >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                    <Upload className="w-4 h-4" />
+                    {uploadingSmall ? 'Laddar upp...' : 'Ladda upp'}
+                  </label>
                 </div>
-              )}
+                {settings.smallImageUrl && (
+                  <div className="relative">
+                    <img
+                      src={settings.smallImageUrl}
+                      alt="Liten bild"
+                      className="w-full h-48 object-cover rounded-lg"
+                    />
+                    <button
+                      onClick={() => updateSetting('smallImageUrl', '')}
+                      className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Placering av liten bild
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => updateSetting('smallImagePosition', 'top-left')}
-                    className={`px-3 py-2 rounded-lg border-2 text-sm ${
-                      settings.smallImagePosition === 'top-left' || !settings.smallImagePosition
-                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    Uppe vänster
-                  </button>
-                  <button
-                    onClick={() => updateSetting('smallImagePosition', 'top-right')}
-                    className={`px-3 py-2 rounded-lg border-2 text-sm ${
-                      settings.smallImagePosition === 'top-right'
-                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    Uppe höger
-                  </button>
-                  <button
-                    onClick={() => updateSetting('smallImagePosition', 'center')}
-                    className={`px-3 py-2 rounded-lg border-2 text-sm ${
-                      settings.smallImagePosition === 'center'
-                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    Center
-                  </button>
-                  <button
-                    onClick={() => updateSetting('smallImagePosition', 'bottom-left')}
-                    className={`px-3 py-2 rounded-lg border-2 text-sm ${
-                      settings.smallImagePosition === 'bottom-left'
-                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    Nere vänster
-                  </button>
-                  <button
-                    onClick={() => updateSetting('smallImagePosition', 'bottom-right')}
-                    className={`px-3 py-2 rounded-lg border-2 text-sm ${
-                      settings.smallImagePosition === 'bottom-right'
-                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                        : 'border-gray-300'
-                    }`}
-                  >
-                    Nere höger
-                  </button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Placering av liten bild
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <button
+                      onClick={() => updateSetting('smallImagePosition', 'top-left')}
+                      className={`px-3 py-2 rounded-lg border-2 text-sm ${
+                        settings.smallImagePosition === 'top-left' || !settings.smallImagePosition
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Uppe vänster
+                    </button>
+                    <button
+                      onClick={() => updateSetting('smallImagePosition', 'top-right')}
+                      className={`px-3 py-2 rounded-lg border-2 text-sm ${
+                        settings.smallImagePosition === 'top-right'
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Uppe höger
+                    </button>
+                    <button
+                      onClick={() => updateSetting('smallImagePosition', 'center')}
+                      className={`px-3 py-2 rounded-lg border-2 text-sm ${
+                        settings.smallImagePosition === 'center'
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Center
+                    </button>
+                    <button
+                      onClick={() => updateSetting('smallImagePosition', 'bottom-left')}
+                      className={`px-3 py-2 rounded-lg border-2 text-sm ${
+                        settings.smallImagePosition === 'bottom-left'
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Nere vänster
+                    </button>
+                    <button
+                      onClick={() => updateSetting('smallImagePosition', 'bottom-right')}
+                      className={`px-3 py-2 rounded-lg border-2 text-sm ${
+                        settings.smallImagePosition === 'bottom-right'
+                          ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                          : 'border-gray-300'
+                      }`}
+                    >
+                      Nere höger
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              <ColorPicker
-                label="Ramfärg för liten bild"
-                value={settings.smallImageBorderColor || '#ffffff'}
-                onChange={(color) => updateSetting('smallImageBorderColor', color)}
-              />
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ramtjocklek (px): {settings.smallImageBorderWidth || 4}
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="10"
-                  value={settings.smallImageBorderWidth || 4}
-                  onChange={(e) => updateSetting('smallImageBorderWidth', parseInt(e.target.value))}
-                  className="w-full"
+                <ColorPicker
+                  label="Ramfärg för liten bild"
+                  value={settings.smallImageBorderColor || '#ffffff'}
+                  onChange={(color) => updateSetting('smallImageBorderColor', color)}
                 />
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ramtjocklek (px): {settings.smallImageBorderWidth || 4}
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="10"
+                    value={settings.smallImageBorderWidth || 4}
+                    onChange={(e) => updateSetting('smallImageBorderWidth', parseInt(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -1374,7 +1431,140 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               )}
             </div>
 
-            <div className="text-sm text-gray-500 text-center mb-4">
+            <div className={`mb-8 ${settings.curiosaPlacement === 'beside-article' ? 'grid md:grid-cols-2 gap-8' : ''}`}>
+              <div className="relative">
+                {settings.mainImageUrl ? (
+                  <div className="relative">
+                    <img
+                      src={settings.mainImageUrl}
+                      alt="Huvudbild"
+                      className="w-full h-64 object-cover rounded-2xl"
+                    />
+                    {settings.smallImageUrl && (
+                      <img
+                        src={settings.smallImageUrl}
+                        alt="Liten bild"
+                        className="absolute w-24 h-24 object-cover rounded-xl shadow-lg"
+                        style={{
+                          top: settings.smallImagePosition === 'top-left' || settings.smallImagePosition === 'top-right' ? '1rem' : settings.smallImagePosition === 'center' ? '50%' : 'auto',
+                          bottom: settings.smallImagePosition === 'bottom-left' || settings.smallImagePosition === 'bottom-right' ? '1rem' : 'auto',
+                          left: settings.smallImagePosition === 'top-left' || settings.smallImagePosition === 'bottom-left' ? '1rem' : settings.smallImagePosition === 'center' ? '50%' : 'auto',
+                          right: settings.smallImagePosition === 'top-right' || settings.smallImagePosition === 'bottom-right' ? '1rem' : 'auto',
+                          transform: settings.smallImagePosition === 'center' ? 'translate(-50%, -50%)' : undefined,
+                          border: `${settings.smallImageBorderWidth || 4}px solid ${settings.smallImageBorderColor || '#ffffff'}`
+                        }}
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <div className="w-full h-64 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400">
+                    Ingen bild uppladdad
+                  </div>
+                )}
+
+                {settings.curiosaPlacement === 'below-image' && curiosaItems.length > 0 && curiosaItems.some(item => item.question) && (
+                  <div
+                    className="mt-6 p-4 rounded-xl"
+                    style={{
+                      backgroundColor: settings.curiosaBgColor || '#f6f2e0',
+                      borderColor: settings.curiosaBorderColor || '#a1c798',
+                      borderWidth: `${settings.curiosaBorderWidth || 2}px`,
+                      borderStyle: 'solid',
+                      opacity: (settings.curiosaOpacity || 100) / 100,
+                      width: `${settings.curiosaWidth || 100}%`,
+                      height: settings.curiosaHeight ? `${settings.curiosaHeight}px` : 'auto'
+                    }}
+                  >
+                    <h4 className="font-bold text-sm mb-2">Kuriosa</h4>
+                    <div className="space-y-2">
+                      {curiosaItems.slice(0, 3).map((item, index) => (
+                        item.question && (
+                          <div key={index} className="text-xs">
+                            <p className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`}
+                              style={{ fontSize: `${settings.curiosaFontSize || 14}px` }}>
+                              {item.question}:
+                            </p>
+                            <p className="text-gray-600"
+                              style={{ fontSize: `${settings.curiosaFontSize || 14}px` }}>
+                              {item.answer || 'Svar...'}
+                            </p>
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div>
+                {settings.articleTitle && (
+                  <h3 className="font-bold mb-2" style={{ fontSize: '18px' }}>
+                    {settings.articleTitle}
+                  </h3>
+                )}
+                {settings.articleIngress && (
+                  <p className="mb-2 text-gray-700" style={{ fontSize: '14px' }}>
+                    {settings.articleIngress}
+                  </p>
+                )}
+                {settings.articleBody && (
+                  <p className="text-gray-600 text-sm" style={{ fontSize: `${settings.articleFontSize || 16}px` }}>
+                    {settings.articleBody.substring(0, 200)}...
+                  </p>
+                )}
+
+                {settings.curiosaPlacement === 'beside-article' && curiosaItems.length > 0 && curiosaItems.some(item => item.question) && (
+                  <div
+                    className="mt-4 p-4 rounded-xl"
+                    style={{
+                      backgroundColor: settings.curiosaBgColor || '#f6f2e0',
+                      borderColor: settings.curiosaBorderColor || '#a1c798',
+                      borderWidth: `${settings.curiosaBorderWidth || 2}px`,
+                      borderStyle: 'solid',
+                      opacity: (settings.curiosaOpacity || 100) / 100,
+                      width: `${settings.curiosaWidth || 100}%`,
+                      height: settings.curiosaHeight ? `${settings.curiosaHeight}px` : 'auto'
+                    }}
+                  >
+                    <h4 className="font-bold text-sm mb-2">Kuriosa</h4>
+                    <div className="space-y-2">
+                      {curiosaItems.slice(0, 2).map((item, index) => (
+                        item.question && (
+                          <div key={index} className="text-xs">
+                            <p className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`}>
+                              {item.question}:
+                            </p>
+                            <p className="text-gray-600">{item.answer || 'Svar...'}</p>
+                          </div>
+                        )
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {settings.quoteText && (
+              <blockquote className="text-center italic text-gray-600 mb-6" style={{ fontSize: `${settings.quoteFontSize || 24}px` }}>
+                "{settings.quoteText}"
+              </blockquote>
+            )}
+
+            {settings.ctaText && (
+              <div className="text-center">
+                <button
+                  className="px-6 py-3 rounded-xl text-white"
+                  style={{
+                    backgroundColor: settings.ctaColor || '#56c5c5',
+                    opacity: (settings.ctaOpacity || 100) / 100
+                  }}
+                >
+                  {settings.ctaText}
+                </button>
+              </div>
+            )}
+
+            <div className="text-sm text-gray-500 text-center mt-8">
               Preview visar layout och grundläggande styling
             </div>
           </div>

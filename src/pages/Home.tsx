@@ -23,8 +23,6 @@ import { TestEatSection } from '../components/homepage/TestEatSection';
 import { EventsSection } from '../components/homepage/EventsSection';
 import { ChefSpotlightSection } from '../components/homepage/ChefSpotlightSection';
 import { MoodDishesSection } from '../components/homepage/MoodDishesSection';
-import { HealthArticlesSection } from '../components/homepage/HealthArticlesSection';
-import { CharityArticlesSection } from '../components/homepage/CharityArticlesSection';
 import { HoroscopeSection } from '../components/homepage/HoroscopeSection';
 import { EditorialCategoriesSection } from '../components/homepage/EditorialCategoriesSection';
 import { OnStoveNowCard } from '../components/CardKit/variants/OnStoveNowCard';
@@ -92,8 +90,6 @@ export const Home: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [spotlightChef, setSpotlightChef] = useState<Chef | null>(null);
   const [moodDishes, setMoodDishes] = useState<Dish[]>([]);
-  const [healthArticles, setHealthArticles] = useState<any[]>([]);
-  const [charityArticles, setCharityArticles] = useState<any[]>([]);
   const [horoscopes, setHoroscopes] = useState<any[]>([]);
 
   useEffect(() => {
@@ -807,26 +803,6 @@ export const Home: React.FC = () => {
       setFridgeMenuProducts(fridgeMenuProductsData);
     }
 
-    const { data: healthArticlesData } = await supabase
-      .from('articles')
-      .select('*')
-      .eq('category', 'health')
-      .limit(8);
-
-    if (healthArticlesData) {
-      setHealthArticles(healthArticlesData);
-    }
-
-    const { data: charityArticlesData } = await supabase
-      .from('articles')
-      .select('*')
-      .eq('category', 'charity')
-      .limit(8);
-
-    if (charityArticlesData) {
-      setCharityArticles(charityArticlesData);
-    }
-
     const horoscopeData = [
       { sign: 'Väduren', symbol: '♈', prediction: 'En dag full av matglädje väntar!' },
       { sign: 'Oxen', symbol: '♉', prediction: 'Prova något nytt idag!' },
@@ -950,10 +926,6 @@ export const Home: React.FC = () => {
           </div>
         </div>
       </section>
-
-      <HealthArticlesSection articles={healthArticles} />
-
-      <CharityArticlesSection articles={charityArticles} />
 
       <HoroscopeSection horoscopes={horoscopes} />
 
