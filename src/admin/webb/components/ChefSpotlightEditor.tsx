@@ -2159,11 +2159,17 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                     }}
                   >
                     <h4
-                      className={`mb-2 ${settings.curiosaTitleBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaTitleItalic ? 'italic' : ''}`}
+                      className={`mb-2 ${settings.curiosaTitleBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaTitleItalic ? 'italic' : ''} ${
+                        settings.curiosaTitleFont === 'lobster' ? 'font-lobster' : ''
+                      }`}
                       style={{
                         fontSize: `${settings.curiosaTitleSize || 20}px`,
                         textAlign: settings.curiosaTitleAlignment || 'left',
-                        color: settings.curiosaTitleColor || '#1f2937'
+                        color: settings.curiosaTitleColor || '#1f2937',
+                        fontFamily: settings.curiosaTitleFont === 'serif' ? 'serif' :
+                                    settings.curiosaTitleFont === 'poppins' ? 'Poppins' :
+                                    settings.curiosaTitleFont === 'lobster' ? 'Lobster' :
+                                    'sans-serif'
                       }}
                     >
                       {settings.curiosaTitle || 'Kuriosa'}
@@ -2322,11 +2328,17 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                     }}
                   >
                     <h4
-                      className={`mb-2 ${settings.curiosaTitleBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaTitleItalic ? 'italic' : ''}`}
+                      className={`mb-2 ${settings.curiosaTitleBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaTitleItalic ? 'italic' : ''} ${
+                        settings.curiosaTitleFont === 'lobster' ? 'font-lobster' : ''
+                      }`}
                       style={{
                         fontSize: `${settings.curiosaTitleSize || 20}px`,
                         textAlign: settings.curiosaTitleAlignment || 'left',
-                        color: settings.curiosaTitleColor || '#1f2937'
+                        color: settings.curiosaTitleColor || '#1f2937',
+                        fontFamily: settings.curiosaTitleFont === 'serif' ? 'serif' :
+                                    settings.curiosaTitleFont === 'poppins' ? 'Poppins' :
+                                    settings.curiosaTitleFont === 'lobster' ? 'Lobster' :
+                                    'sans-serif'
                       }}
                     >
                       {settings.curiosaTitle || 'Kuriosa'}
