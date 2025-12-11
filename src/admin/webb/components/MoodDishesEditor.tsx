@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import CollapsibleCard from './CollapsibleCard';
 import ColorPicker from './ColorPicker';
+import PreviewCard from './PreviewCard';
 
 interface MoodCard {
   id: string;
@@ -27,6 +28,7 @@ interface MoodDishesSettings {
   headingAlignment?: 'left' | 'center';
   headingColor?: string;
   subtitleTexts?: string[];
+  subtitleRotationInterval?: number;
   subtitlePlacement?: 'inline' | 'below';
   subtitleColor?: string;
   mood_cards?: MoodCard[];
@@ -39,9 +41,28 @@ interface MoodDishesEditorProps {
 }
 
 export default function MoodDishesEditor({ settings, onSettingsChange }: MoodDishesEditorProps) {
+  const [activeSubtitleIndex, setActiveSubtitleIndex] = useState(0);
+  const [fadeIn, setFadeIn] = useState(true);
+
   const updateSetting = (key: keyof MoodDishesSettings, value: any) => {
     onSettingsChange({ ...settings, [key]: value });
   };
+
+  useEffect(() => {
+    const subtitleTexts = settings.subtitleTexts || [];
+    if (subtitleTexts.length <= 1) return;
+
+    const rotationInterval = settings.subtitleRotationInterval || 10000;
+    const interval = setInterval(() => {
+      setFadeIn(false);
+      setTimeout(() => {
+        setActiveSubtitleIndex((prev) => (prev + 1) % subtitleTexts.length);
+        setFadeIn(true);
+      }, 300);
+    }, rotationInterval);
+
+    return () => clearInterval(interval);
+  }, [settings.subtitleTexts, settings.subtitleRotationInterval]);
 
   const addSubtitleText = () => {
     const subtitleTexts = settings.subtitleTexts || [];
@@ -199,7 +220,9 @@ export default function MoodDishesEditor({ settings, onSettingsChange }: MoodDis
         <div className="space-y-4">
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-700">Textrader</label>
+              <label className="block text-sm font-medium text-gray-700">
+                Textrader (roterar automatiskt)
+              </label>
               <button
                 onClick={addSubtitleText}
                 className="flex items-center gap-1 px-3 py-1 bg-[#56c5c5] text-white text-sm rounded-lg hover:bg-[#45b4b4] transition-colors"
@@ -232,6 +255,51 @@ export default function MoodDishesEditor({ settings, onSettingsChange }: MoodDis
             </div>
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Intervall för textrad-rotation
+            </label>
+            <select
+              value={settings.subtitleRotationInterval || 10000}
+              onChange={(e) => updateSetting('subtitleRotationInterval', parseInt(e.target.value))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+            >
+              <option value={10000}>10 sekunder</option>
+              <option value={60000}>1 minut</option>
+              <option value={3600000}>1 timme</option>
+              <option value={86400000}>1 dag</option>
+              <option value={604800000}>1 vecka</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Placering av textrad
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('subtitlePlacement', 'inline')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.subtitlePlacement === 'inline' || !settings.subtitlePlacement
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                På samma rad
+              </button>
+              <button
+                onClick={() => updateSetting('subtitlePlacement', 'below')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.subtitlePlacement === 'below'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Under rubriken
+              </button>
+            </div>
+          </div>
+
           <ColorPicker
             label="Textrad – textfärg"
             value={settings.subtitleColor || '#6b7280'}
@@ -252,6 +320,26 @@ export default function MoodDishesEditor({ settings, onSettingsChange }: MoodDis
               Lägg till humör
             </button>
           </div>
+
+          {(settings.mood_cards || []).length > 0 && (
+            <div className="p-4 bg-white rounded-lg border-2 border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-700 mb-3">Översikt - Alla humörkort</h4>
+              <div className="flex gap-3 overflow-x-auto pb-2">
+                {(settings.mood_cards || []).map((card) => (
+                  <div
+                    key={card.id}
+                    className="flex-shrink-0 w-32 h-32 rounded-lg flex flex-col items-center justify-center text-center p-3 shadow-sm"
+                    style={{ backgroundColor: card.front_bg_color || '#a1c798' }}
+                  >
+                    <div className="text-3xl mb-1">{card.icon || '😊'}</div>
+                    <div className="text-xs font-medium text-gray-800 line-clamp-2">
+                      {card.name || 'Namnlöst'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {(settings.mood_cards || []).map((card, index) => (
             <div key={card.id} className="p-4 border-2 border-gray-200 rounded-lg space-y-3">
@@ -370,6 +458,98 @@ export default function MoodDishesEditor({ settings, onSettingsChange }: MoodDis
           ))}
         </div>
       </CollapsibleCard>
+
+      <PreviewCard title="Preview" defaultExpanded={true}>
+        <div
+          className="p-8"
+          style={{ backgroundColor: settings.backgroundColor || '#ffffff' }}
+        >
+          <div
+            className={`mb-6 ${
+              settings.headingAlignment === 'center' ? 'text-center' : 'text-left'
+            }`}
+          >
+            {settings.subtitlePlacement === 'inline' || !settings.subtitlePlacement ? (
+              <div className={`flex items-center gap-3 mb-2 ${settings.headingAlignment === 'center' ? 'justify-center' : ''}`}>
+                <h2
+                  className={`text-3xl ${
+                    settings.headingFont === 'lobster' ? 'font-lobster' : ''
+                  } ${settings.headingBold ? 'font-bold' : ''}`}
+                  style={{
+                    fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+                    color: settings.headingColor || '#374151'
+                  }}
+                >
+                  {settings.heading || 'Humörkäk'}
+                </h2>
+                {subtitleTexts.length > 0 && subtitleTexts[0] && (
+                  <>
+                    <span className="text-gray-400 text-2xl">|</span>
+                    <div className="min-h-[24px] flex items-center">
+                      <p
+                        className="transition-opacity duration-300"
+                        style={{
+                          opacity: fadeIn ? 1 : 0,
+                          color: settings.subtitleColor || '#6b7280'
+                        }}
+                      >
+                        {subtitleTexts[activeSubtitleIndex] || subtitleTexts[0]}
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div>
+                <h2
+                  className={`text-3xl ${
+                    settings.headingFont === 'lobster' ? 'font-lobster' : ''
+                  } ${settings.headingBold ? 'font-bold' : ''}`}
+                  style={{
+                    fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+                    color: settings.headingColor || '#374151'
+                  }}
+                >
+                  {settings.heading || 'Humörkäk'}
+                </h2>
+                {subtitleTexts.length > 0 && subtitleTexts[0] && (
+                  <div className="min-h-[24px] flex items-center mt-2">
+                    <p
+                      className="transition-opacity duration-300"
+                      style={{
+                        opacity: fadeIn ? 1 : 0,
+                        color: settings.subtitleColor || '#6b7280'
+                      }}
+                    >
+                      {subtitleTexts[activeSubtitleIndex] || subtitleTexts[0]}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {(settings.mood_cards || []).length > 0 && (
+            <div className="flex gap-4 overflow-x-auto pb-4">
+              {(settings.mood_cards || []).map((card) => (
+                <div
+                  key={card.id}
+                  className="flex-shrink-0 w-48 h-48 rounded-xl flex flex-col items-center justify-center text-center p-4 shadow-lg hover:shadow-xl transition-shadow cursor-pointer"
+                  style={{ backgroundColor: card.front_bg_color || '#a1c798' }}
+                >
+                  <div className="text-5xl mb-2">{card.icon || '😊'}</div>
+                  <div className="text-base font-semibold text-gray-800 mb-1">
+                    {card.name || 'Namnlöst'}
+                  </div>
+                  <div className="text-xs text-gray-700">
+                    {card.description || 'Ingen beskrivning'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </PreviewCard>
     </div>
   );
 }
