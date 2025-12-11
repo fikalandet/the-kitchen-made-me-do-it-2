@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Upload } from 'lucide-react';
+import { Plus, Trash2, Upload, ChevronUp } from 'lucide-react';
 import CollapsibleCard from './CollapsibleCard';
 import ColorPicker from './ColorPicker';
-import IconPicker from './IconPicker';
+import IconPicker, { ICONS } from './IconPicker';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../contexts/AuthContext';
 
@@ -79,6 +79,7 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
   const [uploadingImage, setUploadingImage] = useState(false);
   const [activeSubtitleIndex, setActiveSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
+  const [expandedBenefitId, setExpandedBenefitId] = useState<string | null>(null);
 
   const updateSetting = (key: keyof BecomeChefSettings, value: any) => {
     onSettingsChange({ ...settings, [key]: value });
@@ -178,6 +179,10 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
     const benefits = settings.benefits || [];
     const newBenefits = benefits.map(b => b.id === id ? { ...b, [key]: value } : b);
     updateSetting('benefits', newBenefits);
+  };
+
+  const toggleBenefitExpansion = (benefitId: string) => {
+    setExpandedBenefitId(expandedBenefitId === benefitId ? null : benefitId);
   };
 
   const subtitleTexts = settings.subtitleTexts || [''];
@@ -974,40 +979,83 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
               </button>
             </div>
 
-            <div className="space-y-3">
-              {benefits.map((benefit, index) => (
-                <div key={benefit.id} className="p-4 border-2 border-gray-200 rounded-lg space-y-3">
+            {benefits.length > 0 && (
+              <div className="p-4 bg-white rounded-lg border-2 border-gray-200 mb-4">
+                <h4 className="text-sm font-semibold text-gray-700 mb-3">Översikt – Alla fördelar</h4>
+                <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+                  {benefits.map((benefit, index) => {
+                    const iconData = ICONS.find(i => i.key === benefit.icon_key);
+                    const IconComponent = iconData?.icon;
+
+                    return (
+                      <button
+                        key={benefit.id}
+                        onClick={() => toggleBenefitExpansion(benefit.id)}
+                        className={`w-full aspect-square rounded-lg flex flex-col items-center justify-center text-center p-2 border-2 cursor-pointer transition-all ${
+                          expandedBenefitId === benefit.id
+                            ? 'border-[#56c5c5] bg-[#56c5c5]/10'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        {IconComponent ? (
+                          <IconComponent className="w-8 h-8 text-gray-700 mb-1" />
+                        ) : (
+                          <div className="w-8 h-8 mb-1 flex items-center justify-center text-gray-400">?</div>
+                        )}
+                        <div className="text-xs font-medium text-gray-800 line-clamp-2">
+                          {benefit.text ? benefit.text.substring(0, 20) : `Fördel ${index + 1}`}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {expandedBenefitId && benefits.map((benefit, index) =>
+              benefit.id === expandedBenefitId ? (
+                <div key={benefit.id} className="p-6 border-2 border-[#56c5c5] rounded-lg bg-[#56c5c5]/5 space-y-4">
                   <div className="flex items-center justify-between">
-                    <h4 className="font-medium text-gray-900">Fördel {index + 1}</h4>
-                    <button
-                      onClick={() => removeBenefit(benefit.id)}
-                      className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <h4 className="text-lg font-semibold text-gray-900">Redigera Fördel {index + 1}</h4>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => removeBenefit(benefit.id)}
+                        className="px-3 py-1 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setExpandedBenefitId(null)}
+                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      >
+                        <ChevronUp className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
 
-                  <IconPicker
-                    label="Ikon"
-                    value={benefit.icon_key}
-                    onChange={(iconKey) => updateBenefit(benefit.id, 'icon_key', iconKey)}
-                  />
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Text
-                    </label>
-                    <textarea
-                      value={benefit.text}
-                      onChange={(e) => updateBenefit(benefit.id, 'text', e.target.value)}
-                      placeholder="Beskriv fördelen..."
-                      rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  <div className="space-y-4 p-4 bg-white rounded-lg">
+                    <IconPicker
+                      label="Ikon"
+                      value={benefit.icon_key}
+                      onChange={(iconKey) => updateBenefit(benefit.id, 'icon_key', iconKey)}
                     />
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Text
+                      </label>
+                      <textarea
+                        value={benefit.text}
+                        onChange={(e) => updateBenefit(benefit.id, 'text', e.target.value)}
+                        placeholder="Beskriv fördelen..."
+                        rows={2}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              ) : null
+            )}
           </div>
         </div>
       </CollapsibleCard>
@@ -1172,12 +1220,21 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
                     gridTemplateColumns: `repeat(${settings.benefitsPerRow || 3}, 1fr)`
                   }}
                 >
-                  {benefits.map((benefit) => (
-                    <div key={benefit.id} className="text-center">
-                      <div className="text-4xl mb-2">{benefit.icon}</div>
-                      <p className="text-sm text-gray-700">{benefit.text}</p>
-                    </div>
-                  ))}
+                  {benefits.map((benefit) => {
+                    const iconData = ICONS.find(i => i.key === benefit.icon_key);
+                    const IconComponent = iconData?.icon;
+
+                    return (
+                      <div key={benefit.id} className="text-center">
+                        {IconComponent ? (
+                          <IconComponent className="w-12 h-12 mx-auto mb-3 text-gray-700" />
+                        ) : (
+                          <div className="w-12 h-12 mx-auto mb-3" />
+                        )}
+                        <p className="text-sm text-gray-700">{benefit.text}</p>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
