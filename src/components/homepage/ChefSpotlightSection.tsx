@@ -17,12 +17,14 @@ interface ChefSpotlightSettings {
   featuredChefId?: string;
   mainImageUrl?: string;
   mainImageWidth?: 'full' | 'large' | 'medium';
+  mainImageWaveStyle?: 'none' | 'wave1' | 'wave2' | 'wave3';
   smallImageUrl?: string;
   smallImagePosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
   smallImageBorderColor?: string;
   smallImageBorderWidth?: number;
   imageShape?: 'rounded';
   curiosaItems?: Array<{ question: string; answer: string }>;
+  curiosaLayout?: 'single' | 'double';
   curiosaFont?: string;
   curiosaFontSize?: number;
   curiosaBold?: boolean;
@@ -50,14 +52,40 @@ interface ChefSpotlightSettings {
   quoteColor?: string;
   quoteAlignment?: 'left' | 'center' | 'right';
   quotePosition?: 'after-article' | 'after-curiosa' | 'before-cta';
-  ctaText?: string;
-  ctaColor?: string;
-  ctaTextColor?: string;
-  ctaFont?: string;
-  ctaBold?: boolean;
-  ctaSize?: 'small' | 'medium' | 'large';
-  ctaAlignment?: 'left' | 'center' | 'right';
-  ctaOpacity?: number;
+  cta1Text?: string;
+  cta1Color?: string;
+  cta1TextColor?: string;
+  cta1Font?: string;
+  cta1Bold?: boolean;
+  cta1Size?: 'small' | 'medium' | 'large';
+  cta1Alignment?: 'left' | 'center' | 'right';
+  cta1Opacity?: number;
+  cta1Link?: string;
+  cta1LinkType?: 'chef' | 'internal' | 'external';
+  cta2Text?: string;
+  cta2Color?: string;
+  cta2TextColor?: string;
+  cta2Font?: string;
+  cta2Bold?: boolean;
+  cta2Size?: 'small' | 'medium' | 'large';
+  cta2Alignment?: 'left' | 'center' | 'right';
+  cta2Opacity?: number;
+  cta2Link?: string;
+  cta2LinkType?: 'chef' | 'internal' | 'external';
+  smallImageSize?: number;
+  smallImageRotation?: number;
+  articleTitleFont?: string;
+  articleTitleSize?: number;
+  articleTitleAlign?: 'left' | 'center' | 'right';
+  articleTitleBold?: boolean;
+  articleIngressFont?: string;
+  articleIngressSize?: number;
+  articleIngressAlign?: 'left' | 'center' | 'right';
+  articleIngressBold?: boolean;
+  articleBodyFont?: string;
+  articleBodySize?: number;
+  articleBodyBold?: boolean;
+  curiosaTextColor?: string;
 }
 
 interface Chef {
@@ -187,6 +215,11 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
   const renderCuriosa = () => {
     if (curiosaItems.length === 0 || !curiosaItems.some(item => item.question)) return null;
 
+    const isDoubleLayout = settings.curiosaLayout === 'double';
+    const halfPoint = Math.ceil(curiosaItems.length / 2);
+    const column1Items = isDoubleLayout ? curiosaItems.slice(0, halfPoint) : curiosaItems;
+    const column2Items = isDoubleLayout ? curiosaItems.slice(halfPoint) : [];
+
     return (
       <div
         className="p-6 rounded-xl"
@@ -200,31 +233,61 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
         }}
       >
         <h4 className="text-xl font-bold text-gray-800 mb-4">Kuriosa</h4>
-        <div className="space-y-3">
-          {curiosaItems.map((item, index) => (
-            item.question && (
-              <div key={index}>
-                <p
-                  className={`text-gray-700 ${settings.curiosaBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaItalic ? 'italic' : ''}`}
-                  style={{
-                    fontFamily: getFontFamily(settings.curiosaFont),
-                    fontSize: `${settings.curiosaFontSize || 14}px`
-                  }}
-                >
-                  {item.question}:
-                </p>
-                <p
-                  className="text-gray-600"
-                  style={{
-                    fontFamily: getFontFamily(settings.curiosaFont),
-                    fontSize: `${settings.curiosaFontSize || 14}px`
-                  }}
-                >
-                  {item.answer || ''}
-                </p>
-              </div>
-            )
-          ))}
+        <div className={`${isDoubleLayout ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-3'}`}>
+          <div className={`space-y-3 ${isDoubleLayout ? 'pr-6 border-r border-gray-400' : ''}`}>
+            {column1Items.map((item, index) => (
+              item.question && (
+                <div key={index}>
+                  <p
+                    className={`text-gray-700 ${settings.curiosaBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaItalic ? 'italic' : ''}`}
+                    style={{
+                      fontFamily: getFontFamily(settings.curiosaFont),
+                      fontSize: `${settings.curiosaFontSize || 14}px`
+                    }}
+                  >
+                    {item.question}:
+                  </p>
+                  <p
+                    className="text-gray-600"
+                    style={{
+                      fontFamily: getFontFamily(settings.curiosaFont),
+                      fontSize: `${settings.curiosaFontSize || 14}px`
+                    }}
+                  >
+                    {item.answer || ''}
+                  </p>
+                </div>
+              )
+            ))}
+          </div>
+          {isDoubleLayout && column2Items.length > 0 && (
+            <div className="space-y-3">
+              {column2Items.map((item, index) => (
+                item.question && (
+                  <div key={index + halfPoint}>
+                    <p
+                      className={`text-gray-700 ${settings.curiosaBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaItalic ? 'italic' : ''}`}
+                      style={{
+                        fontFamily: getFontFamily(settings.curiosaFont),
+                        fontSize: `${settings.curiosaFontSize || 14}px`
+                      }}
+                    >
+                      {item.question}:
+                    </p>
+                    <p
+                      className="text-gray-600"
+                      style={{
+                        fontFamily: getFontFamily(settings.curiosaFont),
+                        fontSize: `${settings.curiosaFontSize || 14}px`
+                      }}
+                    >
+                      {item.answer || ''}
+                    </p>
+                  </div>
+                )
+              ))}
+            </div>
+          )}
         </div>
       </div>
     );
@@ -312,6 +375,25 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
                     settings.imageShape === 'rounded' || !settings.imageShape ? 'rounded-2xl' : ''
                   }`}
                 />
+                {settings.mainImageWaveStyle && settings.mainImageWaveStyle !== 'none' && (
+                  <div className="absolute bottom-0 left-0 right-0">
+                    <svg
+                      viewBox="0 0 1440 160"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-full h-auto"
+                    >
+                      <path
+                        d={
+                          settings.mainImageWaveStyle === 'wave1' ? 'M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z' :
+                          settings.mainImageWaveStyle === 'wave2' ? 'M0,64L48,85.3C96,107,192,149,288,154.7C384,160,480,128,576,128C672,128,768,160,864,154.7C960,149,1056,107,1152,80C1248,53,1344,43,1392,37.3L1440,32L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z' :
+                          'M0,32L48,48C96,64,192,96,288,101.3C384,107,480,85,576,69.3C672,53,768,43,864,58.7C960,75,1056,117,1152,133.3C1248,149,1344,139,1392,133.3L1440,128L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'
+                        }
+                        fill="white"
+                      />
+                    </svg>
+                  </div>
+                )}
                 {settings.smallImageUrl && (
                   <img
                     src={settings.smallImageUrl}
@@ -402,37 +484,87 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
 
         {settings.quotePosition === 'before-cta' && renderQuote()}
 
-        {settings.ctaText && (
-          <div
-            className="flex"
-            style={{
-              justifyContent:
-                settings.ctaAlignment === 'left' ? 'flex-start' :
-                settings.ctaAlignment === 'right' ? 'flex-end' :
-                'center'
-            }}
-          >
-            <a
-              href={chef ? `/chef/${chef.id}` : '#'}
-              className={`rounded-xl font-medium transition-all hover:shadow-lg ${
-                settings.ctaSize === 'small' ? 'px-4 py-2 text-sm' :
-                settings.ctaSize === 'large' ? 'px-8 py-4 text-lg' :
-                'px-6 py-3 text-base'
-              } ${settings.ctaFont === 'lobster' ? 'font-lobster' : ''} ${
-                settings.ctaBold ? 'font-bold' : ''
-              }`}
+        <div className="flex flex-wrap gap-4">
+          {settings.cta1Text && (
+            <div
+              className="flex"
               style={{
-                backgroundColor: settings.ctaColor || '#56c5c5',
-                color: settings.ctaTextColor || '#ffffff',
-                opacity: (settings.ctaOpacity || 100) / 100,
-                fontFamily: getFontFamily(settings.ctaFont),
-                display: 'inline-block'
+                justifyContent:
+                  settings.cta1Alignment === 'left' ? 'flex-start' :
+                  settings.cta1Alignment === 'right' ? 'flex-end' :
+                  'center',
+                flex: settings.cta2Text ? '1' : 'auto'
               }}
             >
-              {settings.ctaText}
-            </a>
-          </div>
-        )}
+              <a
+                href={
+                  settings.cta1LinkType === 'chef' ? (chef ? `/chef/${chef.id}` : '#') :
+                  settings.cta1LinkType === 'internal' ? (settings.cta1Link || '#') :
+                  settings.cta1LinkType === 'external' ? (settings.cta1Link || '#') :
+                  (chef ? `/chef/${chef.id}` : '#')
+                }
+                target={settings.cta1LinkType === 'external' ? '_blank' : undefined}
+                rel={settings.cta1LinkType === 'external' ? 'noopener noreferrer' : undefined}
+                className={`rounded-xl font-medium transition-all hover:shadow-lg ${
+                  settings.cta1Size === 'small' ? 'px-4 py-2 text-sm' :
+                  settings.cta1Size === 'large' ? 'px-8 py-4 text-lg' :
+                  'px-6 py-3 text-base'
+                } ${settings.cta1Font === 'lobster' ? 'font-lobster' : ''} ${
+                  settings.cta1Bold ? 'font-bold' : ''
+                }`}
+                style={{
+                  backgroundColor: settings.cta1Color || '#56c5c5',
+                  color: settings.cta1TextColor || '#ffffff',
+                  opacity: (settings.cta1Opacity || 100) / 100,
+                  fontFamily: getFontFamily(settings.cta1Font),
+                  display: 'inline-block'
+                }}
+              >
+                {settings.cta1Text}
+              </a>
+            </div>
+          )}
+
+          {settings.cta2Text && (
+            <div
+              className="flex"
+              style={{
+                justifyContent:
+                  settings.cta2Alignment === 'left' ? 'flex-start' :
+                  settings.cta2Alignment === 'right' ? 'flex-end' :
+                  'center',
+                flex: settings.cta1Text ? '1' : 'auto'
+              }}
+            >
+              <a
+                href={
+                  settings.cta2LinkType === 'chef' ? (chef ? `/chef/${chef.id}` : '#') :
+                  settings.cta2LinkType === 'internal' ? (settings.cta2Link || '#') :
+                  settings.cta2LinkType === 'external' ? (settings.cta2Link || '#') :
+                  (chef ? `/chef/${chef.id}` : '#')
+                }
+                target={settings.cta2LinkType === 'external' ? '_blank' : undefined}
+                rel={settings.cta2LinkType === 'external' ? 'noopener noreferrer' : undefined}
+                className={`rounded-xl font-medium transition-all hover:shadow-lg ${
+                  settings.cta2Size === 'small' ? 'px-4 py-2 text-sm' :
+                  settings.cta2Size === 'large' ? 'px-8 py-4 text-lg' :
+                  'px-6 py-3 text-base'
+                } ${settings.cta2Font === 'lobster' ? 'font-lobster' : ''} ${
+                  settings.cta2Bold ? 'font-bold' : ''
+                }`}
+                style={{
+                  backgroundColor: settings.cta2Color || '#a1c798',
+                  color: settings.cta2TextColor || '#ffffff',
+                  opacity: (settings.cta2Opacity || 100) / 100,
+                  fontFamily: getFontFamily(settings.cta2Font),
+                  display: 'inline-block'
+                }}
+              >
+                {settings.cta2Text}
+              </a>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );

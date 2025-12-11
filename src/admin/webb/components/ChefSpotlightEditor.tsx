@@ -21,12 +21,16 @@ interface ChefSpotlightSettings {
   featuredChefId?: string;
   mainImageUrl?: string;
   mainImageWidth?: 'full' | 'large' | 'medium';
+  mainImageWaveStyle?: 'none' | 'wave1' | 'wave2' | 'wave3';
   smallImageUrl?: string;
   smallImagePosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
   smallImageBorderColor?: string;
   smallImageBorderWidth?: number;
   imageShape?: 'rounded';
   curiosaItems?: Array<{ question: string; answer: string }>;
+  curiosaLayout?: 'single' | 'double';
+  curiosaColumn1?: Array<{ question: string; answer: string }>;
+  curiosaColumn2?: Array<{ question: string; answer: string }>;
   curiosaFont?: string;
   curiosaFontSize?: number;
   curiosaBold?: boolean;
@@ -54,14 +58,26 @@ interface ChefSpotlightSettings {
   quoteColor?: string;
   quoteAlignment?: 'left' | 'center' | 'right';
   quotePosition?: 'after-article' | 'after-curiosa' | 'before-cta';
-  ctaText?: string;
-  ctaColor?: string;
-  ctaTextColor?: string;
-  ctaFont?: string;
-  ctaBold?: boolean;
-  ctaSize?: 'small' | 'medium' | 'large';
-  ctaAlignment?: 'left' | 'center' | 'right';
-  ctaOpacity?: number;
+  cta1Text?: string;
+  cta1Color?: string;
+  cta1TextColor?: string;
+  cta1Font?: string;
+  cta1Bold?: boolean;
+  cta1Size?: 'small' | 'medium' | 'large';
+  cta1Alignment?: 'left' | 'center' | 'right';
+  cta1Opacity?: number;
+  cta1Link?: string;
+  cta1LinkType?: 'chef' | 'internal' | 'external';
+  cta2Text?: string;
+  cta2Color?: string;
+  cta2TextColor?: string;
+  cta2Font?: string;
+  cta2Bold?: boolean;
+  cta2Size?: 'small' | 'medium' | 'large';
+  cta2Alignment?: 'left' | 'center' | 'right';
+  cta2Opacity?: number;
+  cta2Link?: string;
+  cta2LinkType?: 'chef' | 'internal' | 'external';
 }
 
 interface ChefSpotlightEditorProps {
@@ -626,6 +642,27 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                     </button>
                   </div>
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Böljande form
+                  </label>
+                  <div className="flex gap-3">
+                    {['none', 'wave1', 'wave2', 'wave3'].map((wave) => (
+                      <button
+                        key={wave}
+                        onClick={() => updateSetting('mainImageWaveStyle', wave)}
+                        className={`px-4 py-2 rounded-lg border-2 ${
+                          (settings.mainImageWaveStyle || 'none') === wave
+                            ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                            : 'border-gray-300'
+                        }`}
+                      >
+                        {wave === 'none' ? 'Ingen' : `Våg ${wave.replace('wave', '')}`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -785,9 +822,37 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
       <CollapsibleCard title="Kuriosa" defaultExpanded={true}>
         <div className="space-y-4">
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Layout
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('curiosaLayout', 'single')}
+                className={`px-4 py-2 rounded-lg border-2 ${
+                  (settings.curiosaLayout || 'single') === 'single'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300'
+                }`}
+              >
+                En kolumn
+              </button>
+              <button
+                onClick={() => updateSetting('curiosaLayout', 'double')}
+                className={`px-4 py-2 rounded-lg border-2 ${
+                  settings.curiosaLayout === 'double'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300'
+                }`}
+              >
+                Två kolumner
+              </button>
+            </div>
+          </div>
+
+          <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium text-gray-700">
-                Frågor och svar
+                {settings.curiosaLayout === 'double' ? 'Kolumn 1 - Frågor och svar' : 'Frågor och svar'}
               </label>
               <button
                 onClick={addCuriosaItem}
@@ -1334,7 +1399,7 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
         </div>
       </CollapsibleCard>
 
-      <CollapsibleCard title="Knapp (CTA)" defaultExpanded={true}>
+      <CollapsibleCard title="Knapp 1" defaultExpanded={true}>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1342,23 +1407,68 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
             </label>
             <input
               type="text"
-              value={settings.ctaText || ''}
-              onChange={(e) => updateSetting('ctaText', e.target.value)}
+              value={settings.cta1Text || ''}
+              onChange={(e) => updateSetting('cta1Text', e.target.value)}
               placeholder="Till kockens kök"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
           </div>
 
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Länktyp
+            </label>
+            <select
+              value={settings.cta1LinkType || 'chef'}
+              onChange={(e) => updateSetting('cta1LinkType', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            >
+              <option value="chef">Till kockens sida</option>
+              <option value="internal">Intern sida</option>
+              <option value="external">Extern länk</option>
+            </select>
+          </div>
+
+          {settings.cta1LinkType === 'internal' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Intern sida (t.ex. /marketplace, /membership)
+              </label>
+              <input
+                type="text"
+                value={settings.cta1Link || ''}
+                onChange={(e) => updateSetting('cta1Link', e.target.value)}
+                placeholder="/marketplace"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+          )}
+
+          {settings.cta1LinkType === 'external' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Extern URL
+              </label>
+              <input
+                type="text"
+                value={settings.cta1Link || ''}
+                onChange={(e) => updateSetting('cta1Link', e.target.value)}
+                placeholder="https://..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+          )}
+
           <ColorPicker
             label="Bakgrundsfärg"
-            value={settings.ctaColor || '#56c5c5'}
-            onChange={(color) => updateSetting('ctaColor', color)}
+            value={settings.cta1Color || '#56c5c5'}
+            onChange={(color) => updateSetting('cta1Color', color)}
           />
 
           <ColorPicker
             label="Textfärg"
-            value={settings.ctaTextColor || '#ffffff'}
-            onChange={(color) => updateSetting('ctaTextColor', color)}
+            value={settings.cta1TextColor || '#ffffff'}
+            onChange={(color) => updateSetting('cta1TextColor', color)}
           />
 
           <div>
@@ -1366,8 +1476,8 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               Typsnitt
             </label>
             <select
-              value={settings.ctaFont || 'sans'}
-              onChange={(e) => updateSetting('ctaFont', e.target.value)}
+              value={settings.cta1Font || 'sans'}
+              onChange={(e) => updateSetting('cta1Font', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             >
               <option value="poppins">Poppins</option>
@@ -1380,8 +1490,8 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
           <label className="flex items-center gap-2">
             <input
               type="checkbox"
-              checked={settings.ctaBold || false}
-              onChange={(e) => updateSetting('ctaBold', e.target.checked)}
+              checked={settings.cta1Bold || false}
+              onChange={(e) => updateSetting('cta1Bold', e.target.checked)}
               className="w-4 h-4"
             />
             <span className="text-sm font-medium text-gray-700">Fet stil</span>
@@ -1393,9 +1503,9 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
             </label>
             <div className="flex gap-3">
               <button
-                onClick={() => updateSetting('ctaSize', 'small')}
+                onClick={() => updateSetting('cta1Size', 'small')}
                 className={`px-4 py-2 rounded-lg border-2 ${
-                  settings.ctaSize === 'small'
+                  settings.cta1Size === 'small'
                     ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
                     : 'border-gray-300'
                 }`}
@@ -1403,9 +1513,9 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                 Liten
               </button>
               <button
-                onClick={() => updateSetting('ctaSize', 'medium')}
+                onClick={() => updateSetting('cta1Size', 'medium')}
                 className={`px-4 py-2 rounded-lg border-2 ${
-                  settings.ctaSize === 'medium' || !settings.ctaSize
+                  settings.cta1Size === 'medium' || !settings.cta1Size
                     ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
                     : 'border-gray-300'
                 }`}
@@ -1413,9 +1523,9 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                 Medium
               </button>
               <button
-                onClick={() => updateSetting('ctaSize', 'large')}
+                onClick={() => updateSetting('cta1Size', 'large')}
                 className={`px-4 py-2 rounded-lg border-2 ${
-                  settings.ctaSize === 'large'
+                  settings.cta1Size === 'large'
                     ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
                     : 'border-gray-300'
                 }`}
@@ -1431,9 +1541,9 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
             </label>
             <div className="flex gap-3">
               <button
-                onClick={() => updateSetting('ctaAlignment', 'left')}
+                onClick={() => updateSetting('cta1Alignment', 'left')}
                 className={`px-4 py-2 rounded-lg border-2 ${
-                  settings.ctaAlignment === 'left'
+                  settings.cta1Alignment === 'left'
                     ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
                     : 'border-gray-300'
                 }`}
@@ -1441,9 +1551,9 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                 Vänster
               </button>
               <button
-                onClick={() => updateSetting('ctaAlignment', 'center')}
+                onClick={() => updateSetting('cta1Alignment', 'center')}
                 className={`px-4 py-2 rounded-lg border-2 ${
-                  settings.ctaAlignment === 'center' || !settings.ctaAlignment
+                  settings.cta1Alignment === 'center' || !settings.cta1Alignment
                     ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
                     : 'border-gray-300'
                 }`}
@@ -1451,9 +1561,9 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                 Centrerad
               </button>
               <button
-                onClick={() => updateSetting('ctaAlignment', 'right')}
+                onClick={() => updateSetting('cta1Alignment', 'right')}
                 className={`px-4 py-2 rounded-lg border-2 ${
-                  settings.ctaAlignment === 'right'
+                  settings.cta1Alignment === 'right'
                     ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
                     : 'border-gray-300'
                 }`}
@@ -1465,14 +1575,204 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Opacity: {settings.ctaOpacity || 100}%
+              Opacity: {settings.cta1Opacity || 100}%
             </label>
             <input
               type="range"
               min="0"
               max="100"
-              value={settings.ctaOpacity || 100}
-              onChange={(e) => updateSetting('ctaOpacity', parseInt(e.target.value))}
+              value={settings.cta1Opacity || 100}
+              onChange={(e) => updateSetting('cta1Opacity', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+        </div>
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Knapp 2" defaultExpanded={true}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Knapptext
+            </label>
+            <input
+              type="text"
+              value={settings.cta2Text || ''}
+              onChange={(e) => updateSetting('cta2Text', e.target.value)}
+              placeholder="Se mer"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Länktyp
+            </label>
+            <select
+              value={settings.cta2LinkType || 'chef'}
+              onChange={(e) => updateSetting('cta2LinkType', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            >
+              <option value="chef">Till kockens sida</option>
+              <option value="internal">Intern sida</option>
+              <option value="external">Extern länk</option>
+            </select>
+          </div>
+
+          {settings.cta2LinkType === 'internal' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Intern sida (t.ex. /marketplace, /membership)
+              </label>
+              <input
+                type="text"
+                value={settings.cta2Link || ''}
+                onChange={(e) => updateSetting('cta2Link', e.target.value)}
+                placeholder="/marketplace"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+          )}
+
+          {settings.cta2LinkType === 'external' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Extern URL
+              </label>
+              <input
+                type="text"
+                value={settings.cta2Link || ''}
+                onChange={(e) => updateSetting('cta2Link', e.target.value)}
+                placeholder="https://..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+          )}
+
+          <ColorPicker
+            label="Bakgrundsfärg"
+            value={settings.cta2Color || '#a1c798'}
+            onChange={(color) => updateSetting('cta2Color', color)}
+          />
+
+          <ColorPicker
+            label="Textfärg"
+            value={settings.cta2TextColor || '#ffffff'}
+            onChange={(color) => updateSetting('cta2TextColor', color)}
+          />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Typsnitt
+            </label>
+            <select
+              value={settings.cta2Font || 'sans'}
+              onChange={(e) => updateSetting('cta2Font', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            >
+              <option value="poppins">Poppins</option>
+              <option value="lobster">Lobster</option>
+              <option value="sans">Sans Serif</option>
+              <option value="serif">Serif</option>
+            </select>
+          </div>
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={settings.cta2Bold || false}
+              onChange={(e) => updateSetting('cta2Bold', e.target.checked)}
+              className="w-4 h-4"
+            />
+            <span className="text-sm font-medium text-gray-700">Fet stil</span>
+          </label>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Storlek
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('cta2Size', 'small')}
+                className={`px-4 py-2 rounded-lg border-2 ${
+                  settings.cta2Size === 'small'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300'
+                }`}
+              >
+                Liten
+              </button>
+              <button
+                onClick={() => updateSetting('cta2Size', 'medium')}
+                className={`px-4 py-2 rounded-lg border-2 ${
+                  settings.cta2Size === 'medium' || !settings.cta2Size
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300'
+                }`}
+              >
+                Medium
+              </button>
+              <button
+                onClick={() => updateSetting('cta2Size', 'large')}
+                className={`px-4 py-2 rounded-lg border-2 ${
+                  settings.cta2Size === 'large'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300'
+                }`}
+              >
+                Stor
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Placering
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('cta2Alignment', 'left')}
+                className={`px-4 py-2 rounded-lg border-2 ${
+                  settings.cta2Alignment === 'left'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300'
+                }`}
+              >
+                Vänster
+              </button>
+              <button
+                onClick={() => updateSetting('cta2Alignment', 'center')}
+                className={`px-4 py-2 rounded-lg border-2 ${
+                  settings.cta2Alignment === 'center' || !settings.cta2Alignment
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300'
+                }`}
+              >
+                Centrerad
+              </button>
+              <button
+                onClick={() => updateSetting('cta2Alignment', 'right')}
+                className={`px-4 py-2 rounded-lg border-2 ${
+                  settings.cta2Alignment === 'right'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300'
+                }`}
+              >
+                Höger
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Opacity: {settings.cta2Opacity || 100}%
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={settings.cta2Opacity || 100}
+              onChange={(e) => updateSetting('cta2Opacity', parseInt(e.target.value))}
               className="w-full"
             />
           </div>
