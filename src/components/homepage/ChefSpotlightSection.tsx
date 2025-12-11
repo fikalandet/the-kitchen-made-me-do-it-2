@@ -18,17 +18,22 @@ interface ChefSpotlightSettings {
   mainImageUrl?: string;
   mainImageWidth?: 'full' | 'large' | 'medium';
   smallImageUrl?: string;
-  smallImagePosition?: 'left' | 'right';
-  imageShape?: 'rounded' | 'wavy-top' | 'wavy-bottom' | 'diagonal' | 'wavy-diagonal';
+  smallImagePosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
+  smallImageBorderColor?: string;
+  smallImageBorderWidth?: number;
+  imageShape?: 'rounded';
   curiosaItems?: Array<{ question: string; answer: string }>;
   curiosaFont?: string;
+  curiosaFontSize?: number;
   curiosaBold?: boolean;
   curiosaItalic?: boolean;
   curiosaBgColor?: string;
   curiosaBorderColor?: string;
   curiosaBorderWidth?: number;
   curiosaOpacity?: number;
-  curiosaShape?: 'rounded' | 'wavy' | 'diagonal';
+  curiosaWidth?: number;
+  curiosaHeight?: number;
+  curiosaPlacement?: 'below-image' | 'beside-article';
   articleTitle?: string;
   articleIngress?: string;
   articleBody?: string;
@@ -44,6 +49,7 @@ interface ChefSpotlightSettings {
   quoteItalic?: boolean;
   quoteColor?: string;
   quoteAlignment?: 'left' | 'center' | 'right';
+  quotePosition?: 'after-article' | 'after-curiosa' | 'before-cta';
   ctaText?: string;
   ctaColor?: string;
   ctaTextColor?: string;
@@ -67,6 +73,46 @@ interface Chef {
 interface ChefSpotlightSectionProps {
   settings?: ChefSpotlightSettings;
 }
+
+const getFontFamily = (font?: string) => {
+  if (!font) return undefined;
+  const fontMap: Record<string, string> = {
+    'poppins': 'Poppins, sans-serif',
+    'poppins-light': 'Poppins, sans-serif',
+    'poppins-medium': 'Poppins, sans-serif',
+    'poppins-semibold': 'Poppins, sans-serif',
+    'poppins-bold': 'Poppins, sans-serif',
+    'lobster': 'Lobster, cursive',
+    'sans': 'sans-serif',
+    'serif': 'serif',
+    'georgia': 'Georgia, serif',
+    'playfair': 'Playfair Display, serif'
+  };
+  return fontMap[font] || undefined;
+};
+
+const getFontWeight = (font?: string, bold?: boolean) => {
+  if (bold) return 700;
+  const weightMap: Record<string, number> = {
+    'poppins-light': 300,
+    'poppins': 400,
+    'poppins-medium': 500,
+    'poppins-semibold': 600,
+    'poppins-bold': 700
+  };
+  return font ? weightMap[font] : undefined;
+};
+
+const getSmallImagePosition = (position?: string) => {
+  const positionMap: Record<string, React.CSSProperties> = {
+    'top-left': { top: '1rem', left: '1rem' },
+    'top-right': { top: '1rem', right: '1rem' },
+    'center': { top: '50%', left: '50%', transform: 'translate(-50%, -50%)' },
+    'bottom-left': { bottom: '1rem', left: '1rem' },
+    'bottom-right': { bottom: '1rem', right: '1rem' }
+  };
+  return positionMap[position || 'top-left'] || positionMap['top-left'];
+};
 
 export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ settings = {} }) => {
   const [chef, setChef] = useState<Chef | null>(null);
@@ -117,6 +163,76 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
   const subtitleTexts = settings.subtitleTexts || [];
   const curiosaItems = settings.curiosaItems || [];
 
+  const renderQuote = () => {
+    if (!settings.quoteText) return null;
+
+    return (
+      <blockquote
+        className={`mb-12 py-6 ${
+          settings.quoteFont === 'lobster' ? 'font-lobster' : ''
+        } ${settings.quoteBold ? 'font-bold' : ''} ${settings.quoteItalic !== false ? 'italic' : ''}`}
+        style={{
+          fontFamily: getFontFamily(settings.quoteFont),
+          fontWeight: getFontWeight(settings.quoteFont, settings.quoteBold),
+          fontSize: `${settings.quoteFontSize || 24}px`,
+          color: settings.quoteColor || '#4b5563',
+          textAlign: settings.quoteAlignment || 'center'
+        }}
+      >
+        "{settings.quoteText}"
+      </blockquote>
+    );
+  };
+
+  const renderCuriosa = () => {
+    if (curiosaItems.length === 0 || !curiosaItems.some(item => item.question)) return null;
+
+    return (
+      <div
+        className="p-6 rounded-xl overflow-hidden"
+        style={{
+          backgroundColor: settings.curiosaBgColor || '#f6f2e0',
+          borderColor: settings.curiosaBorderColor || '#a1c798',
+          borderWidth: `${settings.curiosaBorderWidth || 2}px`,
+          borderStyle: 'solid',
+          opacity: (settings.curiosaOpacity || 100) / 100,
+          width: `${settings.curiosaWidth || 100}%`,
+          minHeight: settings.curiosaHeight ? `${settings.curiosaHeight}px` : 'auto',
+          maxHeight: settings.curiosaHeight ? `${settings.curiosaHeight}px` : undefined,
+          overflowY: settings.curiosaHeight ? 'auto' : 'visible'
+        }}
+      >
+        <h4 className="text-xl font-bold text-gray-800 mb-4">Kuriosa</h4>
+        <div className="space-y-3">
+          {curiosaItems.map((item, index) => (
+            item.question && (
+              <div key={index}>
+                <p
+                  className={`text-gray-700 ${settings.curiosaBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaItalic ? 'italic' : ''}`}
+                  style={{
+                    fontFamily: getFontFamily(settings.curiosaFont),
+                    fontSize: `${settings.curiosaFontSize || 14}px`
+                  }}
+                >
+                  {item.question}:
+                </p>
+                <p
+                  className="text-gray-600"
+                  style={{
+                    fontFamily: getFontFamily(settings.curiosaFont),
+                    fontSize: `${settings.curiosaFontSize || 14}px`
+                  }}
+                >
+                  {item.answer || ''}
+                </p>
+              </div>
+            )
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <section
       className="py-16 px-4"
@@ -137,7 +253,7 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
                   settings.headingFont === 'lobster' ? 'font-lobster' : ''
                 } ${settings.headingBold ? 'font-bold' : ''} ${settings.headingItalic ? 'italic' : ''}`}
                 style={{
-                  fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+                  fontFamily: getFontFamily(settings.headingFont),
                   fontSize: `${settings.headingFontSize || 36}px`,
                   color: settings.headingColor || '#374151'
                 }}
@@ -166,7 +282,7 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
                   settings.headingFont === 'lobster' ? 'font-lobster' : ''
                 } ${settings.headingBold ? 'font-bold' : ''} ${settings.headingItalic ? 'italic' : ''}`}
                 style={{
-                  fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+                  fontFamily: getFontFamily(settings.headingFont),
                   fontSize: `${settings.headingFontSize || 36}px`,
                   color: settings.headingColor || '#374151'
                 }}
@@ -188,7 +304,7 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
           )}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 items-center mb-12">
+        <div className={`mb-12 ${settings.curiosaPlacement === 'beside-article' ? 'grid md:grid-cols-2 gap-8' : ''}`}>
           <div className="relative">
             {settings.mainImageUrl ? (
               <div className="relative">
@@ -203,9 +319,11 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
                   <img
                     src={settings.smallImageUrl}
                     alt="Liten bild"
-                    className={`absolute ${
-                      settings.smallImagePosition === 'right' ? 'right-4' : 'left-4'
-                    } top-4 w-32 h-32 object-cover rounded-xl shadow-lg`}
+                    className="absolute w-32 h-32 object-cover rounded-xl shadow-lg"
+                    style={{
+                      ...getSmallImagePosition(settings.smallImagePosition),
+                      border: `${settings.smallImageBorderWidth || 4}px solid ${settings.smallImageBorderColor || '#ffffff'}`
+                    }}
                   />
                 )}
                 {chef?.avatar_url && (
@@ -221,6 +339,12 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
                 Ingen bild tillgänglig
               </div>
             )}
+
+            {settings.curiosaPlacement === 'below-image' && (
+              <div className="mt-8">
+                {renderCuriosa()}
+              </div>
+            )}
           </div>
 
           <div>
@@ -230,7 +354,7 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
                   settings.articleFont === 'lobster' ? 'font-lobster' : ''
                 } ${settings.articleBold ? 'font-bold' : ''} ${settings.articleItalic ? 'italic' : ''}`}
                 style={{
-                  fontFamily: settings.articleFont === 'serif' ? 'serif' : settings.articleFont === 'sans' ? 'sans-serif' : undefined,
+                  fontFamily: getFontFamily(settings.articleFont),
                   fontSize: `${(settings.articleFontSize || 16) * 1.5}px`,
                   textAlign: settings.articleAlignment || 'left'
                 }}
@@ -244,7 +368,7 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
                   settings.articleFont === 'lobster' ? 'font-lobster' : ''
                 } ${settings.articleBold ? 'font-bold' : ''} ${settings.articleItalic ? 'italic' : ''}`}
                 style={{
-                  fontFamily: settings.articleFont === 'serif' ? 'serif' : settings.articleFont === 'sans' ? 'sans-serif' : undefined,
+                  fontFamily: getFontFamily(settings.articleFont),
                   fontSize: `${(settings.articleFontSize || 16) * 1.1}px`,
                   textAlign: settings.articleAlignment || 'left'
                 }}
@@ -258,7 +382,7 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
                   settings.articleFont === 'lobster' ? 'font-lobster' : ''
                 } ${settings.articleBold ? 'font-bold' : ''} ${settings.articleItalic ? 'italic' : ''}`}
                 style={{
-                  fontFamily: settings.articleFont === 'serif' ? 'serif' : settings.articleFont === 'sans' ? 'sans-serif' : undefined,
+                  fontFamily: getFontFamily(settings.articleFont),
                   fontSize: `${settings.articleFontSize || 16}px`,
                   textAlign: settings.articleAlignment || 'left'
                 }}
@@ -266,58 +390,20 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
                 {settings.articleBody}
               </p>
             )}
+
+            {settings.quotePosition === 'after-article' && renderQuote()}
+
+            {settings.curiosaPlacement === 'beside-article' && (
+              <div className="mt-6">
+                {renderCuriosa()}
+              </div>
+            )}
           </div>
         </div>
 
-        {curiosaItems.length > 0 && curiosaItems.some(item => item.question) && (
-          <div
-            className="p-6 rounded-xl mb-12"
-            style={{
-              backgroundColor: settings.curiosaBgColor || '#f6f2e0',
-              borderColor: settings.curiosaBorderColor || '#a1c798',
-              borderWidth: `${settings.curiosaBorderWidth || 2}px`,
-              borderStyle: 'solid',
-              opacity: (settings.curiosaOpacity || 100) / 100
-            }}
-          >
-            <h4 className="text-xl font-bold text-gray-800 mb-4">Kuriosa</h4>
-            <div className="space-y-3">
-              {curiosaItems.map((item, index) => (
-                item.question && (
-                  <div key={index}>
-                    <p
-                      className={`font-semibold text-gray-700 ${
-                        settings.curiosaBold ? 'font-bold' : ''
-                      } ${settings.curiosaItalic ? 'italic' : ''}`}
-                      style={{
-                        fontFamily: settings.curiosaFont === 'lobster' ? 'Lobster' : settings.curiosaFont === 'serif' ? 'serif' : 'sans-serif'
-                      }}
-                    >
-                      {item.question}:
-                    </p>
-                    <p className="text-gray-600">{item.answer || ''}</p>
-                  </div>
-                )
-              ))}
-            </div>
-          </div>
-        )}
+        {settings.quotePosition === 'after-curiosa' && settings.curiosaPlacement === 'below-image' && renderQuote()}
 
-        {settings.quoteText && (
-          <blockquote
-            className={`mb-12 py-6 ${
-              settings.quoteFont === 'lobster' ? 'font-lobster' : ''
-            } ${settings.quoteBold ? 'font-bold' : ''} ${settings.quoteItalic !== false ? 'italic' : ''}`}
-            style={{
-              fontFamily: settings.quoteFont === 'serif' ? 'serif' : settings.quoteFont === 'sans' ? 'sans-serif' : undefined,
-              fontSize: `${settings.quoteFontSize || 24}px`,
-              color: settings.quoteColor || '#4b5563',
-              textAlign: settings.quoteAlignment || 'center'
-            }}
-          >
-            "{settings.quoteText}"
-          </blockquote>
-        )}
+        {settings.quotePosition === 'before-cta' && renderQuote()}
 
         {settings.ctaText && chef && (
           <div
@@ -342,7 +428,7 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
                 backgroundColor: settings.ctaColor || '#56c5c5',
                 color: settings.ctaTextColor || '#ffffff',
                 opacity: (settings.ctaOpacity || 100) / 100,
-                fontFamily: settings.ctaFont === 'serif' ? 'serif' : settings.ctaFont === 'sans' ? 'sans-serif' : undefined,
+                fontFamily: getFontFamily(settings.ctaFont),
                 display: 'inline-block'
               }}
             >

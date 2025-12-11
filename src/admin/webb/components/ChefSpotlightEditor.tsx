@@ -22,17 +22,22 @@ interface ChefSpotlightSettings {
   mainImageUrl?: string;
   mainImageWidth?: 'full' | 'large' | 'medium';
   smallImageUrl?: string;
-  smallImagePosition?: 'left' | 'right';
-  imageShape?: 'rounded' | 'wavy-top' | 'wavy-bottom' | 'diagonal' | 'wavy-diagonal';
+  smallImagePosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
+  smallImageBorderColor?: string;
+  smallImageBorderWidth?: number;
+  imageShape?: 'rounded';
   curiosaItems?: Array<{ question: string; answer: string }>;
   curiosaFont?: string;
+  curiosaFontSize?: number;
   curiosaBold?: boolean;
   curiosaItalic?: boolean;
   curiosaBgColor?: string;
   curiosaBorderColor?: string;
   curiosaBorderWidth?: number;
   curiosaOpacity?: number;
-  curiosaShape?: 'rounded' | 'wavy' | 'diagonal';
+  curiosaWidth?: number;
+  curiosaHeight?: number;
+  curiosaPlacement?: 'below-image' | 'beside-article';
   articleTitle?: string;
   articleIngress?: string;
   articleBody?: string;
@@ -48,6 +53,7 @@ interface ChefSpotlightSettings {
   quoteItalic?: boolean;
   quoteColor?: string;
   quoteAlignment?: 'left' | 'center' | 'right';
+  quotePosition?: 'after-article' | 'after-curiosa' | 'before-cta';
   ctaText?: string;
   ctaColor?: string;
   ctaTextColor?: string;
@@ -254,6 +260,7 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                 onChange={(e) => updateSetting('headingFont', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
               >
+                <option value="poppins">Poppins</option>
                 <option value="lobster">Lobster</option>
                 <option value="sans">Sans Serif</option>
                 <option value="serif">Serif</option>
@@ -449,7 +456,7 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                       name="featured-chef"
                       checked={settings.featuredChefId === chef.id}
                       onChange={() => updateSetting('featuredChefId', chef.id)}
-                      className="w-4 h-4 rounded"
+                      className="w-4 h-4"
                     />
                     {chef.avatar_url && (
                       <img src={chef.avatar_url} alt={chef.display_name} className="w-10 h-10 rounded-full object-cover" />
@@ -612,47 +619,80 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Placering av liten bild
                 </label>
-                <div className="flex gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   <button
-                    onClick={() => updateSetting('smallImagePosition', 'left')}
-                    className={`px-4 py-2 rounded-lg border-2 ${
-                      settings.smallImagePosition === 'left' || !settings.smallImagePosition
+                    onClick={() => updateSetting('smallImagePosition', 'top-left')}
+                    className={`px-3 py-2 rounded-lg border-2 text-sm ${
+                      settings.smallImagePosition === 'top-left' || !settings.smallImagePosition
                         ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
                         : 'border-gray-300'
                     }`}
                   >
-                    Vänster
+                    Uppe vänster
                   </button>
                   <button
-                    onClick={() => updateSetting('smallImagePosition', 'right')}
-                    className={`px-4 py-2 rounded-lg border-2 ${
-                      settings.smallImagePosition === 'right'
+                    onClick={() => updateSetting('smallImagePosition', 'top-right')}
+                    className={`px-3 py-2 rounded-lg border-2 text-sm ${
+                      settings.smallImagePosition === 'top-right'
                         ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
                         : 'border-gray-300'
                     }`}
                   >
-                    Höger
+                    Uppe höger
+                  </button>
+                  <button
+                    onClick={() => updateSetting('smallImagePosition', 'center')}
+                    className={`px-3 py-2 rounded-lg border-2 text-sm ${
+                      settings.smallImagePosition === 'center'
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300'
+                    }`}
+                  >
+                    Center
+                  </button>
+                  <button
+                    onClick={() => updateSetting('smallImagePosition', 'bottom-left')}
+                    className={`px-3 py-2 rounded-lg border-2 text-sm ${
+                      settings.smallImagePosition === 'bottom-left'
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300'
+                    }`}
+                  >
+                    Nere vänster
+                  </button>
+                  <button
+                    onClick={() => updateSetting('smallImagePosition', 'bottom-right')}
+                    className={`px-3 py-2 rounded-lg border-2 text-sm ${
+                      settings.smallImagePosition === 'bottom-right'
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300'
+                    }`}
+                  >
+                    Nere höger
                   </button>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Bildform / Clip-path
-            </label>
-            <select
-              value={settings.imageShape || 'rounded'}
-              onChange={(e) => updateSetting('imageShape', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-            >
-              <option value="rounded">Rundade hörn</option>
-              <option value="wavy-top">Vågformad topp</option>
-              <option value="wavy-bottom">Vågformad botten</option>
-              <option value="diagonal">Diagonalt snitt</option>
-              <option value="wavy-diagonal">Vågformat diagonalt</option>
-            </select>
+              <ColorPicker
+                label="Ramfärg för liten bild"
+                value={settings.smallImageBorderColor || '#ffffff'}
+                onChange={(color) => updateSetting('smallImageBorderColor', color)}
+              />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ramtjocklek (px): {settings.smallImageBorderWidth || 4}
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="10"
+                  value={settings.smallImageBorderWidth || 4}
+                  onChange={(e) => updateSetting('smallImageBorderWidth', parseInt(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </CollapsibleCard>
@@ -708,6 +748,65 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
+              Placering av kuriosa-rutan
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('curiosaPlacement', 'below-image')}
+                className={`px-4 py-2 rounded-lg border-2 ${
+                  settings.curiosaPlacement === 'below-image' || !settings.curiosaPlacement
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300'
+                }`}
+              >
+                Under huvudbilden
+              </button>
+              <button
+                onClick={() => updateSetting('curiosaPlacement', 'beside-article')}
+                className={`px-4 py-2 rounded-lg border-2 ${
+                  settings.curiosaPlacement === 'beside-article'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300'
+                }`}
+              >
+                Bredvid artikeln
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Bredd (%): {settings.curiosaWidth || 100}
+              </label>
+              <input
+                type="range"
+                min="50"
+                max="100"
+                value={settings.curiosaWidth || 100}
+                onChange={(e) => updateSetting('curiosaWidth', parseInt(e.target.value))}
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Höjd (px): {settings.curiosaHeight || 200}
+              </label>
+              <input
+                type="range"
+                min="100"
+                max="400"
+                step="20"
+                value={settings.curiosaHeight || 200}
+                onChange={(e) => updateSetting('curiosaHeight', parseInt(e.target.value))}
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
               Typsnitt
             </label>
             <select
@@ -715,33 +814,36 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               onChange={(e) => updateSetting('curiosaFont', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             >
+              <option value="poppins">Poppins</option>
               <option value="lobster">Lobster</option>
               <option value="sans">Sans Serif</option>
               <option value="serif">Serif</option>
             </select>
           </div>
 
-          <div className="flex gap-4">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={settings.curiosaBold || false}
-                onChange={(e) => updateSetting('curiosaBold', e.target.checked)}
-                className="w-4 h-4"
-              />
-              <span className="text-sm">Fet</span>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Textstorlek (px)
             </label>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={settings.curiosaItalic || false}
-                onChange={(e) => updateSetting('curiosaItalic', e.target.checked)}
-                className="w-4 h-4"
-              />
-              <span className="text-sm">Kursiv</span>
-            </label>
+            <input
+              type="number"
+              min="12"
+              max="24"
+              value={settings.curiosaFontSize || 14}
+              onChange={(e) => updateSetting('curiosaFontSize', parseInt(e.target.value))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            />
           </div>
+
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={settings.curiosaBold || false}
+              onChange={(e) => updateSetting('curiosaBold', e.target.checked)}
+              className="w-4 h-4"
+            />
+            <span className="text-sm">Fet stil (endast frågan)</span>
+          </label>
 
           <ColorPicker
             label="Bakgrundsfärg"
@@ -781,21 +883,6 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               onChange={(e) => updateSetting('curiosaOpacity', parseInt(e.target.value))}
               className="w-full"
             />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Form
-            </label>
-            <select
-              value={settings.curiosaShape || 'rounded'}
-              onChange={(e) => updateSetting('curiosaShape', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-            >
-              <option value="rounded">Rundad</option>
-              <option value="wavy">Vågig</option>
-              <option value="diagonal">Diagonal</option>
-            </select>
           </div>
         </div>
       </CollapsibleCard>
@@ -851,6 +938,7 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                 onChange={(e) => updateSetting('articleFont', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               >
+                <option value="poppins">Poppins</option>
                 <option value="lobster">Lobster</option>
                 <option value="sans">Sans Serif</option>
                 <option value="serif">Serif</option>
@@ -959,9 +1047,16 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                 onChange={(e) => updateSetting('quoteFont', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
               >
+                <option value="poppins">Poppins</option>
+                <option value="poppins-light">Poppins Light</option>
+                <option value="poppins-medium">Poppins Medium</option>
+                <option value="poppins-semibold">Poppins SemiBold</option>
+                <option value="poppins-bold">Poppins Bold</option>
                 <option value="lobster">Lobster</option>
                 <option value="sans">Sans Serif</option>
                 <option value="serif">Serif</option>
+                <option value="georgia">Georgia</option>
+                <option value="playfair">Playfair Display</option>
               </select>
             </div>
 
@@ -972,7 +1067,7 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               <input
                 type="number"
                 min="16"
-                max="48"
+                max="64"
                 value={settings.quoteFontSize || 24}
                 onChange={(e) => updateSetting('quoteFontSize', parseInt(e.target.value))}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg"
@@ -994,7 +1089,7 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={settings.quoteItalic || true}
+                checked={settings.quoteItalic !== false}
                 onChange={(e) => updateSetting('quoteItalic', e.target.checked)}
                 className="w-4 h-4"
               />
@@ -1045,6 +1140,21 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               </button>
             </div>
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Position i flödet
+            </label>
+            <select
+              value={settings.quotePosition || 'after-article'}
+              onChange={(e) => updateSetting('quotePosition', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            >
+              <option value="after-article">Efter artikeln</option>
+              <option value="after-curiosa">Efter kuriosa</option>
+              <option value="before-cta">Precis före knappen</option>
+            </select>
+          </div>
         </div>
       </CollapsibleCard>
 
@@ -1084,6 +1194,7 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               onChange={(e) => updateSetting('ctaFont', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             >
+              <option value="poppins">Poppins</option>
               <option value="lobster">Lobster</option>
               <option value="sans">Sans Serif</option>
               <option value="serif">Serif</option>
@@ -1212,7 +1323,7 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                       settings.headingFont === 'lobster' ? 'font-lobster' : ''
                     } ${settings.headingBold ? 'font-bold' : ''} ${settings.headingItalic ? 'italic' : ''}`}
                     style={{
-                      fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+                      fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : settings.headingFont === 'poppins' ? 'Poppins' : undefined,
                       fontSize: `${settings.headingFontSize || 36}px`,
                       color: settings.headingColor || '#374151'
                     }}
@@ -1241,7 +1352,7 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                       settings.headingFont === 'lobster' ? 'font-lobster' : ''
                     } ${settings.headingBold ? 'font-bold' : ''} ${settings.headingItalic ? 'italic' : ''}`}
                     style={{
-                      fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+                      fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : settings.headingFont === 'poppins' ? 'Poppins' : undefined,
                       fontSize: `${settings.headingFontSize || 36}px`,
                       color: settings.headingColor || '#374151'
                     }}
@@ -1263,166 +1374,9 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               )}
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 items-center mb-8">
-              <div className="relative">
-                {settings.mainImageUrl ? (
-                  <div className="relative">
-                    <img
-                      src={settings.mainImageUrl}
-                      alt="Huvudbild"
-                      className={`w-full h-96 object-cover ${
-                        settings.imageShape === 'rounded' ? 'rounded-2xl' : ''
-                      }`}
-                    />
-                    {settings.smallImageUrl && (
-                      <img
-                        src={settings.smallImageUrl}
-                        alt="Liten bild"
-                        className={`absolute ${
-                          settings.smallImagePosition === 'right' ? 'right-4' : 'left-4'
-                        } top-4 w-32 h-32 object-cover rounded-xl shadow-lg`}
-                      />
-                    )}
-                    {selectedChef?.avatar_url && (
-                      <img
-                        src={selectedChef.avatar_url}
-                        alt={selectedChef.display_name}
-                        className="absolute bottom-4 left-4 w-20 h-20 rounded-full object-cover border-4 border-white shadow-lg"
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <div className="w-full h-96 bg-gray-100 rounded-2xl flex items-center justify-center text-gray-400">
-                    Ingen huvudbild uppladdad
-                  </div>
-                )}
-              </div>
-
-              <div>
-                {settings.articleTitle && (
-                  <h3
-                    className={`mb-4 ${
-                      settings.articleFont === 'lobster' ? 'font-lobster' : ''
-                    } ${settings.articleBold ? 'font-bold' : ''} ${settings.articleItalic ? 'italic' : ''}`}
-                    style={{
-                      fontFamily: settings.articleFont === 'serif' ? 'serif' : settings.articleFont === 'sans' ? 'sans-serif' : undefined,
-                      fontSize: `${(settings.articleFontSize || 16) * 1.5}px`,
-                      textAlign: settings.articleAlignment || 'left'
-                    }}
-                  >
-                    {settings.articleTitle}
-                  </h3>
-                )}
-                {settings.articleIngress && (
-                  <p
-                    className={`mb-4 ${
-                      settings.articleFont === 'lobster' ? 'font-lobster' : ''
-                    } ${settings.articleBold ? 'font-bold' : ''} ${settings.articleItalic ? 'italic' : ''}`}
-                    style={{
-                      fontFamily: settings.articleFont === 'serif' ? 'serif' : settings.articleFont === 'sans' ? 'sans-serif' : undefined,
-                      fontSize: `${(settings.articleFontSize || 16) * 1.1}px`,
-                      textAlign: settings.articleAlignment || 'left'
-                    }}
-                  >
-                    {settings.articleIngress}
-                  </p>
-                )}
-                {settings.articleBody && (
-                  <p
-                    className={`text-gray-600 ${
-                      settings.articleFont === 'lobster' ? 'font-lobster' : ''
-                    } ${settings.articleBold ? 'font-bold' : ''} ${settings.articleItalic ? 'italic' : ''}`}
-                    style={{
-                      fontFamily: settings.articleFont === 'serif' ? 'serif' : settings.articleFont === 'sans' ? 'sans-serif' : undefined,
-                      fontSize: `${settings.articleFontSize || 16}px`,
-                      textAlign: settings.articleAlignment || 'left'
-                    }}
-                  >
-                    {settings.articleBody}
-                  </p>
-                )}
-              </div>
+            <div className="text-sm text-gray-500 text-center mb-4">
+              Preview visar layout och grundläggande styling
             </div>
-
-            {curiosaItems.length > 0 && curiosaItems[0].question && (
-              <div
-                className="p-6 rounded-xl mb-8"
-                style={{
-                  backgroundColor: settings.curiosaBgColor || '#f6f2e0',
-                  borderColor: settings.curiosaBorderColor || '#a1c798',
-                  borderWidth: `${settings.curiosaBorderWidth || 2}px`,
-                  borderStyle: 'solid',
-                  opacity: (settings.curiosaOpacity || 100) / 100
-                }}
-              >
-                <h4 className="text-xl font-bold text-gray-800 mb-4">Kuriosa</h4>
-                <div className="space-y-3">
-                  {curiosaItems.map((item, index) => (
-                    item.question && (
-                      <div key={index}>
-                        <p
-                          className={`font-semibold text-gray-700 ${
-                            settings.curiosaBold ? 'font-bold' : ''
-                          } ${settings.curiosaItalic ? 'italic' : ''}`}
-                          style={{
-                            fontFamily: settings.curiosaFont === 'lobster' ? 'Lobster' : settings.curiosaFont === 'serif' ? 'serif' : 'sans-serif'
-                          }}
-                        >
-                          {item.question}:
-                        </p>
-                        <p className="text-gray-600">{item.answer || '(Inget svar)'}</p>
-                      </div>
-                    )
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {settings.quoteText && (
-              <blockquote
-                className={`mb-8 py-6 ${
-                  settings.quoteFont === 'lobster' ? 'font-lobster' : ''
-                } ${settings.quoteBold ? 'font-bold' : ''} ${settings.quoteItalic ? 'italic' : ''}`}
-                style={{
-                  fontFamily: settings.quoteFont === 'serif' ? 'serif' : settings.quoteFont === 'sans' ? 'sans-serif' : undefined,
-                  fontSize: `${settings.quoteFontSize || 24}px`,
-                  color: settings.quoteColor || '#4b5563',
-                  textAlign: settings.quoteAlignment || 'center'
-                }}
-              >
-                "{settings.quoteText}"
-              </blockquote>
-            )}
-
-            {settings.ctaText && (
-              <div
-                className="flex"
-                style={{
-                  justifyContent:
-                    settings.ctaAlignment === 'left' ? 'flex-start' :
-                    settings.ctaAlignment === 'right' ? 'flex-end' :
-                    'center'
-                }}
-              >
-                <button
-                  className={`rounded-xl font-medium transition-all hover:shadow-lg ${
-                    settings.ctaSize === 'small' ? 'px-4 py-2 text-sm' :
-                    settings.ctaSize === 'large' ? 'px-8 py-4 text-lg' :
-                    'px-6 py-3 text-base'
-                  } ${settings.ctaFont === 'lobster' ? 'font-lobster' : ''} ${
-                    settings.ctaBold ? 'font-bold' : ''
-                  }`}
-                  style={{
-                    backgroundColor: settings.ctaColor || '#56c5c5',
-                    color: settings.ctaTextColor || '#ffffff',
-                    opacity: (settings.ctaOpacity || 100) / 100,
-                    fontFamily: settings.ctaFont === 'serif' ? 'serif' : settings.ctaFont === 'sans' ? 'sans-serif' : undefined
-                  }}
-                >
-                  {settings.ctaText}
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </CollapsibleCard>
