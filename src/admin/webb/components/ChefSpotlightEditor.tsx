@@ -748,6 +748,34 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                     className="w-full"
                   />
                 </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Bildstorlek (px): {settings.smallImageSize || 96}
+                  </label>
+                  <input
+                    type="range"
+                    min="50"
+                    max="300"
+                    value={settings.smallImageSize || 96}
+                    onChange={(e) => updateSetting('smallImageSize', parseInt(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Rotation (grader): {settings.smallImageRotation || 0}°
+                  </label>
+                  <input
+                    type="range"
+                    min="-45"
+                    max="45"
+                    value={settings.smallImageRotation || 0}
+                    onChange={(e) => updateSetting('smallImageRotation', parseInt(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -903,6 +931,12 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
           </label>
 
           <ColorPicker
+            label="Textfärg"
+            value={settings.curiosaTextColor || '#374151'}
+            onChange={(color) => updateSetting('curiosaTextColor', color)}
+          />
+
+          <ColorPicker
             label="Bakgrundsfärg"
             value={settings.curiosaBgColor || '#f6f2e0'}
             onChange={(color) => updateSetting('curiosaBgColor', color)}
@@ -957,6 +991,45 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               placeholder="Artikelrubrik"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              <select
+                value={settings.articleTitleFont || 'poppins'}
+                onChange={(e) => updateSetting('articleTitleFont', e.target.value)}
+                className="px-2 py-1 text-sm border border-gray-300 rounded"
+              >
+                <option value="poppins">Poppins</option>
+                <option value="lobster">Lobster</option>
+                <option value="sans">Sans</option>
+                <option value="serif">Serif</option>
+              </select>
+              <select
+                value={settings.articleTitleAlign || 'left'}
+                onChange={(e) => updateSetting('articleTitleAlign', e.target.value)}
+                className="px-2 py-1 text-sm border border-gray-300 rounded"
+              >
+                <option value="left">Vänster</option>
+                <option value="center">Center</option>
+                <option value="right">Höger</option>
+              </select>
+              <label className="flex items-center gap-1 px-2 py-1 text-sm border border-gray-300 rounded">
+                <input
+                  type="checkbox"
+                  checked={settings.articleTitleBold || false}
+                  onChange={(e) => updateSetting('articleTitleBold', e.target.checked)}
+                  className="w-3 h-3"
+                />
+                Fet
+              </label>
+              <input
+                type="number"
+                min="14"
+                max="48"
+                value={settings.articleTitleSize || 24}
+                onChange={(e) => updateSetting('articleTitleSize', parseInt(e.target.value))}
+                placeholder="px"
+                className="px-2 py-1 text-sm border border-gray-300 rounded"
+              />
+            </div>
           </div>
 
           <div>
@@ -970,6 +1043,45 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              <select
+                value={settings.articleIngressFont || 'poppins'}
+                onChange={(e) => updateSetting('articleIngressFont', e.target.value)}
+                className="px-2 py-1 text-sm border border-gray-300 rounded"
+              >
+                <option value="poppins">Poppins</option>
+                <option value="lobster">Lobster</option>
+                <option value="sans">Sans</option>
+                <option value="serif">Serif</option>
+              </select>
+              <select
+                value={settings.articleIngressAlign || 'left'}
+                onChange={(e) => updateSetting('articleIngressAlign', e.target.value)}
+                className="px-2 py-1 text-sm border border-gray-300 rounded"
+              >
+                <option value="left">Vänster</option>
+                <option value="center">Center</option>
+                <option value="right">Höger</option>
+              </select>
+              <label className="flex items-center gap-1 px-2 py-1 text-sm border border-gray-300 rounded">
+                <input
+                  type="checkbox"
+                  checked={settings.articleIngressBold || false}
+                  onChange={(e) => updateSetting('articleIngressBold', e.target.checked)}
+                  className="w-3 h-3"
+                />
+                Fet
+              </label>
+              <input
+                type="number"
+                min="12"
+                max="24"
+                value={settings.articleIngressSize || 16}
+                onChange={(e) => updateSetting('articleIngressSize', parseInt(e.target.value))}
+                placeholder="px"
+                className="px-2 py-1 text-sm border border-gray-300 rounded"
+              />
+            </div>
           </div>
 
           <div>
@@ -983,36 +1095,34 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               rows={6}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Typsnitt
-              </label>
+            <div className="grid grid-cols-3 gap-2 mt-2">
               <select
-                value={settings.articleFont || 'sans'}
-                onChange={(e) => updateSetting('articleFont', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                value={settings.articleBodyFont || 'poppins'}
+                onChange={(e) => updateSetting('articleBodyFont', e.target.value)}
+                className="px-2 py-1 text-sm border border-gray-300 rounded"
               >
                 <option value="poppins">Poppins</option>
                 <option value="lobster">Lobster</option>
-                <option value="sans">Sans Serif</option>
+                <option value="sans">Sans</option>
                 <option value="serif">Serif</option>
               </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Storlek (px)
+              <label className="flex items-center gap-1 px-2 py-1 text-sm border border-gray-300 rounded">
+                <input
+                  type="checkbox"
+                  checked={settings.articleBodyBold || false}
+                  onChange={(e) => updateSetting('articleBodyBold', e.target.checked)}
+                  className="w-3 h-3"
+                />
+                Fet
               </label>
               <input
                 type="number"
                 min="12"
-                max="32"
-                value={settings.articleFontSize || 16}
-                onChange={(e) => updateSetting('articleFontSize', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                max="24"
+                value={settings.articleBodySize || 14}
+                onChange={(e) => updateSetting('articleBodySize', parseInt(e.target.value))}
+                placeholder="px"
+                className="px-2 py-1 text-sm border border-gray-300 rounded"
               />
             </div>
           </div>
@@ -1114,6 +1224,11 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                 <option value="serif">Serif</option>
                 <option value="georgia">Georgia</option>
                 <option value="playfair">Playfair Display</option>
+                <option value="dancing-script">Dancing Script (handskriven)</option>
+                <option value="pacifico">Pacifico (handskriven)</option>
+                <option value="great-vibes">Great Vibes (skrivstil)</option>
+                <option value="allura">Allura (skrivstil)</option>
+                <option value="satisfy">Satisfy (handskriven)</option>
               </select>
             </div>
 
@@ -1207,6 +1322,10 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               onChange={(e) => updateSetting('quotePosition', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             >
+              <option value="on-image-top">På bild, överst</option>
+              <option value="on-image-middle">På bild, mitten</option>
+              <option value="on-image-bottom">På bild, underst</option>
+              <option value="above-article">Över artikeln</option>
               <option value="after-article">Efter artikeln</option>
               <option value="after-curiosa">Efter kuriosa</option>
               <option value="before-cta">Precis före knappen</option>
@@ -1444,16 +1563,39 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                       <img
                         src={settings.smallImageUrl}
                         alt="Liten bild"
-                        className="absolute w-24 h-24 object-cover rounded-xl shadow-lg"
+                        className="absolute object-cover rounded-xl shadow-lg"
                         style={{
+                          width: `${settings.smallImageSize || 96}px`,
+                          height: `${settings.smallImageSize || 96}px`,
                           top: settings.smallImagePosition === 'top-left' || settings.smallImagePosition === 'top-right' ? '1rem' : settings.smallImagePosition === 'center' ? '50%' : 'auto',
                           bottom: settings.smallImagePosition === 'bottom-left' || settings.smallImagePosition === 'bottom-right' ? '1rem' : 'auto',
                           left: settings.smallImagePosition === 'top-left' || settings.smallImagePosition === 'bottom-left' ? '1rem' : settings.smallImagePosition === 'center' ? '50%' : 'auto',
                           right: settings.smallImagePosition === 'top-right' || settings.smallImagePosition === 'bottom-right' ? '1rem' : 'auto',
-                          transform: settings.smallImagePosition === 'center' ? 'translate(-50%, -50%)' : undefined,
+                          transform: `${settings.smallImagePosition === 'center' ? 'translate(-50%, -50%)' : ''} rotate(${settings.smallImageRotation || 0}deg)`,
                           border: `${settings.smallImageBorderWidth || 4}px solid ${settings.smallImageBorderColor || '#ffffff'}`
                         }}
                       />
+                    )}
+                    {(settings.quotePosition === 'on-image-top' || settings.quotePosition === 'on-image-middle' || settings.quotePosition === 'on-image-bottom') && settings.quoteText && (
+                      <div
+                        className="absolute left-0 right-0 px-4"
+                        style={{
+                          top: settings.quotePosition === 'on-image-top' ? '1rem' : settings.quotePosition === 'on-image-middle' ? '50%' : 'auto',
+                          bottom: settings.quotePosition === 'on-image-bottom' ? '1rem' : 'auto',
+                          transform: settings.quotePosition === 'on-image-middle' ? 'translateY(-50%)' : undefined,
+                          textAlign: settings.quoteAlignment || 'center'
+                        }}
+                      >
+                        <p
+                          className={`text-white ${settings.quoteBold ? 'font-bold' : ''} ${settings.quoteItalic !== false ? 'italic' : ''}`}
+                          style={{
+                            fontSize: `${settings.quoteFontSize || 24}px`,
+                            textShadow: '0 2px 4px rgba(0,0,0,0.5)'
+                          }}
+                        >
+                          "{settings.quoteText}"
+                        </p>
+                      </div>
                     )}
                   </div>
                 ) : (
@@ -1466,13 +1608,20 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                   <div
                     className="mt-6 p-4 rounded-xl"
                     style={{
-                      backgroundColor: settings.curiosaBgColor || '#f6f2e0',
+                      backgroundColor: (() => {
+                        const hex = settings.curiosaBgColor || '#f6f2e0';
+                        const opacity = (settings.curiosaOpacity || 100) / 100;
+                        const r = parseInt(hex.slice(1, 3), 16);
+                        const g = parseInt(hex.slice(3, 5), 16);
+                        const b = parseInt(hex.slice(5, 7), 16);
+                        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                      })(),
                       borderColor: settings.curiosaBorderColor || '#a1c798',
                       borderWidth: `${settings.curiosaBorderWidth || 2}px`,
                       borderStyle: 'solid',
-                      opacity: (settings.curiosaOpacity || 100) / 100,
                       width: `${settings.curiosaWidth || 100}%`,
-                      height: settings.curiosaHeight ? `${settings.curiosaHeight}px` : 'auto'
+                      height: settings.curiosaHeight ? `${settings.curiosaHeight}px` : 'auto',
+                      color: settings.curiosaTextColor || '#374151'
                     }}
                   >
                     <h4 className="font-bold text-sm mb-2">Kuriosa</h4>
@@ -1484,8 +1633,10 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                               style={{ fontSize: `${settings.curiosaFontSize || 14}px` }}>
                               {item.question}:
                             </p>
-                            <p className="text-gray-600"
-                              style={{ fontSize: `${settings.curiosaFontSize || 14}px` }}>
+                            <p style={{
+                              fontSize: `${settings.curiosaFontSize || 14}px`,
+                              opacity: 0.8
+                            }}>
                               {item.answer || 'Svar...'}
                             </p>
                           </div>
@@ -1497,18 +1648,50 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               </div>
 
               <div>
+                {settings.quotePosition === 'above-article' && settings.quoteText && (
+                  <blockquote
+                    className={`mb-4 ${settings.quoteBold ? 'font-bold' : ''} ${settings.quoteItalic !== false ? 'italic' : ''}`}
+                    style={{
+                      fontSize: `${settings.quoteFontSize || 24}px`,
+                      color: settings.quoteColor || '#4b5563',
+                      textAlign: settings.quoteAlignment || 'center'
+                    }}
+                  >
+                    "{settings.quoteText}"
+                  </blockquote>
+                )}
                 {settings.articleTitle && (
-                  <h3 className="font-bold mb-2" style={{ fontSize: '18px' }}>
+                  <h3
+                    className={`mb-2 ${settings.articleTitleBold ? 'font-bold' : ''}`}
+                    style={{
+                      fontSize: `${settings.articleTitleSize || 24}px`,
+                      textAlign: settings.articleTitleAlign || 'left',
+                      fontFamily: settings.articleTitleFont === 'poppins' ? 'Poppins' : settings.articleTitleFont === 'lobster' ? 'Lobster' : settings.articleTitleFont === 'serif' ? 'serif' : 'sans-serif'
+                    }}
+                  >
                     {settings.articleTitle}
                   </h3>
                 )}
                 {settings.articleIngress && (
-                  <p className="mb-2 text-gray-700" style={{ fontSize: '14px' }}>
+                  <p
+                    className={`mb-2 ${settings.articleIngressBold ? 'font-bold' : ''}`}
+                    style={{
+                      fontSize: `${settings.articleIngressSize || 16}px`,
+                      textAlign: settings.articleIngressAlign || 'left',
+                      fontFamily: settings.articleIngressFont === 'poppins' ? 'Poppins' : settings.articleIngressFont === 'lobster' ? 'Lobster' : settings.articleIngressFont === 'serif' ? 'serif' : 'sans-serif'
+                    }}
+                  >
                     {settings.articleIngress}
                   </p>
                 )}
                 {settings.articleBody && (
-                  <p className="text-gray-600 text-sm" style={{ fontSize: `${settings.articleFontSize || 16}px` }}>
+                  <p
+                    className={`text-sm ${settings.articleBodyBold ? 'font-bold' : ''}`}
+                    style={{
+                      fontSize: `${settings.articleBodySize || 14}px`,
+                      fontFamily: settings.articleBodyFont === 'poppins' ? 'Poppins' : settings.articleBodyFont === 'lobster' ? 'Lobster' : settings.articleBodyFont === 'serif' ? 'serif' : 'sans-serif'
+                    }}
+                  >
                     {settings.articleBody.substring(0, 200)}...
                   </p>
                 )}
@@ -1517,13 +1700,20 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                   <div
                     className="mt-4 p-4 rounded-xl"
                     style={{
-                      backgroundColor: settings.curiosaBgColor || '#f6f2e0',
+                      backgroundColor: (() => {
+                        const hex = settings.curiosaBgColor || '#f6f2e0';
+                        const opacity = (settings.curiosaOpacity || 100) / 100;
+                        const r = parseInt(hex.slice(1, 3), 16);
+                        const g = parseInt(hex.slice(3, 5), 16);
+                        const b = parseInt(hex.slice(5, 7), 16);
+                        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                      })(),
                       borderColor: settings.curiosaBorderColor || '#a1c798',
                       borderWidth: `${settings.curiosaBorderWidth || 2}px`,
                       borderStyle: 'solid',
-                      opacity: (settings.curiosaOpacity || 100) / 100,
                       width: `${settings.curiosaWidth || 100}%`,
-                      height: settings.curiosaHeight ? `${settings.curiosaHeight}px` : 'auto'
+                      height: settings.curiosaHeight ? `${settings.curiosaHeight}px` : 'auto',
+                      color: settings.curiosaTextColor || '#374151'
                     }}
                   >
                     <h4 className="font-bold text-sm mb-2">Kuriosa</h4>
@@ -1531,10 +1721,16 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                       {curiosaItems.slice(0, 2).map((item, index) => (
                         item.question && (
                           <div key={index} className="text-xs">
-                            <p className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`}>
+                            <p className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`}
+                              style={{ fontSize: `${settings.curiosaFontSize || 14}px` }}>
                               {item.question}:
                             </p>
-                            <p className="text-gray-600">{item.answer || 'Svar...'}</p>
+                            <p style={{
+                              fontSize: `${settings.curiosaFontSize || 14}px`,
+                              opacity: 0.8
+                            }}>
+                              {item.answer || 'Svar...'}
+                            </p>
                           </div>
                         )
                       ))}
@@ -1544,14 +1740,51 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               </div>
             </div>
 
-            {settings.quoteText && (
-              <blockquote className="text-center italic text-gray-600 mb-6" style={{ fontSize: `${settings.quoteFontSize || 24}px` }}>
+            {settings.quotePosition === 'after-article' && settings.quoteText && (
+              <blockquote
+                className={`mb-6 ${settings.quoteBold ? 'font-bold' : ''} ${settings.quoteItalic !== false ? 'italic' : ''}`}
+                style={{
+                  fontSize: `${settings.quoteFontSize || 24}px`,
+                  color: settings.quoteColor || '#4b5563',
+                  textAlign: settings.quoteAlignment || 'center'
+                }}
+              >
+                "{settings.quoteText}"
+              </blockquote>
+            )}
+
+            {settings.quotePosition === 'after-curiosa' && settings.quoteText && (
+              <blockquote
+                className={`mb-6 ${settings.quoteBold ? 'font-bold' : ''} ${settings.quoteItalic !== false ? 'italic' : ''}`}
+                style={{
+                  fontSize: `${settings.quoteFontSize || 24}px`,
+                  color: settings.quoteColor || '#4b5563',
+                  textAlign: settings.quoteAlignment || 'center'
+                }}
+              >
+                "{settings.quoteText}"
+              </blockquote>
+            )}
+
+            {settings.quotePosition === 'before-cta' && settings.quoteText && (
+              <blockquote
+                className={`mb-6 ${settings.quoteBold ? 'font-bold' : ''} ${settings.quoteItalic !== false ? 'italic' : ''}`}
+                style={{
+                  fontSize: `${settings.quoteFontSize || 24}px`,
+                  color: settings.quoteColor || '#4b5563',
+                  textAlign: settings.quoteAlignment || 'center'
+                }}
+              >
                 "{settings.quoteText}"
               </blockquote>
             )}
 
             {settings.ctaText && (
-              <div className="text-center">
+              <div className={`mb-6 ${
+                settings.ctaAlignment === 'left' ? 'text-left' :
+                settings.ctaAlignment === 'right' ? 'text-right' :
+                'text-center'
+              }`}>
                 <button
                   className="px-6 py-3 rounded-xl text-white"
                   style={{
@@ -1561,6 +1794,22 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                 >
                   {settings.ctaText}
                 </button>
+              </div>
+            )}
+
+            {selectedChef && (
+              <div className="mt-8 flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
+                {selectedChef.avatar_url && (
+                  <img
+                    src={selectedChef.avatar_url}
+                    alt={selectedChef.display_name}
+                    className="w-16 h-16 rounded-full object-cover"
+                  />
+                )}
+                <div>
+                  <p className="font-semibold text-gray-900">{selectedChef.display_name}</p>
+                  {selectedChef.bio && <p className="text-sm text-gray-600">{selectedChef.bio}</p>}
+                </div>
               </div>
             )}
 
