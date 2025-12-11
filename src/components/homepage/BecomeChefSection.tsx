@@ -17,6 +17,7 @@ interface BecomeChefSectionProps {
     headingColor?: string;
     subtitleTexts?: string[];
     subtitleRotationInterval?: number;
+    subtitlePlacement?: 'inline' | 'below';
     subtitleColor?: string;
     contentBox?: {
       bgColor?: string;
@@ -24,6 +25,11 @@ interface BecomeChefSectionProps {
       opacity?: number;
       borderRadius?: number;
     };
+    innerTitle?: string;
+    innerTitleFont?: string;
+    innerTitleBold?: boolean;
+    innerTitleSize?: number;
+    innerTitleColor?: string;
     description?: string;
     descriptionFont?: string;
     descriptionBold?: boolean;
@@ -39,7 +45,9 @@ interface BecomeChefSectionProps {
     };
     cta?: {
       label?: string;
-      href?: string;
+      linkType?: 'internal' | 'external';
+      internalRoute?: string;
+      externalUrl?: string;
       bgColor?: string;
       textColor?: string;
       font?: string;
@@ -85,6 +93,12 @@ export function BecomeChefSection({ settings }: BecomeChefSectionProps) {
     settings.headingFont === 'sans' ? 'sans-serif' :
     undefined;
 
+  const innerTitleFontClass = settings.innerTitleFont === 'lobster' ? 'font-lobster' : '';
+  const innerTitleFontFamily =
+    settings.innerTitleFont === 'serif' ? 'serif' :
+    settings.innerTitleFont === 'sans' ? 'sans-serif' :
+    undefined;
+
   const descFontFamily =
     settings.descriptionFont === 'serif' ? 'serif' :
     settings.descriptionFont === 'lobster' ? 'Lobster' :
@@ -100,20 +114,20 @@ export function BecomeChefSection({ settings }: BecomeChefSectionProps) {
     benefitsPerRow === 4 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' :
     'grid-cols-1 md:grid-cols-2 lg:grid-cols-3';
 
+  const getLinkHref = () => {
+    if (cta.linkType === 'external') return cta.externalUrl || '#';
+    return cta.internalRoute || '#';
+  };
+
+  const isExternalLink = cta.linkType === 'external';
+
   return (
     <section className="py-16 px-4" style={{ backgroundColor: settings.backgroundColor || '#a1c798' }}>
-      <div className="mx-auto" style={{ maxWidth: `${contentBox.width || 100}%` }}>
-        <div
-          className="p-12 shadow-lg"
-          style={{
-            backgroundColor: contentBox.bgColor || '#f6f2e0',
-            opacity: (contentBox.opacity || 100) / 100,
-            borderRadius: `${contentBox.borderRadius || 16}px`
-          }}
-        >
-          <div className={`mb-6 ${settings.headingAlignment === 'center' ? 'text-center' : 'text-left'}`}>
+      <div className={`mb-8 px-4 ${settings.headingAlignment === 'center' ? 'text-center' : 'text-left'}`}>
+        {settings.subtitlePlacement === 'inline' || !settings.subtitlePlacement ? (
+          <div className={`flex items-center gap-3 ${settings.headingAlignment === 'center' ? 'justify-center' : ''}`}>
             <h2
-              className={`text-4xl mb-4 ${headingFontClass} ${
+              className={`text-3xl md:text-4xl ${headingFontClass} ${
                 settings.headingBold ? 'font-bold' : ''
               }`}
               style={{
@@ -124,17 +138,75 @@ export function BecomeChefSection({ settings }: BecomeChefSectionProps) {
               {settings.heading || 'Bli en Kitchen-kock'}
             </h2>
             {subtitleTexts.length > 0 && subtitleTexts[0] && (
-              <p
-                className="transition-opacity duration-300"
-                style={{
-                  opacity: fadeIn ? 1 : 0,
-                  color: settings.subtitleColor || '#6b7280'
-                }}
-              >
-                {subtitleTexts[currentSubtitleIndex] || subtitleTexts[0]}
-              </p>
+              <>
+                <span className="text-gray-400 text-2xl hidden md:inline">|</span>
+                <div className="min-h-[24px] flex items-center">
+                  <p
+                    className="transition-opacity duration-300 text-sm md:text-base"
+                    style={{
+                      opacity: fadeIn ? 1 : 0,
+                      color: settings.subtitleColor || '#6b7280'
+                    }}
+                  >
+                    {subtitleTexts[currentSubtitleIndex] || subtitleTexts[0]}
+                  </p>
+                </div>
+              </>
             )}
           </div>
+        ) : (
+          <div>
+            <h2
+              className={`text-3xl md:text-4xl ${headingFontClass} ${
+                settings.headingBold ? 'font-bold' : ''
+              }`}
+              style={{
+                fontFamily: headingFontFamily,
+                color: settings.headingColor || '#374151'
+              }}
+            >
+              {settings.heading || 'Bli en Kitchen-kock'}
+            </h2>
+            {subtitleTexts.length > 0 && subtitleTexts[0] && (
+              <div className="min-h-[24px] flex items-center mt-2">
+                <p
+                  className="transition-opacity duration-300 text-sm md:text-base"
+                  style={{
+                    opacity: fadeIn ? 1 : 0,
+                    color: settings.subtitleColor || '#6b7280'
+                  }}
+                >
+                  {subtitleTexts[currentSubtitleIndex] || subtitleTexts[0]}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      <div className="mx-auto" style={{ maxWidth: `${contentBox.width || 100}%` }}>
+        <div
+          className="p-8 md:p-12 shadow-lg"
+          style={{
+            backgroundColor: contentBox.bgColor || '#f6f2e0',
+            opacity: (contentBox.opacity || 100) / 100,
+            borderRadius: `${contentBox.borderRadius || 16}px`
+          }}
+        >
+          {settings.innerTitle && (
+            <h3
+              className={`mb-6 ${innerTitleFontClass} ${
+                settings.innerTitleBold ? 'font-bold' : ''
+              }`}
+              style={{
+                fontSize: `${settings.innerTitleSize || 32}px`,
+                fontFamily: innerTitleFontFamily,
+                color: settings.innerTitleColor || '#374151'
+              }}
+            >
+              {settings.innerTitle}
+            </h3>
+          )}
 
           <div className={image.position !== 'none' && image.url ? 'grid md:grid-cols-2 gap-8 items-center' : ''}>
             {image.position === 'left' && image.url && (
@@ -166,22 +238,42 @@ export function BecomeChefSection({ settings }: BecomeChefSectionProps) {
                 </p>
               )}
 
-              {cta.label && cta.href && (
-                <Link
-                  to={cta.href}
-                  className="px-8 py-3 rounded-full transition-all hover:shadow-lg hover:opacity-90 inline-block"
-                  style={{
-                    backgroundColor: cta.bgColor || '#56c5c5',
-                    color: cta.textColor || '#ffffff',
-                    fontSize: `${cta.size || 16}px`,
-                    fontFamily: ctaFontFamily,
-                    fontWeight: cta.bold ? 'bold' : 'normal',
-                    fontStyle: cta.italic ? 'italic' : 'normal',
-                    textTransform: cta.uppercase ? 'uppercase' : 'none'
-                  }}
-                >
-                  {cta.label}
-                </Link>
+              {cta.label && (getLinkHref() !== '#') && (
+                isExternalLink ? (
+                  <a
+                    href={getLinkHref()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-8 py-3 rounded-full transition-all hover:shadow-lg hover:opacity-90 inline-block"
+                    style={{
+                      backgroundColor: cta.bgColor || '#56c5c5',
+                      color: cta.textColor || '#ffffff',
+                      fontSize: `${cta.size || 16}px`,
+                      fontFamily: ctaFontFamily,
+                      fontWeight: cta.bold ? 'bold' : 'normal',
+                      fontStyle: cta.italic ? 'italic' : 'normal',
+                      textTransform: cta.uppercase ? 'uppercase' : 'none'
+                    }}
+                  >
+                    {cta.label}
+                  </a>
+                ) : (
+                  <Link
+                    to={getLinkHref()}
+                    className="px-8 py-3 rounded-full transition-all hover:shadow-lg hover:opacity-90 inline-block"
+                    style={{
+                      backgroundColor: cta.bgColor || '#56c5c5',
+                      color: cta.textColor || '#ffffff',
+                      fontSize: `${cta.size || 16}px`,
+                      fontFamily: ctaFontFamily,
+                      fontWeight: cta.bold ? 'bold' : 'normal',
+                      fontStyle: cta.italic ? 'italic' : 'normal',
+                      textTransform: cta.uppercase ? 'uppercase' : 'none'
+                    }}
+                  >
+                    {cta.label}
+                  </Link>
+                )
               )}
             </div>
 

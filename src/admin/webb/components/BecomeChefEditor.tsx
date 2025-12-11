@@ -30,6 +30,11 @@ interface BecomeChefSettings {
     opacity?: number;
     borderRadius?: number;
   };
+  innerTitle?: string;
+  innerTitleFont?: string;
+  innerTitleBold?: boolean;
+  innerTitleSize?: number;
+  innerTitleColor?: string;
   description?: string;
   descriptionFont?: string;
   descriptionBold?: boolean;
@@ -46,7 +51,9 @@ interface BecomeChefSettings {
   };
   cta?: {
     label?: string;
-    href?: string;
+    linkType?: 'internal' | 'external';
+    internalRoute?: string;
+    externalUrl?: string;
     bgColor?: string;
     textColor?: string;
     font?: string;
@@ -311,15 +318,47 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Intervall för textrad-rotation (sekunder)
+              Intervall för textrad-rotation
             </label>
-            <input
-              type="number"
-              min="1"
-              value={(settings.subtitleRotationInterval || 10000) / 1000}
-              onChange={(e) => updateSetting('subtitleRotationInterval', parseInt(e.target.value) * 1000 || 10000)}
+            <select
+              value={settings.subtitleRotationInterval || 10000}
+              onChange={(e) => updateSetting('subtitleRotationInterval', parseInt(e.target.value))}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
-            />
+            >
+              <option value={10000}>10 sekunder</option>
+              <option value={60000}>1 minut</option>
+              <option value={3600000}>1 timme</option>
+              <option value={86400000}>1 dag</option>
+              <option value={604800000}>1 vecka</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Placering av textrad
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('subtitlePlacement', 'inline')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.subtitlePlacement === 'inline' || !settings.subtitlePlacement
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Efter rubrik
+              </button>
+              <button
+                onClick={() => updateSetting('subtitlePlacement', 'below')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  settings.subtitlePlacement === 'below'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Under rubrik
+              </button>
+            </div>
           </div>
 
           <ColorPicker
@@ -391,13 +430,13 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Beskrivningstext
+                Rubrik i kortet
               </label>
-              <textarea
-                value={settings.description || ''}
-                onChange={(e) => updateSetting('description', e.target.value)}
-                placeholder="Dela din passion för matlagning och tjäna pengar på det du älskar..."
-                rows={3}
+              <input
+                type="text"
+                value={settings.innerTitle || ''}
+                onChange={(e) => updateSetting('innerTitle', e.target.value)}
+                placeholder="Bli en del av vår community"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
               />
             </div>
@@ -405,11 +444,11 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Typsnitt
+                  Rubrik – Typsnitt
                 </label>
                 <select
-                  value={settings.descriptionFont || 'sans'}
-                  onChange={(e) => updateSetting('descriptionFont', e.target.value)}
+                  value={settings.innerTitleFont || 'lobster'}
+                  onChange={(e) => updateSetting('innerTitleFont', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 >
                   <option value="lobster">Lobster</option>
@@ -420,14 +459,14 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Storlek (px)
+                  Rubrik – Storlek (px)
                 </label>
                 <input
                   type="number"
-                  min="12"
-                  max="32"
-                  value={settings.descriptionSize || 18}
-                  onChange={(e) => updateSetting('descriptionSize', parseInt(e.target.value))}
+                  min="18"
+                  max="48"
+                  value={settings.innerTitleSize || 32}
+                  onChange={(e) => updateSetting('innerTitleSize', parseInt(e.target.value))}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
               </div>
@@ -437,19 +476,83 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={settings.descriptionBold || false}
-                  onChange={(e) => updateSetting('descriptionBold', e.target.checked)}
+                  checked={settings.innerTitleBold || false}
+                  onChange={(e) => updateSetting('innerTitleBold', e.target.checked)}
                   className="w-4 h-4 rounded"
                 />
-                <span className="text-sm font-medium text-gray-700">Fet stil</span>
+                <span className="text-sm font-medium text-gray-700">Rubrik – Fet stil</span>
               </label>
             </div>
 
             <ColorPicker
-              label="Textfärg"
-              value={settings.descriptionColor || '#374151'}
-              onChange={(color) => updateSetting('descriptionColor', color)}
+              label="Rubrik – Textfärg"
+              value={settings.innerTitleColor || '#374151'}
+              onChange={(color) => updateSetting('innerTitleColor', color)}
             />
+
+            <div className="border-t pt-4 mt-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Beskrivningstext
+                </label>
+                <textarea
+                  value={settings.description || ''}
+                  onChange={(e) => updateSetting('description', e.target.value)}
+                  placeholder="Dela din passion för matlagning och tjäna pengar på det du älskar..."
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Beskrivning – Typsnitt
+                  </label>
+                  <select
+                    value={settings.descriptionFont || 'sans'}
+                    onChange={(e) => updateSetting('descriptionFont', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="lobster">Lobster</option>
+                    <option value="sans">Sans Serif</option>
+                    <option value="serif">Serif</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Beskrivning – Storlek (px)
+                  </label>
+                  <input
+                    type="number"
+                    min="12"
+                    max="32"
+                    value={settings.descriptionSize || 18}
+                    onChange={(e) => updateSetting('descriptionSize', parseInt(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.descriptionBold || false}
+                    onChange={(e) => updateSetting('descriptionBold', e.target.checked)}
+                    className="w-4 h-4 rounded"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Beskrivning – Fet stil</span>
+                </label>
+              </div>
+
+              <ColorPicker
+                label="Beskrivning – Textfärg"
+                value={settings.descriptionColor || '#374151'}
+                onChange={(color) => updateSetting('descriptionColor', color)}
+              />
+            </div>
           </div>
 
           <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
@@ -573,33 +676,80 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
 
       <CollapsibleCard title="Knappar" defaultExpanded={true}>
         <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Knapptext
-              </label>
-              <input
-                type="text"
-                value={cta.label || ''}
-                onChange={(e) => updateNestedSetting('cta', 'label', e.target.value)}
-                placeholder="Ansök nu"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              />
-            </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Knapptext
+            </label>
+            <input
+              type="text"
+              value={cta.label || ''}
+              onChange={(e) => updateNestedSetting('cta', 'label', e.target.value)}
+              placeholder="Ansök nu"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            />
+          </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Länk
-              </label>
-              <input
-                type="text"
-                value={cta.href || ''}
-                onChange={(e) => updateNestedSetting('cta', 'href', e.target.value)}
-                placeholder="/bli-kock"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-              />
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Länktyp
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateNestedSetting('cta', 'linkType', 'internal')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  cta.linkType === 'internal' || !cta.linkType
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Intern sida
+              </button>
+              <button
+                onClick={() => updateNestedSetting('cta', 'linkType', 'external')}
+                className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                  cta.linkType === 'external'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300 hover:border-gray-400'
+                }`}
+              >
+                Extern länk
+              </button>
             </div>
           </div>
+
+          {(cta.linkType === 'internal' || !cta.linkType) && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Intern sida
+              </label>
+              <select
+                value={cta.internalRoute || ''}
+                onChange={(e) => updateNestedSetting('cta', 'internalRoute', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="">Välj sida...</option>
+                <option value="/bli-kock">Bli kock</option>
+                <option value="/marknadsplats">Marknadsplats</option>
+                <option value="/medlemskap">Medlemskap</option>
+                <option value="/gyllene-skedar">Gyllene Skedar</option>
+              </select>
+            </div>
+          )}
+
+          {cta.linkType === 'external' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Extern URL
+              </label>
+              <input
+                type="url"
+                value={cta.externalUrl || ''}
+                onChange={(e) => updateNestedSetting('cta', 'externalUrl', e.target.value)}
+                placeholder="https://example.com"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+          )}
 
           <div className="grid grid-cols-2 gap-4">
             <ColorPicker
@@ -700,11 +850,16 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-medium text-gray-700">
-                Fördelar
+                Fördelar (max 8)
               </label>
               <button
                 onClick={addBenefit}
-                className="flex items-center gap-1 px-3 py-1 bg-[#56c5c5] text-white text-sm rounded-lg hover:bg-[#45b4b4] transition-colors"
+                disabled={benefits.length >= 8}
+                className={`flex items-center gap-1 px-3 py-1 text-white text-sm rounded-lg transition-colors ${
+                  benefits.length >= 8
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-[#56c5c5] hover:bg-[#45b4b4]'
+                }`}
               >
                 <Plus className="w-4 h-4" />
                 Lägg till fördel
@@ -754,18 +909,11 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
           className="p-8 rounded-lg"
           style={{ backgroundColor: settings.backgroundColor || '#a1c798' }}
         >
-          <div className="mx-auto" style={{ maxWidth: `${contentBox.width || 100}%` }}>
-            <div
-              className="p-12 shadow-lg"
-              style={{
-                backgroundColor: contentBox.bgColor || '#f6f2e0',
-                opacity: (contentBox.opacity || 100) / 100,
-                borderRadius: `${contentBox.borderRadius || 16}px`
-              }}
-            >
-              <div className={`mb-6 ${settings.headingAlignment === 'center' ? 'text-center' : 'text-left'}`}>
+          <div className={`mb-6 ${settings.headingAlignment === 'center' ? 'text-center' : 'text-left'}`}>
+            {settings.subtitlePlacement === 'inline' || !settings.subtitlePlacement ? (
+              <div className={`flex items-center gap-3 mb-4 ${settings.headingAlignment === 'center' ? 'justify-center' : ''}`}>
                 <h2
-                  className={`text-4xl mb-2 ${
+                  className={`text-3xl ${
                     settings.headingFont === 'lobster' ? 'font-lobster' : ''
                   } ${settings.headingBold ? 'font-bold' : ''}`}
                   style={{
@@ -776,17 +924,75 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
                   {settings.heading || 'Bli en Kitchen-kock'}
                 </h2>
                 {subtitleTexts.length > 0 && subtitleTexts[0] && (
-                  <p
-                    className="transition-opacity duration-300"
-                    style={{
-                      opacity: fadeIn ? 1 : 0,
-                      color: settings.subtitleColor || '#6b7280'
-                    }}
-                  >
-                    {subtitleTexts[activeSubtitleIndex] || subtitleTexts[0]}
-                  </p>
+                  <>
+                    <span className="text-gray-400 text-2xl">|</span>
+                    <div className="min-h-[24px] flex items-center">
+                      <p
+                        className="transition-opacity duration-300"
+                        style={{
+                          opacity: fadeIn ? 1 : 0,
+                          color: settings.subtitleColor || '#6b7280'
+                        }}
+                      >
+                        {subtitleTexts[activeSubtitleIndex] || subtitleTexts[0]}
+                      </p>
+                    </div>
+                  </>
                 )}
               </div>
+            ) : (
+              <div>
+                <h2
+                  className={`text-3xl ${
+                    settings.headingFont === 'lobster' ? 'font-lobster' : ''
+                  } ${settings.headingBold ? 'font-bold' : ''}`}
+                  style={{
+                    fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+                    color: settings.headingColor || '#374151'
+                  }}
+                >
+                  {settings.heading || 'Bli en Kitchen-kock'}
+                </h2>
+                {subtitleTexts.length > 0 && subtitleTexts[0] && (
+                  <div className="min-h-[24px] flex items-center mt-2">
+                    <p
+                      className="transition-opacity duration-300"
+                      style={{
+                        opacity: fadeIn ? 1 : 0,
+                        color: settings.subtitleColor || '#6b7280'
+                      }}
+                    >
+                      {subtitleTexts[activeSubtitleIndex] || subtitleTexts[0]}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="mx-auto" style={{ maxWidth: `${contentBox.width || 100}%` }}>
+            <div
+              className="p-12 shadow-lg"
+              style={{
+                backgroundColor: contentBox.bgColor || '#f6f2e0',
+                opacity: (contentBox.opacity || 100) / 100,
+                borderRadius: `${contentBox.borderRadius || 16}px`
+              }}
+            >
+              {settings.innerTitle && (
+                <h3
+                  className={`mb-6 ${
+                    settings.innerTitleFont === 'lobster' ? 'font-lobster' : ''
+                  } ${settings.innerTitleBold ? 'font-bold' : ''}`}
+                  style={{
+                    fontSize: `${settings.innerTitleSize || 32}px`,
+                    fontFamily: settings.innerTitleFont === 'serif' ? 'serif' : settings.innerTitleFont === 'sans' ? 'sans-serif' : undefined,
+                    color: settings.innerTitleColor || '#374151'
+                  }}
+                >
+                  {settings.innerTitle}
+                </h3>
+              )}
 
               <div className={image.position !== 'none' && image.url ? 'grid grid-cols-2 gap-8 items-center' : ''}>
                 {image.position === 'left' && image.url && (
@@ -804,32 +1010,36 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
                 )}
 
                 <div className={image.position === 'none' || !image.url ? 'text-center' : ''}>
-                  <p
-                    className="mb-8"
-                    style={{
-                      fontSize: `${settings.descriptionSize || 18}px`,
-                      fontFamily: settings.descriptionFont === 'serif' ? 'serif' : settings.descriptionFont === 'lobster' ? 'Lobster' : 'sans-serif',
-                      fontWeight: settings.descriptionBold ? 'bold' : 'normal',
-                      color: settings.descriptionColor || '#374151'
-                    }}
-                  >
-                    {settings.description || 'Dela din passion för matlagning och tjäna pengar på det du älskar.'}
-                  </p>
+                  {settings.description && (
+                    <p
+                      className="mb-8"
+                      style={{
+                        fontSize: `${settings.descriptionSize || 18}px`,
+                        fontFamily: settings.descriptionFont === 'serif' ? 'serif' : settings.descriptionFont === 'lobster' ? 'Lobster' : 'sans-serif',
+                        fontWeight: settings.descriptionBold ? 'bold' : 'normal',
+                        color: settings.descriptionColor || '#374151'
+                      }}
+                    >
+                      {settings.description}
+                    </p>
+                  )}
 
-                  <button
-                    className="px-8 py-3 rounded-full transition-all hover:opacity-90 inline-block"
-                    style={{
-                      backgroundColor: cta.bgColor || '#56c5c5',
-                      color: cta.textColor || '#ffffff',
-                      fontSize: `${cta.size || 16}px`,
-                      fontFamily: cta.font === 'serif' ? 'serif' : cta.font === 'lobster' ? 'Lobster' : 'sans-serif',
-                      fontWeight: cta.bold ? 'bold' : 'normal',
-                      fontStyle: cta.italic ? 'italic' : 'normal',
-                      textTransform: cta.uppercase ? 'uppercase' : 'none'
-                    }}
-                  >
-                    {cta.label || 'Ansök nu'}
-                  </button>
+                  {cta.label && (
+                    <button
+                      className="px-8 py-3 rounded-full transition-all hover:opacity-90 inline-block"
+                      style={{
+                        backgroundColor: cta.bgColor || '#56c5c5',
+                        color: cta.textColor || '#ffffff',
+                        fontSize: `${cta.size || 16}px`,
+                        fontFamily: cta.font === 'serif' ? 'serif' : cta.font === 'lobster' ? 'Lobster' : 'sans-serif',
+                        fontWeight: cta.bold ? 'bold' : 'normal',
+                        fontStyle: cta.italic ? 'italic' : 'normal',
+                        textTransform: cta.uppercase ? 'uppercase' : 'none'
+                      }}
+                    >
+                      {cta.label}
+                    </button>
+                  )}
                 </div>
 
                 {image.position === 'right' && image.url && (
