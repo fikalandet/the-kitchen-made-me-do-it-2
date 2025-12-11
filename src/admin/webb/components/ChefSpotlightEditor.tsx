@@ -29,8 +29,16 @@ interface ChefSpotlightSettings {
   imageShape?: 'rounded';
   curiosaItems?: Array<{ question: string; answer: string }>;
   curiosaLayout?: 'single' | 'double';
+  curiosaItemLayout?: 'inline' | 'stacked';
   curiosaColumn1?: Array<{ question: string; answer: string }>;
   curiosaColumn2?: Array<{ question: string; answer: string }>;
+  curiosaTitle?: string;
+  curiosaTitleFont?: string;
+  curiosaTitleSize?: number;
+  curiosaTitleBold?: boolean;
+  curiosaTitleItalic?: boolean;
+  curiosaTitleAlignment?: 'left' | 'center' | 'right';
+  curiosaTitleColor?: string;
   curiosaFont?: string;
   curiosaFontSize?: number;
   curiosaBold?: boolean;
@@ -845,6 +853,130 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                 }`}
               >
                 Två kolumner
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Rubrik
+            </label>
+            <input
+              type="text"
+              value={settings.curiosaTitle || 'Kuriosa'}
+              onChange={(e) => updateSetting('curiosaTitle', e.target.value)}
+              placeholder="Rubrik"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rubriktypsnitt
+              </label>
+              <select
+                value={settings.curiosaTitleFont || 'sans'}
+                onChange={(e) => updateSetting('curiosaTitleFont', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="poppins">Poppins</option>
+                <option value="lobster">Lobster</option>
+                <option value="sans">Sans Serif</option>
+                <option value="serif">Serif</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rubrikstorlek (px): {settings.curiosaTitleSize || 20}
+              </label>
+              <input
+                type="range"
+                min="14"
+                max="32"
+                value={settings.curiosaTitleSize || 20}
+                onChange={(e) => updateSetting('curiosaTitleSize', parseInt(e.target.value))}
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={settings.curiosaTitleBold || false}
+                  onChange={(e) => updateSetting('curiosaTitleBold', e.target.checked)}
+                  className="rounded"
+                />
+                <span className="text-sm text-gray-700">Fetstil rubrik</span>
+              </label>
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={settings.curiosaTitleItalic || false}
+                  onChange={(e) => updateSetting('curiosaTitleItalic', e.target.checked)}
+                  className="rounded"
+                />
+                <span className="text-sm text-gray-700">Kursiv rubrik</span>
+              </label>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rubrikplacering
+              </label>
+              <select
+                value={settings.curiosaTitleAlignment || 'left'}
+                onChange={(e) => updateSetting('curiosaTitleAlignment', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="left">Vänster</option>
+                <option value="center">Centrerad</option>
+                <option value="right">Höger</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Rubrikfärg
+            </label>
+            <ColorPicker
+              color={settings.curiosaTitleColor || '#1f2937'}
+              onChange={(color) => updateSetting('curiosaTitleColor', color)}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Fråga och svar-layout
+            </label>
+            <div className="flex gap-3">
+              <button
+                onClick={() => updateSetting('curiosaItemLayout', 'inline')}
+                className={`px-4 py-2 rounded-lg border-2 ${
+                  (settings.curiosaItemLayout || 'inline') === 'inline'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300'
+                }`}
+              >
+                Fråga + Svar på samma rad
+              </button>
+              <button
+                onClick={() => updateSetting('curiosaItemLayout', 'stacked')}
+                className={`px-4 py-2 rounded-lg border-2 ${
+                  settings.curiosaItemLayout === 'stacked'
+                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                    : 'border-gray-300'
+                }`}
+              >
+                Fråga över, Svar under
               </button>
             </div>
           </div>

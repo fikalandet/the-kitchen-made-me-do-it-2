@@ -25,6 +25,14 @@ interface ChefSpotlightSettings {
   imageShape?: 'rounded';
   curiosaItems?: Array<{ question: string; answer: string }>;
   curiosaLayout?: 'single' | 'double';
+  curiosaItemLayout?: 'inline' | 'stacked';
+  curiosaTitle?: string;
+  curiosaTitleFont?: string;
+  curiosaTitleSize?: number;
+  curiosaTitleBold?: boolean;
+  curiosaTitleItalic?: boolean;
+  curiosaTitleAlignment?: 'left' | 'center' | 'right';
+  curiosaTitleColor?: string;
   curiosaFont?: string;
   curiosaFontSize?: number;
   curiosaBold?: boolean;
@@ -216,9 +224,68 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
     if (curiosaItems.length === 0 || !curiosaItems.some(item => item.question)) return null;
 
     const isDoubleLayout = settings.curiosaLayout === 'double';
+    const isStackedLayout = settings.curiosaItemLayout === 'stacked';
     const halfPoint = Math.ceil(curiosaItems.length / 2);
     const column1Items = isDoubleLayout ? curiosaItems.slice(0, halfPoint) : curiosaItems;
     const column2Items = isDoubleLayout ? curiosaItems.slice(halfPoint) : [];
+
+    const renderItem = (item: { question: string; answer: string }, index: number) => {
+      if (!item.question) return null;
+
+      if (isStackedLayout) {
+        return (
+          <div key={index} className="mb-3">
+            <p
+              className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaItalic ? 'italic' : ''}`}
+              style={{
+                fontFamily: getFontFamily(settings.curiosaFont),
+                fontSize: `${settings.curiosaFontSize || 14}px`,
+                color: settings.curiosaTitleColor || '#374151'
+              }}
+            >
+              {item.question}
+            </p>
+            <p
+              className="mt-1"
+              style={{
+                fontFamily: getFontFamily(settings.curiosaFont),
+                fontSize: `${settings.curiosaFontSize || 14}px`,
+                color: (settings as any).curiosaTextColor || '#4b5563'
+              }}
+            >
+              {item.answer || ''}
+            </p>
+          </div>
+        );
+      }
+
+      return (
+        <p
+          key={index}
+          className="mb-2"
+          style={{
+            fontFamily: getFontFamily(settings.curiosaFont),
+            fontSize: `${settings.curiosaFontSize || 14}px`
+          }}
+        >
+          <span
+            className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaItalic ? 'italic' : ''}`}
+            style={{
+              color: settings.curiosaTitleColor || '#374151'
+            }}
+          >
+            {item.question}:
+          </span>{' '}
+          <span
+            style={{
+              color: (settings as any).curiosaTextColor || '#4b5563'
+            }}
+          >
+            {item.answer || ''}
+          </span>
+        </p>
+      );
+    };
 
     return (
       <div
@@ -232,60 +299,26 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
           width: `${settings.curiosaWidth || 100}%`
         }}
       >
-        <h4 className="text-xl font-bold text-gray-800 mb-4">Kuriosa</h4>
-        <div className={`${isDoubleLayout ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : 'space-y-3'}`}>
-          <div className={`space-y-3 ${isDoubleLayout ? 'pr-6 border-r border-gray-400' : ''}`}>
-            {column1Items.map((item, index) => (
-              item.question && (
-                <div key={index}>
-                  <p
-                    className={`text-gray-700 ${settings.curiosaBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaItalic ? 'italic' : ''}`}
-                    style={{
-                      fontFamily: getFontFamily(settings.curiosaFont),
-                      fontSize: `${settings.curiosaFontSize || 14}px`
-                    }}
-                  >
-                    {item.question}:
-                  </p>
-                  <p
-                    className="text-gray-600"
-                    style={{
-                      fontFamily: getFontFamily(settings.curiosaFont),
-                      fontSize: `${settings.curiosaFontSize || 14}px`
-                    }}
-                  >
-                    {item.answer || ''}
-                  </p>
-                </div>
-              )
-            ))}
+        <h4
+          className={`mb-4 ${settings.curiosaTitleFont === 'lobster' ? 'font-lobster' : ''} ${
+            settings.curiosaTitleBold ? 'font-bold' : 'font-semibold'
+          } ${settings.curiosaTitleItalic ? 'italic' : ''}`}
+          style={{
+            fontFamily: getFontFamily(settings.curiosaTitleFont),
+            fontSize: `${settings.curiosaTitleSize || 20}px`,
+            textAlign: settings.curiosaTitleAlignment || 'left',
+            color: settings.curiosaTitleColor || '#1f2937'
+          }}
+        >
+          {settings.curiosaTitle || 'Kuriosa'}
+        </h4>
+        <div className={`${isDoubleLayout ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : ''}`}>
+          <div className={`${isDoubleLayout ? 'pr-6 md:border-r border-gray-400' : ''}`}>
+            {column1Items.map((item, index) => renderItem(item, index))}
           </div>
           {isDoubleLayout && column2Items.length > 0 && (
-            <div className="space-y-3">
-              {column2Items.map((item, index) => (
-                item.question && (
-                  <div key={index + halfPoint}>
-                    <p
-                      className={`text-gray-700 ${settings.curiosaBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaItalic ? 'italic' : ''}`}
-                      style={{
-                        fontFamily: getFontFamily(settings.curiosaFont),
-                        fontSize: `${settings.curiosaFontSize || 14}px`
-                      }}
-                    >
-                      {item.question}:
-                    </p>
-                    <p
-                      className="text-gray-600"
-                      style={{
-                        fontFamily: getFontFamily(settings.curiosaFont),
-                        fontSize: `${settings.curiosaFontSize || 14}px`
-                      }}
-                    >
-                      {item.answer || ''}
-                    </p>
-                  </div>
-                )
-              ))}
+            <div>
+              {column2Items.map((item, index) => renderItem(item, index + halfPoint))}
             </div>
           )}
         </div>
@@ -376,20 +409,24 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
                   }`}
                 />
                 {settings.mainImageWaveStyle && settings.mainImageWaveStyle !== 'none' && (
-                  <div className="absolute bottom-0 left-0 right-0">
+                  <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
                     <svg
-                      viewBox="0 0 1440 160"
+                      viewBox="0 0 1440 100"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
                       className="w-full h-auto"
+                      preserveAspectRatio="none"
+                      style={{ display: 'block' }}
                     >
                       <path
                         d={
-                          settings.mainImageWaveStyle === 'wave1' ? 'M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z' :
-                          settings.mainImageWaveStyle === 'wave2' ? 'M0,64L48,85.3C96,107,192,149,288,154.7C384,160,480,128,576,128C672,128,768,160,864,154.7C960,149,1056,107,1152,80C1248,53,1344,43,1392,37.3L1440,32L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z' :
-                          'M0,32L48,48C96,64,192,96,288,101.3C384,107,480,85,576,69.3C672,53,768,43,864,58.7C960,75,1056,117,1152,133.3C1248,149,1344,139,1392,133.3L1440,128L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'
+                          settings.mainImageWaveStyle === 'wave1'
+                            ? 'M0,50 C240,20 480,80 720,50 C960,20 1200,80 1440,50 L1440,100 L0,100 Z'
+                            : settings.mainImageWaveStyle === 'wave2'
+                            ? 'M0,30 C360,70 720,0 1080,40 C1260,60 1350,50 1440,60 L1440,100 L0,100 Z'
+                            : 'M0,60 C240,30 480,70 720,40 C960,10 1200,60 1440,30 L1440,100 L0,100 Z'
                         }
-                        fill="white"
+                        fill={settings.backgroundColor || '#ffffff'}
                       />
                     </svg>
                   </div>
