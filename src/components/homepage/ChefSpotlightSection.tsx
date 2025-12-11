@@ -189,17 +189,14 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
 
     return (
       <div
-        className="p-6 rounded-xl overflow-hidden"
+        className="p-6 rounded-xl"
         style={{
           backgroundColor: settings.curiosaBgColor || '#f6f2e0',
           borderColor: settings.curiosaBorderColor || '#a1c798',
           borderWidth: `${settings.curiosaBorderWidth || 2}px`,
           borderStyle: 'solid',
           opacity: (settings.curiosaOpacity || 100) / 100,
-          width: `${settings.curiosaWidth || 100}%`,
-          minHeight: settings.curiosaHeight ? `${settings.curiosaHeight}px` : 'auto',
-          maxHeight: settings.curiosaHeight ? `${settings.curiosaHeight}px` : undefined,
-          overflowY: settings.curiosaHeight ? 'auto' : 'visible'
+          width: `${settings.curiosaWidth || 100}%`
         }}
       >
         <h4 className="text-xl font-bold text-gray-800 mb-4">Kuriosa</h4>
@@ -235,10 +232,10 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
 
   return (
     <section
-      className="py-16 px-4"
+      className="py-8 px-4"
       style={{ backgroundColor: settings.backgroundColor || '#ffffff' }}
     >
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div
           className={`mb-12 ${
             settings.headingAlignment === 'center' || !settings.headingAlignment
@@ -351,12 +348,12 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
             {settings.articleTitle && (
               <h3
                 className={`mb-4 ${
-                  settings.articleFont === 'lobster' ? 'font-lobster' : ''
-                } ${settings.articleBold ? 'font-bold' : ''} ${settings.articleItalic ? 'italic' : ''}`}
+                  (settings as any).articleTitleFont === 'lobster' ? 'font-lobster' : ''
+                } ${(settings as any).articleTitleBold ? 'font-bold' : ''}`}
                 style={{
-                  fontFamily: getFontFamily(settings.articleFont),
-                  fontSize: `${(settings.articleFontSize || 16) * 1.5}px`,
-                  textAlign: settings.articleAlignment || 'left'
+                  fontFamily: getFontFamily((settings as any).articleTitleFont || settings.articleFont),
+                  fontSize: `${(settings as any).articleTitleSize || 24}px`,
+                  textAlign: (settings as any).articleTitleAlign || settings.articleAlignment || 'left'
                 }}
               >
                 {settings.articleTitle}
@@ -365,12 +362,12 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
             {settings.articleIngress && (
               <p
                 className={`mb-4 ${
-                  settings.articleFont === 'lobster' ? 'font-lobster' : ''
-                } ${settings.articleBold ? 'font-bold' : ''} ${settings.articleItalic ? 'italic' : ''}`}
+                  (settings as any).articleIngressFont === 'lobster' ? 'font-lobster' : ''
+                } ${(settings as any).articleIngressBold ? 'font-bold' : ''}`}
                 style={{
-                  fontFamily: getFontFamily(settings.articleFont),
-                  fontSize: `${(settings.articleFontSize || 16) * 1.1}px`,
-                  textAlign: settings.articleAlignment || 'left'
+                  fontFamily: getFontFamily((settings as any).articleIngressFont || settings.articleFont),
+                  fontSize: `${(settings as any).articleIngressSize || 16}px`,
+                  textAlign: (settings as any).articleIngressAlign || settings.articleAlignment || 'left'
                 }}
               >
                 {settings.articleIngress}
@@ -379,11 +376,11 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
             {settings.articleBody && (
               <p
                 className={`text-gray-600 ${
-                  settings.articleFont === 'lobster' ? 'font-lobster' : ''
-                } ${settings.articleBold ? 'font-bold' : ''} ${settings.articleItalic ? 'italic' : ''}`}
+                  (settings as any).articleBodyFont === 'lobster' ? 'font-lobster' : ''
+                } ${(settings as any).articleBodyBold || settings.articleBold ? 'font-bold' : ''} ${settings.articleItalic ? 'italic' : ''}`}
                 style={{
-                  fontFamily: getFontFamily(settings.articleFont),
-                  fontSize: `${settings.articleFontSize || 16}px`,
+                  fontFamily: getFontFamily((settings as any).articleBodyFont || settings.articleFont),
+                  fontSize: `${(settings as any).articleBodySize || settings.articleFontSize || 14}px`,
                   textAlign: settings.articleAlignment || 'left'
                 }}
               >
@@ -405,7 +402,7 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
 
         {settings.quotePosition === 'before-cta' && renderQuote()}
 
-        {settings.ctaText && chef && (
+        {settings.ctaText && (
           <div
             className="flex"
             style={{
@@ -416,7 +413,7 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
             }}
           >
             <a
-              href={`/chef/${chef.id}`}
+              href={chef ? `/chef/${chef.id}` : '#'}
               className={`rounded-xl font-medium transition-all hover:shadow-lg ${
                 settings.ctaSize === 'small' ? 'px-4 py-2 text-sm' :
                 settings.ctaSize === 'large' ? 'px-8 py-4 text-lg' :
