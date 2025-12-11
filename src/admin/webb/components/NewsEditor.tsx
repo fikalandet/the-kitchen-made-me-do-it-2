@@ -31,9 +31,23 @@ interface NewsSettings {
   displayMode?: 'big-image-text' | 'card-flow';
   imageBlockPlacement?: 'left' | 'right';
   imageLayout?: 'layered' | 'grid';
+  imageBorderColor?: string;
+  imageBorderWidth?: number;
   textSectionHeading?: string;
+  textSectionHeadingFont?: string;
+  textSectionHeadingSize?: number;
+  textSectionHeadingBold?: boolean;
+  textSectionHeadingAlign?: 'left' | 'center' | 'right';
   textSectionIngress?: string;
+  textSectionIngressFont?: string;
+  textSectionIngressSize?: number;
+  textSectionIngressBold?: boolean;
+  textSectionIngressAlign?: 'left' | 'center' | 'right';
   textSectionBody?: string;
+  textSectionBodyFont?: string;
+  textSectionBodySize?: number;
+  textSectionBodyBold?: boolean;
+  textSectionBodyAlign?: 'left' | 'center' | 'right';
   textSectionCtaText?: string;
   textSectionCtaLink?: string;
   textSectionCtaLinkType?: 'internal' | 'external';
@@ -731,6 +745,32 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ramfärg
+                  </label>
+                  <ColorPicker
+                    color={settings.imageBorderColor || '#ffffff'}
+                    onChange={(color) => updateSetting('imageBorderColor', color)}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Rambredd (px): {settings.imageBorderWidth || 0}
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="20"
+                    value={settings.imageBorderWidth || 0}
+                    onChange={(e) => updateSetting('imageBorderWidth', parseInt(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Textsektionens rubrik
@@ -742,6 +782,45 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
                   placeholder="T.ex. Senaste nytt"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  <select
+                    value={settings.textSectionHeadingFont || 'sans'}
+                    onChange={(e) => updateSetting('textSectionHeadingFont', e.target.value)}
+                    className="px-2 py-1 text-sm border border-gray-300 rounded"
+                  >
+                    <option value="poppins">Poppins</option>
+                    <option value="lobster">Lobster</option>
+                    <option value="sans">Sans</option>
+                    <option value="serif">Serif</option>
+                  </select>
+                  <select
+                    value={settings.textSectionHeadingAlign || 'left'}
+                    onChange={(e) => updateSetting('textSectionHeadingAlign', e.target.value)}
+                    className="px-2 py-1 text-sm border border-gray-300 rounded"
+                  >
+                    <option value="left">Vänster</option>
+                    <option value="center">Center</option>
+                    <option value="right">Höger</option>
+                  </select>
+                  <label className="flex items-center gap-1 px-2 py-1 text-sm border border-gray-300 rounded">
+                    <input
+                      type="checkbox"
+                      checked={settings.textSectionHeadingBold || false}
+                      onChange={(e) => updateSetting('textSectionHeadingBold', e.target.checked)}
+                      className="w-3 h-3"
+                    />
+                    Fet
+                  </label>
+                  <input
+                    type="number"
+                    min="18"
+                    max="48"
+                    value={settings.textSectionHeadingSize || 30}
+                    onChange={(e) => updateSetting('textSectionHeadingSize', parseInt(e.target.value))}
+                    placeholder="px"
+                    className="px-2 py-1 text-sm border border-gray-300 rounded"
+                  />
+                </div>
               </div>
 
               <div>
@@ -755,6 +834,45 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
                   rows={2}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  <select
+                    value={settings.textSectionIngressFont || 'sans'}
+                    onChange={(e) => updateSetting('textSectionIngressFont', e.target.value)}
+                    className="px-2 py-1 text-sm border border-gray-300 rounded"
+                  >
+                    <option value="poppins">Poppins</option>
+                    <option value="lobster">Lobster</option>
+                    <option value="sans">Sans</option>
+                    <option value="serif">Serif</option>
+                  </select>
+                  <select
+                    value={settings.textSectionIngressAlign || 'left'}
+                    onChange={(e) => updateSetting('textSectionIngressAlign', e.target.value)}
+                    className="px-2 py-1 text-sm border border-gray-300 rounded"
+                  >
+                    <option value="left">Vänster</option>
+                    <option value="center">Center</option>
+                    <option value="right">Höger</option>
+                  </select>
+                  <label className="flex items-center gap-1 px-2 py-1 text-sm border border-gray-300 rounded">
+                    <input
+                      type="checkbox"
+                      checked={settings.textSectionIngressBold || false}
+                      onChange={(e) => updateSetting('textSectionIngressBold', e.target.checked)}
+                      className="w-3 h-3"
+                    />
+                    Fet
+                  </label>
+                  <input
+                    type="number"
+                    min="14"
+                    max="32"
+                    value={settings.textSectionIngressSize || 18}
+                    onChange={(e) => updateSetting('textSectionIngressSize', parseInt(e.target.value))}
+                    placeholder="px"
+                    className="px-2 py-1 text-sm border border-gray-300 rounded"
+                  />
+                </div>
               </div>
 
               <div>
@@ -768,6 +886,45 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg"
                 />
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  <select
+                    value={settings.textSectionBodyFont || 'sans'}
+                    onChange={(e) => updateSetting('textSectionBodyFont', e.target.value)}
+                    className="px-2 py-1 text-sm border border-gray-300 rounded"
+                  >
+                    <option value="poppins">Poppins</option>
+                    <option value="lobster">Lobster</option>
+                    <option value="sans">Sans</option>
+                    <option value="serif">Serif</option>
+                  </select>
+                  <select
+                    value={settings.textSectionBodyAlign || 'left'}
+                    onChange={(e) => updateSetting('textSectionBodyAlign', e.target.value)}
+                    className="px-2 py-1 text-sm border border-gray-300 rounded"
+                  >
+                    <option value="left">Vänster</option>
+                    <option value="center">Center</option>
+                    <option value="right">Höger</option>
+                  </select>
+                  <label className="flex items-center gap-1 px-2 py-1 text-sm border border-gray-300 rounded">
+                    <input
+                      type="checkbox"
+                      checked={settings.textSectionBodyBold || false}
+                      onChange={(e) => updateSetting('textSectionBodyBold', e.target.checked)}
+                      className="w-3 h-3"
+                    />
+                    Fet
+                  </label>
+                  <input
+                    type="number"
+                    min="12"
+                    max="24"
+                    value={settings.textSectionBodySize || 16}
+                    onChange={(e) => updateSetting('textSectionBodySize', parseInt(e.target.value))}
+                    placeholder="px"
+                    className="px-2 py-1 text-sm border border-gray-300 rounded"
+                  />
+                </div>
               </div>
 
               <div>
@@ -1472,7 +1629,8 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
                             image.shape === 'circle' ? 'rounded-full' : image.shape === 'rounded' ? 'rounded-2xl' : 'rounded-lg'
                           }`}
                           style={{
-                            transform: `rotate(${image.rotation}deg) scale(${image.scale})`
+                            transform: `rotate(${image.rotation}deg) scale(${image.scale})`,
+                            border: `${settings.imageBorderWidth || 0}px solid ${settings.imageBorderColor || '#ffffff'}`
                           }}
                         >
                           <img
@@ -1506,7 +1664,8 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
                               width: '200px',
                               height: '200px',
                               zIndex: image.z_index,
-                              transform: `translate(${image.offset_x}px, ${image.offset_y}px) rotate(${image.rotation}deg) scale(${image.scale})`
+                              transform: `translate(${image.offset_x}px, ${image.offset_y}px) rotate(${image.rotation}deg) scale(${image.scale})`,
+                              border: `${settings.imageBorderWidth || 0}px solid ${settings.imageBorderColor || '#ffffff'}`
                             }}
                           >
                             <img
@@ -1528,17 +1687,53 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
 
                 <div className={settings.imageBlockPlacement === 'right' ? 'order-1' : 'order-2'}>
                   {settings.textSectionHeading && (
-                    <h3 className="text-3xl font-bold text-gray-900 mb-4">
+                    <h3
+                      className={`mb-4 ${settings.textSectionHeadingBold ? 'font-bold' : 'font-semibold'} ${
+                        settings.textSectionHeadingFont === 'lobster' ? 'font-lobster' : ''
+                      }`}
+                      style={{
+                        fontSize: `${settings.textSectionHeadingSize || 30}px`,
+                        textAlign: settings.textSectionHeadingAlign || 'left',
+                        fontFamily: settings.textSectionHeadingFont === 'poppins' ? 'Poppins' :
+                                    settings.textSectionHeadingFont === 'lobster' ? 'Lobster' :
+                                    settings.textSectionHeadingFont === 'serif' ? 'serif' :
+                                    'sans-serif'
+                      }}
+                    >
                       {settings.textSectionHeading}
                     </h3>
                   )}
                   {settings.textSectionIngress && (
-                    <p className="text-lg text-gray-700 mb-4">
+                    <p
+                      className={`mb-4 ${settings.textSectionIngressBold ? 'font-bold' : ''} ${
+                        settings.textSectionIngressFont === 'lobster' ? 'font-lobster' : ''
+                      }`}
+                      style={{
+                        fontSize: `${settings.textSectionIngressSize || 18}px`,
+                        textAlign: settings.textSectionIngressAlign || 'left',
+                        fontFamily: settings.textSectionIngressFont === 'poppins' ? 'Poppins' :
+                                    settings.textSectionIngressFont === 'lobster' ? 'Lobster' :
+                                    settings.textSectionIngressFont === 'serif' ? 'serif' :
+                                    'sans-serif'
+                      }}
+                    >
                       {settings.textSectionIngress}
                     </p>
                   )}
                   {settings.textSectionBody && (
-                    <p className="text-gray-600 mb-6">
+                    <p
+                      className={`mb-6 ${settings.textSectionBodyBold ? 'font-bold' : ''} ${
+                        settings.textSectionBodyFont === 'lobster' ? 'font-lobster' : ''
+                      }`}
+                      style={{
+                        fontSize: `${settings.textSectionBodySize || 16}px`,
+                        textAlign: settings.textSectionBodyAlign || 'left',
+                        fontFamily: settings.textSectionBodyFont === 'poppins' ? 'Poppins' :
+                                    settings.textSectionBodyFont === 'lobster' ? 'Lobster' :
+                                    settings.textSectionBodyFont === 'serif' ? 'serif' :
+                                    'sans-serif'
+                      }}
+                    >
                       {settings.textSectionBody}
                     </p>
                   )}

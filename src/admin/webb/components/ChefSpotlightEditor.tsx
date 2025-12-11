@@ -24,6 +24,8 @@ interface ChefSpotlightSettings {
   mainImageWaveStyle?: 'none' | 'wave1' | 'wave2' | 'wave3';
   smallImageUrl?: string;
   smallImagePosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
+  smallImageSize?: number;
+  smallImageRotation?: number;
   smallImageBorderColor?: string;
   smallImageBorderWidth?: number;
   imageShape?: 'rounded';
@@ -43,6 +45,7 @@ interface ChefSpotlightSettings {
   curiosaFontSize?: number;
   curiosaBold?: boolean;
   curiosaItalic?: boolean;
+  curiosaTextColor?: string;
   curiosaBgColor?: string;
   curiosaBorderColor?: string;
   curiosaBorderWidth?: number;
@@ -51,8 +54,19 @@ interface ChefSpotlightSettings {
   curiosaHeight?: number;
   curiosaPlacement?: 'below-image' | 'beside-article';
   articleTitle?: string;
+  articleTitleFont?: string;
+  articleTitleSize?: number;
+  articleTitleBold?: boolean;
+  articleTitleAlign?: string;
   articleIngress?: string;
+  articleIngressFont?: string;
+  articleIngressSize?: number;
+  articleIngressBold?: boolean;
+  articleIngressAlign?: string;
   articleBody?: string;
+  articleBodyFont?: string;
+  articleBodySize?: number;
+  articleBodyBold?: boolean;
   articleFont?: string;
   articleFontSize?: number;
   articleBold?: boolean;
@@ -65,7 +79,7 @@ interface ChefSpotlightSettings {
   quoteItalic?: boolean;
   quoteColor?: string;
   quoteAlignment?: 'left' | 'center' | 'right';
-  quotePosition?: 'after-article' | 'after-curiosa' | 'before-cta';
+  quotePosition?: 'after-article' | 'after-curiosa' | 'before-cta' | 'above-article' | 'on-image-top' | 'on-image-middle' | 'on-image-bottom';
   cta1Text?: string;
   cta1Color?: string;
   cta1TextColor?: string;
