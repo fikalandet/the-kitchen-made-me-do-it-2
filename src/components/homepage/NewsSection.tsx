@@ -29,9 +29,26 @@ interface NewsSettings {
   displayMode?: 'big-image-text' | 'card-flow';
   imageBlockPlacement?: 'left' | 'right';
   imageLayout?: 'layered' | 'grid';
+  imageBorderColor?: string;
+  imageBorderWidth?: number;
+  textSectionBackgroundColor?: string;
+  textSectionBackgroundOpacity?: number;
+  textSectionPadding?: number;
   textSectionHeading?: string;
+  textSectionHeadingFont?: string;
+  textSectionHeadingSize?: number;
+  textSectionHeadingBold?: boolean;
+  textSectionHeadingAlign?: 'left' | 'center' | 'right';
   textSectionIngress?: string;
+  textSectionIngressFont?: string;
+  textSectionIngressSize?: number;
+  textSectionIngressBold?: boolean;
+  textSectionIngressAlign?: 'left' | 'center' | 'right';
   textSectionBody?: string;
+  textSectionBodyFont?: string;
+  textSectionBodySize?: number;
+  textSectionBodyBold?: boolean;
+  textSectionBodyAlign?: 'left' | 'center' | 'right';
   textSectionCtaText?: string;
   textSectionCtaLink?: string;
   textSectionCtaLinkType?: 'internal' | 'external';
@@ -281,7 +298,8 @@ export function NewsSection({ settings }: NewsSectionProps) {
                   key={image.id}
                   className={`relative overflow-hidden ${getShapeClass(image.shape)}`}
                   style={{
-                    transform: `rotate(${image.rotation}deg) scale(${image.scale})`
+                    transform: `rotate(${image.rotation}deg) scale(${image.scale})`,
+                    border: `${settings.imageBorderWidth || 0}px solid ${settings.imageBorderColor || '#ffffff'}`
                   }}
                 >
                   <img
@@ -303,7 +321,8 @@ export function NewsSection({ settings }: NewsSectionProps) {
                     width: '300px',
                     height: '300px',
                     zIndex: image.z_index,
-                    transform: `${getPositionStyle(image.position_preset, image.offset_x, image.offset_y).transform} rotate(${image.rotation}deg) scale(${image.scale})`
+                    transform: `${getPositionStyle(image.position_preset, image.offset_x, image.offset_y).transform} rotate(${image.rotation}deg) scale(${image.scale})`,
+                    border: `${settings.imageBorderWidth || 0}px solid ${settings.imageBorderColor || '#ffffff'}`
                   }}
                 >
                   <img
@@ -323,48 +342,99 @@ export function NewsSection({ settings }: NewsSectionProps) {
         </div>
 
         <div className={isImageLeft ? 'order-2' : 'order-1'}>
-          {settings.textSectionHeading && (
-            <h3 className="text-4xl font-bold text-gray-900 mb-4">
-              {settings.textSectionHeading}
-            </h3>
-          )}
-          {settings.textSectionIngress && (
-            <p className="text-xl text-gray-700 mb-4">
-              {settings.textSectionIngress}
-            </p>
-          )}
-          {settings.textSectionBody && (
-            <p className="text-gray-600 mb-6">
-              {settings.textSectionBody}
-            </p>
-          )}
-          {settings.textSectionCtaText && settings.textSectionCtaLink && (
-            settings.textSectionCtaLinkType === 'internal' ? (
-              <Link
-                to={settings.textSectionCtaLink}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium hover:opacity-90 transition-opacity"
+          <div
+            className="rounded-lg"
+            style={{
+              backgroundColor: (() => {
+                const hex = settings.textSectionBackgroundColor || '#f9fafb';
+                const opacity = (settings.textSectionBackgroundOpacity || 100) / 100;
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+              })(),
+              padding: `${settings.textSectionPadding || 24}px`
+            }}
+          >
+            {settings.textSectionHeading && (
+              <h3
+                className={`mb-4 ${settings.textSectionHeadingBold ? 'font-bold' : 'font-semibold'} ${
+                  settings.textSectionHeadingFont === 'lobster' ? 'font-lobster' : ''
+                }`}
                 style={{
-                  backgroundColor: settings.textSectionCtaColor || '#a1c798'
+                  fontSize: `${settings.textSectionHeadingSize || 30}px`,
+                  textAlign: settings.textSectionHeadingAlign || 'left',
+                  fontFamily: settings.textSectionHeadingFont === 'poppins' ? 'Poppins' :
+                              settings.textSectionHeadingFont === 'lobster' ? 'Lobster' :
+                              settings.textSectionHeadingFont === 'serif' ? 'serif' :
+                              'sans-serif'
                 }}
               >
-                {settings.textSectionCtaText}
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-            ) : (
-              <a
-                href={settings.textSectionCtaLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium hover:opacity-90 transition-opacity"
+                {settings.textSectionHeading}
+              </h3>
+            )}
+            {settings.textSectionIngress && (
+              <p
+                className={`mb-4 ${settings.textSectionIngressBold ? 'font-bold' : ''} ${
+                  settings.textSectionIngressFont === 'lobster' ? 'font-lobster' : ''
+                }`}
                 style={{
-                  backgroundColor: settings.textSectionCtaColor || '#a1c798'
+                  fontSize: `${settings.textSectionIngressSize || 18}px`,
+                  textAlign: settings.textSectionIngressAlign || 'left',
+                  fontFamily: settings.textSectionIngressFont === 'poppins' ? 'Poppins' :
+                              settings.textSectionIngressFont === 'lobster' ? 'Lobster' :
+                              settings.textSectionIngressFont === 'serif' ? 'serif' :
+                              'sans-serif'
                 }}
               >
-                {settings.textSectionCtaText}
-                <ArrowRight className="w-5 h-5" />
-              </a>
-            )
-          )}
+                {settings.textSectionIngress}
+              </p>
+            )}
+            {settings.textSectionBody && (
+              <p
+                className={`mb-6 ${settings.textSectionBodyBold ? 'font-bold' : ''} ${
+                  settings.textSectionBodyFont === 'lobster' ? 'font-lobster' : ''
+                }`}
+                style={{
+                  fontSize: `${settings.textSectionBodySize || 16}px`,
+                  textAlign: settings.textSectionBodyAlign || 'left',
+                  fontFamily: settings.textSectionBodyFont === 'poppins' ? 'Poppins' :
+                              settings.textSectionBodyFont === 'lobster' ? 'Lobster' :
+                              settings.textSectionBodyFont === 'serif' ? 'serif' :
+                              'sans-serif'
+                }}
+              >
+                {settings.textSectionBody}
+              </p>
+            )}
+            {settings.textSectionCtaText && settings.textSectionCtaLink && (
+              settings.textSectionCtaLinkType === 'internal' ? (
+                <Link
+                  to={settings.textSectionCtaLink}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium hover:opacity-90 transition-opacity"
+                  style={{
+                    backgroundColor: settings.textSectionCtaColor || '#a1c798'
+                  }}
+                >
+                  {settings.textSectionCtaText}
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              ) : (
+                <a
+                  href={settings.textSectionCtaLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium hover:opacity-90 transition-opacity"
+                  style={{
+                    backgroundColor: settings.textSectionCtaColor || '#a1c798'
+                  }}
+                >
+                  {settings.textSectionCtaText}
+                  <ArrowRight className="w-5 h-5" />
+                </a>
+              )
+            )}
+          </div>
         </div>
       </div>
     );

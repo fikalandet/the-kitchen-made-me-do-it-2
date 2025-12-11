@@ -1551,100 +1551,6 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
         </div>
       </CollapsibleCard>
 
-      <CollapsibleCard title="Spacing" defaultExpanded={true}>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Rubrik till bild (px): {settings.spacingHeaderToImage || 48}
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="4"
-              value={settings.spacingHeaderToImage || 48}
-              onChange={(e) => updateSetting('spacingHeaderToImage', parseInt(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Bild till innehåll (px): {settings.spacingImageToContent || 32}
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="4"
-              value={settings.spacingImageToContent || 32}
-              onChange={(e) => updateSetting('spacingImageToContent', parseInt(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Kuriosa till artikel (px): {settings.spacingCuriosaToArticle || 24}
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="4"
-              value={settings.spacingCuriosaToArticle || 24}
-              onChange={(e) => updateSetting('spacingCuriosaToArticle', parseInt(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Innehåll till citat (px): {settings.spacingContentToQuote || 48}
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="4"
-              value={settings.spacingContentToQuote || 48}
-              onChange={(e) => updateSetting('spacingContentToQuote', parseInt(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Citat till knappar (px): {settings.spacingQuoteToButtons || 48}
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              step="4"
-              value={settings.spacingQuoteToButtons || 48}
-              onChange={(e) => updateSetting('spacingQuoteToButtons', parseInt(e.target.value))}
-              className="w-full"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Mellan knappar (px): {settings.spacingBetweenButtons || 16}
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="60"
-              step="4"
-              value={settings.spacingBetweenButtons || 16}
-              onChange={(e) => updateSetting('spacingBetweenButtons', parseInt(e.target.value))}
-              className="w-full"
-            />
-          </div>
-        </div>
-      </CollapsibleCard>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <CollapsibleCard title="Knapp 1" defaultExpanded={true}>
         <div className="space-y-4">
@@ -2027,7 +1933,101 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
       </CollapsibleCard>
       </div>
 
-      <CollapsibleCard title="Preview" defaultExpanded={false}>
+      <CollapsibleCard title="Spacing" defaultExpanded={true}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Rubrik till bild (px): {settings.spacingHeaderToImage || 48}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="4"
+              value={settings.spacingHeaderToImage || 48}
+              onChange={(e) => updateSetting('spacingHeaderToImage', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Bild till innehåll (px): {settings.spacingImageToContent || 32}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="4"
+              value={settings.spacingImageToContent || 32}
+              onChange={(e) => updateSetting('spacingImageToContent', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Kuriosa till artikel (px): {settings.spacingCuriosaToArticle || 24}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="4"
+              value={settings.spacingCuriosaToArticle || 24}
+              onChange={(e) => updateSetting('spacingCuriosaToArticle', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Innehåll till citat (px): {settings.spacingContentToQuote || 48}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="4"
+              value={settings.spacingContentToQuote || 48}
+              onChange={(e) => updateSetting('spacingContentToQuote', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Citat till knappar (px): {settings.spacingQuoteToButtons || 48}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="4"
+              value={settings.spacingQuoteToButtons || 48}
+              onChange={(e) => updateSetting('spacingQuoteToButtons', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Mellan knappar (px): {settings.spacingBetweenButtons || 16}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="60"
+              step="4"
+              value={settings.spacingBetweenButtons || 16}
+              onChange={(e) => updateSetting('spacingBetweenButtons', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+        </div>
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Preview" defaultExpanded={true}>
         <div
           className="p-8 rounded-lg min-h-[600px]"
           style={{ backgroundColor: settings.backgroundColor || '#ffffff' }}

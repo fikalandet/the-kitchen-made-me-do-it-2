@@ -33,6 +33,9 @@ interface NewsSettings {
   imageLayout?: 'layered' | 'grid';
   imageBorderColor?: string;
   imageBorderWidth?: number;
+  textSectionBackgroundColor?: string;
+  textSectionBackgroundOpacity?: number;
+  textSectionPadding?: number;
   textSectionHeading?: string;
   textSectionHeadingFont?: string;
   textSectionHeadingSize?: number;
@@ -768,6 +771,49 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
                     onChange={(e) => updateSetting('imageBorderWidth', parseInt(e.target.value))}
                     className="w-full"
                   />
+                </div>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-semibold text-gray-900 mb-3">Textblockets bakgrund</h4>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Bakgrundsfärg
+                    </label>
+                    <ColorPicker
+                      color={settings.textSectionBackgroundColor || '#f9fafb'}
+                      onChange={(color) => updateSetting('textSectionBackgroundColor', color)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Opacitet (%): {settings.textSectionBackgroundOpacity || 100}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={settings.textSectionBackgroundOpacity || 100}
+                      onChange={(e) => updateSetting('textSectionBackgroundOpacity', parseInt(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Padding (px): {settings.textSectionPadding || 24}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="80"
+                      value={settings.textSectionPadding || 24}
+                      onChange={(e) => updateSetting('textSectionPadding', parseInt(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1686,68 +1732,83 @@ export default function NewsEditor({ settings, onSettingsChange }: NewsEditorPro
                 </div>
 
                 <div className={settings.imageBlockPlacement === 'right' ? 'order-1' : 'order-2'}>
-                  {settings.textSectionHeading && (
-                    <h3
-                      className={`mb-4 ${settings.textSectionHeadingBold ? 'font-bold' : 'font-semibold'} ${
-                        settings.textSectionHeadingFont === 'lobster' ? 'font-lobster' : ''
-                      }`}
-                      style={{
-                        fontSize: `${settings.textSectionHeadingSize || 30}px`,
-                        textAlign: settings.textSectionHeadingAlign || 'left',
-                        fontFamily: settings.textSectionHeadingFont === 'poppins' ? 'Poppins' :
-                                    settings.textSectionHeadingFont === 'lobster' ? 'Lobster' :
-                                    settings.textSectionHeadingFont === 'serif' ? 'serif' :
-                                    'sans-serif'
-                      }}
-                    >
-                      {settings.textSectionHeading}
-                    </h3>
-                  )}
-                  {settings.textSectionIngress && (
-                    <p
-                      className={`mb-4 ${settings.textSectionIngressBold ? 'font-bold' : ''} ${
-                        settings.textSectionIngressFont === 'lobster' ? 'font-lobster' : ''
-                      }`}
-                      style={{
-                        fontSize: `${settings.textSectionIngressSize || 18}px`,
-                        textAlign: settings.textSectionIngressAlign || 'left',
-                        fontFamily: settings.textSectionIngressFont === 'poppins' ? 'Poppins' :
-                                    settings.textSectionIngressFont === 'lobster' ? 'Lobster' :
-                                    settings.textSectionIngressFont === 'serif' ? 'serif' :
-                                    'sans-serif'
-                      }}
-                    >
-                      {settings.textSectionIngress}
-                    </p>
-                  )}
-                  {settings.textSectionBody && (
-                    <p
-                      className={`mb-6 ${settings.textSectionBodyBold ? 'font-bold' : ''} ${
-                        settings.textSectionBodyFont === 'lobster' ? 'font-lobster' : ''
-                      }`}
-                      style={{
-                        fontSize: `${settings.textSectionBodySize || 16}px`,
-                        textAlign: settings.textSectionBodyAlign || 'left',
-                        fontFamily: settings.textSectionBodyFont === 'poppins' ? 'Poppins' :
-                                    settings.textSectionBodyFont === 'lobster' ? 'Lobster' :
-                                    settings.textSectionBodyFont === 'serif' ? 'serif' :
-                                    'sans-serif'
-                      }}
-                    >
-                      {settings.textSectionBody}
-                    </p>
-                  )}
-                  {settings.textSectionCtaText && (
-                    <button
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium"
-                      style={{
-                        backgroundColor: settings.textSectionCtaColor || '#a1c798'
-                      }}
-                    >
-                      {settings.textSectionCtaText}
-                      <ArrowRight className="w-5 h-5" />
-                    </button>
-                  )}
+                  <div
+                    className="rounded-lg"
+                    style={{
+                      backgroundColor: (() => {
+                        const hex = settings.textSectionBackgroundColor || '#f9fafb';
+                        const opacity = (settings.textSectionBackgroundOpacity || 100) / 100;
+                        const r = parseInt(hex.slice(1, 3), 16);
+                        const g = parseInt(hex.slice(3, 5), 16);
+                        const b = parseInt(hex.slice(5, 7), 16);
+                        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+                      })(),
+                      padding: `${settings.textSectionPadding || 24}px`
+                    }}
+                  >
+                    {settings.textSectionHeading && (
+                      <h3
+                        className={`mb-4 ${settings.textSectionHeadingBold ? 'font-bold' : 'font-semibold'} ${
+                          settings.textSectionHeadingFont === 'lobster' ? 'font-lobster' : ''
+                        }`}
+                        style={{
+                          fontSize: `${settings.textSectionHeadingSize || 30}px`,
+                          textAlign: settings.textSectionHeadingAlign || 'left',
+                          fontFamily: settings.textSectionHeadingFont === 'poppins' ? 'Poppins' :
+                                      settings.textSectionHeadingFont === 'lobster' ? 'Lobster' :
+                                      settings.textSectionHeadingFont === 'serif' ? 'serif' :
+                                      'sans-serif'
+                        }}
+                      >
+                        {settings.textSectionHeading}
+                      </h3>
+                    )}
+                    {settings.textSectionIngress && (
+                      <p
+                        className={`mb-4 ${settings.textSectionIngressBold ? 'font-bold' : ''} ${
+                          settings.textSectionIngressFont === 'lobster' ? 'font-lobster' : ''
+                        }`}
+                        style={{
+                          fontSize: `${settings.textSectionIngressSize || 18}px`,
+                          textAlign: settings.textSectionIngressAlign || 'left',
+                          fontFamily: settings.textSectionIngressFont === 'poppins' ? 'Poppins' :
+                                      settings.textSectionIngressFont === 'lobster' ? 'Lobster' :
+                                      settings.textSectionIngressFont === 'serif' ? 'serif' :
+                                      'sans-serif'
+                        }}
+                      >
+                        {settings.textSectionIngress}
+                      </p>
+                    )}
+                    {settings.textSectionBody && (
+                      <p
+                        className={`mb-6 ${settings.textSectionBodyBold ? 'font-bold' : ''} ${
+                          settings.textSectionBodyFont === 'lobster' ? 'font-lobster' : ''
+                        }`}
+                        style={{
+                          fontSize: `${settings.textSectionBodySize || 16}px`,
+                          textAlign: settings.textSectionBodyAlign || 'left',
+                          fontFamily: settings.textSectionBodyFont === 'poppins' ? 'Poppins' :
+                                      settings.textSectionBodyFont === 'lobster' ? 'Lobster' :
+                                      settings.textSectionBodyFont === 'serif' ? 'serif' :
+                                      'sans-serif'
+                        }}
+                      >
+                        {settings.textSectionBody}
+                      </p>
+                    )}
+                    {settings.textSectionCtaText && (
+                      <button
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-lg text-white font-medium"
+                        style={{
+                          backgroundColor: settings.textSectionCtaColor || '#a1c798'
+                        }}
+                      >
+                        {settings.textSectionCtaText}
+                        <ArrowRight className="w-5 h-5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
