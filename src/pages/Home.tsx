@@ -26,6 +26,7 @@ import { MoodDishesSection } from '../components/homepage/MoodDishesSection';
 import { HoroscopeSection } from '../components/homepage/HoroscopeSection';
 import { EditorialCategoriesSection } from '../components/homepage/EditorialCategoriesSection';
 import { TestimonialsSection } from '../components/homepage/TestimonialsSection';
+import { BecomeChefSection } from '../components/homepage/BecomeChefSection';
 import { OnStoveNowCard } from '../components/CardKit/variants/OnStoveNowCard';
 import { PopularNewMoodCard } from '../components/CardKit/variants/PopularNewMoodCard';
 import { ChefOfWeekCard } from '../components/CardKit/variants/ChefOfWeekCard';
@@ -75,6 +76,7 @@ export const Home: React.FC = () => {
   const [editorialCategoriesSettings, setEditorialCategoriesSettings] = useState<any>({});
   const [chefSpotlightSettings, setChefSpotlightSettings] = useState<any>({});
   const [testimonialsSettings, setTestimonialsSettings] = useState<any>({});
+  const [becomeChefSettings, setBecomeChefSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
   const [brattomDishes, setBrattomDishes] = useState<any[]>([]);
   const [tjuvkikDishes, setTjuvkikDishes] = useState<any[]>([]);
@@ -269,6 +271,16 @@ export const Home: React.FC = () => {
 
     if (testimonialsSection) {
       setTestimonialsSettings(testimonialsSection.settings || {});
+    }
+
+    const { data: becomeChefSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'bli-en-kitchen-kock')
+      .maybeSingle();
+
+    if (becomeChefSection) {
+      setBecomeChefSettings(becomeChefSection.settings || {});
     }
 
     const mockChef = {
@@ -920,26 +932,7 @@ export const Home: React.FC = () => {
 
       <TestimonialsSection settings={testimonialsSettings} />
 
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <div className="rounded-2xl p-12 text-center shadow-lg" style={{ backgroundColor: '#f6f2e0' }}>
-            <h2 className="font-lobster text-4xl text-gray-800 mb-4">
-              Bli en Kitchen-kock
-            </h2>
-            <p className="text-lg text-gray-700 mb-8 max-w-2xl mx-auto">
-              Dela din passion för matlagning och tjäna pengar på det du älskar.
-              Bli en del av Sveriges största community för hemmakockar.
-            </p>
-            <Link
-              to="/bli-kock"
-              className="px-8 py-3 rounded-full font-medium text-white transition-all hover:shadow-lg hover:opacity-90 inline-block"
-              style={{ backgroundColor: '#56c5c5' }}
-            >
-              Ansök nu
-            </Link>
-          </div>
-        </div>
-      </section>
+      <BecomeChefSection settings={becomeChefSettings} />
 
       <HoroscopeSection horoscopes={horoscopes} />
 

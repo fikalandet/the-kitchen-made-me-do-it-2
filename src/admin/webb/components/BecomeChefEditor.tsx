@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Trash2, Upload } from 'lucide-react';
 import CollapsibleCard from './CollapsibleCard';
 import ColorPicker from './ColorPicker';
@@ -6,32 +6,10 @@ import EmojiPicker from './EmojiPicker';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../contexts/AuthContext';
 
-interface BecomeChefCard {
+interface BecomeChefBenefit {
   id: string;
-  title: string;
-  body: string;
   icon: string;
-  title_font?: string;
-  title_bold?: boolean;
-  title_size?: number;
-  body_font?: string;
-  body_bold?: boolean;
-  body_size?: number;
-}
-
-interface BecomeChefCTA {
-  id: string;
-  label: string;
-  href: string;
-  font?: string;
-  bold?: boolean;
-  italic?: boolean;
-  uppercase?: boolean;
-  size?: number;
-  bg_color?: string;
-  text_color?: string;
-  opacity?: number;
-  icon?: string;
+  text: string;
 }
 
 interface BecomeChefSettings {
@@ -45,12 +23,40 @@ interface BecomeChefSettings {
   subtitleRotationInterval?: number;
   subtitlePlacement?: 'inline' | 'below';
   subtitleColor?: string;
-  become_chef_main_image?: string;
-  become_chef_image_position?: 'left' | 'right' | 'top' | 'none';
-  become_chef_image_opacity?: number;
-  become_chef_emojis?: string;
-  become_chef_cards?: BecomeChefCard[];
-  become_chef_ctas?: BecomeChefCTA[];
+  contentBox?: {
+    bgColor?: string;
+    width?: number;
+    height?: number;
+    opacity?: number;
+    borderRadius?: number;
+  };
+  description?: string;
+  descriptionFont?: string;
+  descriptionBold?: boolean;
+  descriptionSize?: number;
+  descriptionColor?: string;
+  descriptionAlignment?: 'left' | 'center';
+  image?: {
+    url?: string;
+    position?: 'none' | 'left' | 'right';
+    hasBorder?: boolean;
+    borderColor?: string;
+    borderWidth?: number;
+    borderRadius?: 'small' | 'large';
+  };
+  cta?: {
+    label?: string;
+    href?: string;
+    bgColor?: string;
+    textColor?: string;
+    font?: string;
+    bold?: boolean;
+    italic?: boolean;
+    uppercase?: boolean;
+    size?: number;
+  };
+  benefits?: BecomeChefBenefit[];
+  benefitsPerRow?: number;
 }
 
 interface BecomeChefEditorProps {
@@ -61,10 +67,38 @@ interface BecomeChefEditorProps {
 export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeChefEditorProps) {
   const { user } = useAuth();
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [activeSubtitleIndex, setActiveSubtitleIndex] = useState(0);
+  const [fadeIn, setFadeIn] = useState(true);
 
   const updateSetting = (key: keyof BecomeChefSettings, value: any) => {
     onSettingsChange({ ...settings, [key]: value });
   };
+
+  const updateNestedSetting = (parent: 'contentBox' | 'image' | 'cta', key: string, value: any) => {
+    onSettingsChange({
+      ...settings,
+      [parent]: {
+        ...(settings[parent] || {}),
+        [key]: value
+      }
+    });
+  };
+
+  useEffect(() => {
+    const subtitleTexts = settings.subtitleTexts || [];
+    if (subtitleTexts.length <= 1) return;
+
+    const rotationInterval = settings.subtitleRotationInterval || 10000;
+    const interval = setInterval(() => {
+      setFadeIn(false);
+      setTimeout(() => {
+        setActiveSubtitleIndex((prev) => (prev + 1) % subtitleTexts.length);
+        setFadeIn(true);
+      }, 300);
+    }, rotationInterval);
+
+    return () => clearInterval(interval);
+  }, [settings.subtitleTexts, settings.subtitleRotationInterval]);
 
   const addSubtitleText = () => {
     const subtitleTexts = settings.subtitleTexts || [];
@@ -105,7 +139,7 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
         .from('product-images')
         .getPublicUrl(filePath);
 
-      updateSetting('become_chef_main_image', data.publicUrl);
+      updateNestedSetting('image', 'url', data.publicUrl);
     } catch (err) {
       console.error('Error uploading file:', err);
       alert('Kunde inte ladda upp filen. Försök igen.');
@@ -114,70 +148,46 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
     }
   };
 
-  const addCard = () => {
-    const cards = settings.become_chef_cards || [];
-    const newCard: BecomeChefCard = {
-      id: `card-${Date.now()}`,
-      title: '',
-      body: '',
+  const addBenefit = () => {
+    const benefits = settings.benefits || [];
+    const newBenefit: BecomeChefBenefit = {
+      id: `benefit-${Date.now()}`,
       icon: '',
-      title_size: 20,
-      body_size: 16
+      text: ''
     };
-    updateSetting('become_chef_cards', [...cards, newCard]);
+    updateSetting('benefits', [...benefits, newBenefit]);
   };
 
-  const removeCard = (id: string) => {
-    const cards = settings.become_chef_cards || [];
-    updateSetting('become_chef_cards', cards.filter(c => c.id !== id));
+  const removeBenefit = (id: string) => {
+    const benefits = settings.benefits || [];
+    updateSetting('benefits', benefits.filter(b => b.id !== id));
   };
 
-  const updateCard = (id: string, key: keyof BecomeChefCard, value: any) => {
-    const cards = settings.become_chef_cards || [];
-    const newCards = cards.map(c => c.id === id ? { ...c, [key]: value } : c);
-    updateSetting('become_chef_cards', newCards);
-  };
-
-  const addCTA = () => {
-    const ctas = settings.become_chef_ctas || [];
-    const newCTA: BecomeChefCTA = {
-      id: `cta-${Date.now()}`,
-      label: '',
-      href: '',
-      size: 16,
-      bg_color: '#56c5c5',
-      text_color: '#ffffff',
-      opacity: 100
-    };
-    updateSetting('become_chef_ctas', [...ctas, newCTA]);
-  };
-
-  const removeCTA = (id: string) => {
-    const ctas = settings.become_chef_ctas || [];
-    updateSetting('become_chef_ctas', ctas.filter(c => c.id !== id));
-  };
-
-  const updateCTA = (id: string, key: keyof BecomeChefCTA, value: any) => {
-    const ctas = settings.become_chef_ctas || [];
-    const newCTAs = ctas.map(c => c.id === id ? { ...c, [key]: value } : c);
-    updateSetting('become_chef_ctas', newCTAs);
+  const updateBenefit = (id: string, key: keyof BecomeChefBenefit, value: any) => {
+    const benefits = settings.benefits || [];
+    const newBenefits = benefits.map(b => b.id === id ? { ...b, [key]: value } : b);
+    updateSetting('benefits', newBenefits);
   };
 
   const subtitleTexts = settings.subtitleTexts || [''];
+  const contentBox = settings.contentBox || {};
+  const image = settings.image || {};
+  const cta = settings.cta || {};
+  const benefits = settings.benefits || [];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900">Bli en kitchen-kock</h3>
-          <p className="text-sm text-gray-600">Anpassa inställningar för Bli en kitchen-kock-sektionen</p>
+          <h3 className="text-lg font-semibold text-gray-900">Bli en Kitchen-kock</h3>
+          <p className="text-sm text-gray-600">Anpassa inställningar för Bli en Kitchen-kock-sektionen</p>
         </div>
       </div>
 
       <CollapsibleCard title="Bakgrund" defaultExpanded={true}>
         <ColorPicker
           label="Bakgrundsfärg för hela sektionen"
-          value={settings.backgroundColor || '#f6f2e0'}
+          value={settings.backgroundColor || '#a1c798'}
           onChange={(color) => updateSetting('backgroundColor', color)}
         />
       </CollapsibleCard>
@@ -301,30 +311,15 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Placering av textrad
+              Intervall för textrad-rotation (sekunder)
             </label>
-            <div className="flex gap-3">
-              <button
-                onClick={() => updateSetting('subtitlePlacement', 'inline')}
-                className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                  settings.subtitlePlacement === 'inline' || !settings.subtitlePlacement
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                På samma rad
-              </button>
-              <button
-                onClick={() => updateSetting('subtitlePlacement', 'below')}
-                className={`px-4 py-2 rounded-lg border-2 transition-all ${
-                  settings.subtitlePlacement === 'below'
-                    ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
-                    : 'border-gray-300 hover:border-gray-400'
-                }`}
-              >
-                Under rubriken
-              </button>
-            </div>
+            <input
+              type="number"
+              min="1"
+              value={(settings.subtitleRotationInterval || 10000) / 1000}
+              onChange={(e) => updateSetting('subtitleRotationInterval', parseInt(e.target.value) * 1000 || 10000)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+            />
           </div>
 
           <ColorPicker
@@ -335,238 +330,540 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
         </div>
       </CollapsibleCard>
 
-      <CollapsibleCard title="Bild & layout" defaultExpanded={false}>
+      <CollapsibleCard title="Innehåll" defaultExpanded={true}>
+        <div className="space-y-6">
+          <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-medium text-gray-900">Bakgrundskort</h4>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Bredd (%)
+                </label>
+                <input
+                  type="number"
+                  min="50"
+                  max="100"
+                  value={contentBox.width || 100}
+                  onChange={(e) => updateNestedSetting('contentBox', 'width', parseInt(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Rundade hörn (px)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="50"
+                  value={contentBox.borderRadius || 16}
+                  onChange={(e) => updateNestedSetting('contentBox', 'borderRadius', parseInt(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+            </div>
+
+            <ColorPicker
+              label="Bakgrundsfärg"
+              value={contentBox.bgColor || '#f6f2e0'}
+              onChange={(color) => updateNestedSetting('contentBox', 'bgColor', color)}
+            />
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Opacity ({contentBox.opacity || 100}%)
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={contentBox.opacity || 100}
+                onChange={(e) => updateNestedSetting('contentBox', 'opacity', parseInt(e.target.value))}
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-medium text-gray-900">Text</h4>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Beskrivningstext
+              </label>
+              <textarea
+                value={settings.description || ''}
+                onChange={(e) => updateSetting('description', e.target.value)}
+                placeholder="Dela din passion för matlagning och tjäna pengar på det du älskar..."
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Typsnitt
+                </label>
+                <select
+                  value={settings.descriptionFont || 'sans'}
+                  onChange={(e) => updateSetting('descriptionFont', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="lobster">Lobster</option>
+                  <option value="sans">Sans Serif</option>
+                  <option value="serif">Serif</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Storlek (px)
+                </label>
+                <input
+                  type="number"
+                  min="12"
+                  max="32"
+                  value={settings.descriptionSize || 18}
+                  onChange={(e) => updateSetting('descriptionSize', parseInt(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.descriptionBold || false}
+                  onChange={(e) => updateSetting('descriptionBold', e.target.checked)}
+                  className="w-4 h-4 rounded"
+                />
+                <span className="text-sm font-medium text-gray-700">Fet stil</span>
+              </label>
+            </div>
+
+            <ColorPicker
+              label="Textfärg"
+              value={settings.descriptionColor || '#374151'}
+              onChange={(color) => updateSetting('descriptionColor', color)}
+            />
+          </div>
+
+          <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+            <h4 className="font-medium text-gray-900">Bild</h4>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Bild
+              </label>
+              <input
+                type="file"
+                id="become-chef-image-upload"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImageUpload(file);
+                }}
+                className="hidden"
+              />
+              <div className="flex gap-2">
+                <label
+                  htmlFor="become-chef-image-upload"
+                  className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 ${
+                    uploadingImage ? 'opacity-50' : ''
+                  }`}
+                >
+                  <Upload className="w-4 h-4" />
+                  {uploadingImage ? 'Laddar upp...' : 'Ladda upp bild'}
+                </label>
+                {image.url && (
+                  <button
+                    onClick={() => updateNestedSetting('image', 'url', '')}
+                    className="px-3 py-2 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-lg hover:bg-red-50"
+                  >
+                    Ta bort
+                  </button>
+                )}
+              </div>
+              {image.url && (
+                <div className="mt-2">
+                  <img
+                    src={image.url}
+                    alt="Preview"
+                    className="w-full max-w-xs rounded-lg border border-gray-300"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Placering
+              </label>
+              <select
+                value={image.position || 'none'}
+                onChange={(e) => updateNestedSetting('image', 'position', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="none">Ingen bild</option>
+                <option value="left">Bild vänster</option>
+                <option value="right">Bild höger</option>
+              </select>
+            </div>
+
+            {image.position !== 'none' && (
+              <>
+                <div>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={image.hasBorder || false}
+                      onChange={(e) => updateNestedSetting('image', 'hasBorder', e.target.checked)}
+                      className="w-4 h-4 rounded"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Visa ram</span>
+                  </label>
+                </div>
+
+                {image.hasBorder && (
+                  <>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Ramens rundning
+                      </label>
+                      <select
+                        value={image.borderRadius || 'small'}
+                        onChange={(e) => updateNestedSetting('image', 'borderRadius', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="small">Lite rundad</option>
+                        <option value="large">Mycket rundad</option>
+                      </select>
+                    </div>
+
+                    <ColorPicker
+                      label="Ramfärg"
+                      value={image.borderColor || '#56c5c5'}
+                      onChange={(color) => updateNestedSetting('image', 'borderColor', color)}
+                    />
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Ramtjocklek (px)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="10"
+                        value={image.borderWidth || 4}
+                        onChange={(e) => updateNestedSetting('image', 'borderWidth', parseInt(e.target.value))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      />
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Knappar" defaultExpanded={true}>
+        <div className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Knapptext
+              </label>
+              <input
+                type="text"
+                value={cta.label || ''}
+                onChange={(e) => updateNestedSetting('cta', 'label', e.target.value)}
+                placeholder="Ansök nu"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Länk
+              </label>
+              <input
+                type="text"
+                value={cta.href || ''}
+                onChange={(e) => updateNestedSetting('cta', 'href', e.target.value)}
+                placeholder="/bli-kock"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <ColorPicker
+              label="Knappfärg"
+              value={cta.bgColor || '#56c5c5'}
+              onChange={(color) => updateNestedSetting('cta', 'bgColor', color)}
+            />
+
+            <ColorPicker
+              label="Textfärg"
+              value={cta.textColor || '#ffffff'}
+              onChange={(color) => updateNestedSetting('cta', 'textColor', color)}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Typsnitt
+              </label>
+              <select
+                value={cta.font || 'sans'}
+                onChange={(e) => updateNestedSetting('cta', 'font', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="lobster">Lobster</option>
+                <option value="sans">Sans Serif</option>
+                <option value="serif">Serif</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Storlek (px)
+              </label>
+              <input
+                type="number"
+                min="12"
+                max="24"
+                value={cta.size || 16}
+                onChange={(e) => updateNestedSetting('cta', 'size', parseInt(e.target.value))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={cta.bold || false}
+                onChange={(e) => updateNestedSetting('cta', 'bold', e.target.checked)}
+                className="w-4 h-4 rounded"
+              />
+              <span className="text-sm font-medium text-gray-700">Fet stil</span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={cta.italic || false}
+                onChange={(e) => updateNestedSetting('cta', 'italic', e.target.checked)}
+                className="w-4 h-4 rounded"
+              />
+              <span className="text-sm font-medium text-gray-700">Kursiv</span>
+            </label>
+
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={cta.uppercase || false}
+                onChange={(e) => updateNestedSetting('cta', 'uppercase', e.target.checked)}
+                className="w-4 h-4 rounded"
+              />
+              <span className="text-sm font-medium text-gray-700">Versaler</span>
+            </label>
+          </div>
+        </div>
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Fördelar" defaultExpanded={true}>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Huvudbild
-            </label>
-            <input
-              type="file"
-              id="become-chef-image-upload"
-              accept="image/*"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleImageUpload(file);
-              }}
-              className="hidden"
-            />
-            <div className="flex gap-2">
-              <label
-                htmlFor="become-chef-image-upload"
-                className={`flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 ${
-                  uploadingImage ? 'opacity-50' : ''
-                }`}
-              >
-                <Upload className="w-4 h-4" />
-                {uploadingImage ? 'Laddar upp...' : 'Ladda upp bild'}
-              </label>
-              {settings.become_chef_main_image && (
-                <button
-                  onClick={() => updateSetting('become_chef_main_image', '')}
-                  className="px-3 py-2 text-sm text-red-600 hover:text-red-700 border border-red-300 rounded-lg hover:bg-red-50"
-                >
-                  Ta bort
-                </button>
-              )}
-            </div>
-            {settings.become_chef_main_image && (
-              <div className="mt-2">
-                <img
-                  src={settings.become_chef_main_image}
-                  alt="Preview"
-                  className="w-full max-w-xs rounded-lg border border-gray-300"
-                />
-              </div>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Placering av bilden
+              Antal i rad
             </label>
             <select
-              value={settings.become_chef_image_position || 'right'}
-              onChange={(e) => updateSetting('become_chef_image_position', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
+              value={settings.benefitsPerRow || 3}
+              onChange={(e) => updateSetting('benefitsPerRow', parseInt(e.target.value))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg"
             >
-              <option value="left">Vänster</option>
-              <option value="right">Höger</option>
-              <option value="top">Överst</option>
-              <option value="none">Ingen bild</option>
+              <option value={2}>2</option>
+              <option value={3}>3</option>
+              <option value={4}>4</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Opacity på bild ({settings.become_chef_image_opacity || 100}%)
-            </label>
-            <input
-              type="range"
-              value={settings.become_chef_image_opacity || 100}
-              onChange={(e) => updateSetting('become_chef_image_opacity', parseInt(e.target.value))}
-              min="0"
-              max="100"
-              className="w-full"
-            />
-          </div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Fördelar
+              </label>
+              <button
+                onClick={addBenefit}
+                className="flex items-center gap-1 px-3 py-1 bg-[#56c5c5] text-white text-sm rounded-lg hover:bg-[#45b4b4] transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Lägg till fördel
+              </button>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Emojis/ikoner (separerade med komma)
-            </label>
-            <input
-              type="text"
-              value={settings.become_chef_emojis || ''}
-              onChange={(e) => updateSetting('become_chef_emojis', e.target.value)}
-              placeholder="🍳,👨‍🍳,💰"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798] focus:border-transparent"
-            />
+            <div className="space-y-3">
+              {benefits.map((benefit, index) => (
+                <div key={benefit.id} className="p-4 border-2 border-gray-200 rounded-lg space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-medium text-gray-900">Fördel {index + 1}</h4>
+                    <button
+                      onClick={() => removeBenefit(benefit.id)}
+                      className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <EmojiPicker
+                    label="Emoji/ikon"
+                    value={benefit.icon}
+                    onChange={(emoji) => updateBenefit(benefit.id, 'icon', emoji)}
+                  />
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Text
+                    </label>
+                    <textarea
+                      value={benefit.text}
+                      onChange={(e) => updateBenefit(benefit.id, 'text', e.target.value)}
+                      placeholder="Beskriv fördelen..."
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </CollapsibleCard>
 
-      <CollapsibleCard title="Innehållskort (USP)" defaultExpanded={false}>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              USP-kort
-            </label>
-            <button
-              onClick={addCard}
-              className="flex items-center gap-1 px-3 py-1 bg-[#56c5c5] text-white text-sm rounded-lg hover:bg-[#45b4b4] transition-colors"
+      <CollapsibleCard title="Preview" defaultExpanded={true}>
+        <div
+          className="p-8 rounded-lg"
+          style={{ backgroundColor: settings.backgroundColor || '#a1c798' }}
+        >
+          <div className="mx-auto" style={{ maxWidth: `${contentBox.width || 100}%` }}>
+            <div
+              className="p-12 shadow-lg"
+              style={{
+                backgroundColor: contentBox.bgColor || '#f6f2e0',
+                opacity: (contentBox.opacity || 100) / 100,
+                borderRadius: `${contentBox.borderRadius || 16}px`
+              }}
             >
-              <Plus className="w-4 h-4" />
-              Lägg till kort
-            </button>
-          </div>
-
-          {(settings.become_chef_cards || []).map((card, index) => (
-            <div key={card.id} className="p-4 border-2 border-gray-200 rounded-lg space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium text-gray-900">Kort {index + 1}</h4>
-                <button
-                  onClick={() => removeCard(card.id)}
-                  className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded"
+              <div className={`mb-6 ${settings.headingAlignment === 'center' ? 'text-center' : 'text-left'}`}>
+                <h2
+                  className={`text-4xl mb-2 ${
+                    settings.headingFont === 'lobster' ? 'font-lobster' : ''
+                  } ${settings.headingBold ? 'font-bold' : ''}`}
+                  style={{
+                    fontFamily: settings.headingFont === 'serif' ? 'serif' : settings.headingFont === 'sans' ? 'sans-serif' : undefined,
+                    color: settings.headingColor || '#374151'
+                  }}
                 >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                  {settings.heading || 'Bli en Kitchen-kock'}
+                </h2>
+                {subtitleTexts.length > 0 && subtitleTexts[0] && (
+                  <p
+                    className="transition-opacity duration-300"
+                    style={{
+                      opacity: fadeIn ? 1 : 0,
+                      color: settings.subtitleColor || '#6b7280'
+                    }}
+                  >
+                    {subtitleTexts[activeSubtitleIndex] || subtitleTexts[0]}
+                  </p>
+                )}
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Rubrik</label>
-                <input
-                  type="text"
-                  value={card.title}
-                  onChange={(e) => updateCard(card.id, 'title', e.target.value)}
-                  placeholder="T.ex. Tjäna pengar"
-                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                />
-              </div>
+              <div className={image.position !== 'none' && image.url ? 'grid grid-cols-2 gap-8 items-center' : ''}>
+                {image.position === 'left' && image.url && (
+                  <div>
+                    <img
+                      src={image.url}
+                      alt="Preview"
+                      className="w-full"
+                      style={{
+                        border: image.hasBorder ? `${image.borderWidth || 4}px solid ${image.borderColor || '#56c5c5'}` : 'none',
+                        borderRadius: image.hasBorder ? (image.borderRadius === 'large' ? '24px' : '12px') : '0'
+                      }}
+                    />
+                  </div>
+                )}
 
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Text</label>
-                <textarea
-                  value={card.body}
-                  onChange={(e) => updateCard(card.id, 'body', e.target.value)}
-                  placeholder="Beskrivning..."
-                  rows={2}
-                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                />
-              </div>
+                <div className={image.position === 'none' || !image.url ? 'text-center' : ''}>
+                  <p
+                    className="mb-8"
+                    style={{
+                      fontSize: `${settings.descriptionSize || 18}px`,
+                      fontFamily: settings.descriptionFont === 'serif' ? 'serif' : settings.descriptionFont === 'lobster' ? 'Lobster' : 'sans-serif',
+                      fontWeight: settings.descriptionBold ? 'bold' : 'normal',
+                      color: settings.descriptionColor || '#374151'
+                    }}
+                  >
+                    {settings.description || 'Dela din passion för matlagning och tjäna pengar på det du älskar.'}
+                  </p>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Emoji/ikon</label>
-                <input
-                  type="text"
-                  value={card.icon}
-                  onChange={(e) => updateCard(card.id, 'icon', e.target.value)}
-                  placeholder="💰"
-                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </CollapsibleCard>
-
-      <CollapsibleCard title="Knappar (CTA)" defaultExpanded={false}>
-        <div className="space-y-4">
-          <div className="flex items-center justify-between mb-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Call-to-action knappar
-            </label>
-            <button
-              onClick={addCTA}
-              className="flex items-center gap-1 px-3 py-1 bg-[#56c5c5] text-white text-sm rounded-lg hover:bg-[#45b4b4] transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              Lägg till knapp
-            </button>
-          </div>
-
-          {(settings.become_chef_ctas || []).map((cta, index) => (
-            <div key={cta.id} className="p-4 border-2 border-gray-200 rounded-lg space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="font-medium text-gray-900">Knapp {index + 1}</h4>
-                <button
-                  onClick={() => removeCTA(cta.id)}
-                  className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 rounded"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Knapptext</label>
-                  <input
-                    type="text"
-                    value={cta.label}
-                    onChange={(e) => updateCTA(cta.id, 'label', e.target.value)}
-                    placeholder="Ansök nu"
-                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                  />
+                  <button
+                    className="px-8 py-3 rounded-full transition-all hover:opacity-90 inline-block"
+                    style={{
+                      backgroundColor: cta.bgColor || '#56c5c5',
+                      color: cta.textColor || '#ffffff',
+                      fontSize: `${cta.size || 16}px`,
+                      fontFamily: cta.font === 'serif' ? 'serif' : cta.font === 'lobster' ? 'Lobster' : 'sans-serif',
+                      fontWeight: cta.bold ? 'bold' : 'normal',
+                      fontStyle: cta.italic ? 'italic' : 'normal',
+                      textTransform: cta.uppercase ? 'uppercase' : 'none'
+                    }}
+                  >
+                    {cta.label || 'Ansök nu'}
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Länk</label>
-                  <input
-                    type="text"
-                    value={cta.href}
-                    onChange={(e) => updateCTA(cta.id, 'href', e.target.value)}
-                    placeholder="/bli-kock"
-                    className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                  />
+                {image.position === 'right' && image.url && (
+                  <div>
+                    <img
+                      src={image.url}
+                      alt="Preview"
+                      className="w-full"
+                      style={{
+                        border: image.hasBorder ? `${image.borderWidth || 4}px solid ${image.borderColor || '#56c5c5'}` : 'none',
+                        borderRadius: image.hasBorder ? (image.borderRadius === 'large' ? '24px' : '12px') : '0'
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              {benefits.length > 0 && (
+                <div
+                  className={`grid gap-6 mt-12`}
+                  style={{
+                    gridTemplateColumns: `repeat(${settings.benefitsPerRow || 3}, 1fr)`
+                  }}
+                >
+                  {benefits.map((benefit) => (
+                    <div key={benefit.id} className="text-center">
+                      <div className="text-4xl mb-2">{benefit.icon}</div>
+                      <p className="text-sm text-gray-700">{benefit.text}</p>
+                    </div>
+                  ))}
                 </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <ColorPicker
-                  label="Bakgrundsfärg"
-                  value={cta.bg_color || '#56c5c5'}
-                  onChange={(color) => updateCTA(cta.id, 'bg_color', color)}
-                />
-
-                <ColorPicker
-                  label="Textfärg"
-                  value={cta.text_color || '#ffffff'}
-                  onChange={(color) => updateCTA(cta.id, 'text_color', color)}
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Emoji/ikon i knapp</label>
-                <input
-                  type="text"
-                  value={cta.icon || ''}
-                  onChange={(e) => updateCTA(cta.id, 'icon', e.target.value)}
-                  placeholder="🚀"
-                  className="w-full px-2 py-1 text-sm border border-gray-300 rounded"
-                />
-              </div>
+              )}
             </div>
-          ))}
+          </div>
         </div>
       </CollapsibleCard>
     </div>
