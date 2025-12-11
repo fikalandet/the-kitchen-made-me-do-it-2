@@ -66,13 +66,48 @@ interface EditorialCategory {
   cta_placement: string;
 }
 
+interface EditorialArticle {
+  id: string;
+  category_id: string;
+  title: string;
+  slug: string;
+  ingress: string;
+  body: string;
+  image_url: string;
+  hero_image_size: string;
+  hero_image_position: string;
+  hero_wave_style: string;
+  trivia_layout: string;
+  trivia_position: string;
+  trivia_column1: string;
+  trivia_column2: string;
+  cta_primary_text: string;
+  cta_primary_bg_color: string;
+  cta_primary_text_color: string;
+  cta_primary_bg_opacity: number;
+  cta_primary_font: string;
+  cta_primary_placement: string;
+  cta_secondary_text: string;
+  cta_secondary_bg_color: string;
+  cta_secondary_text_color: string;
+  cta_secondary_bg_opacity: number;
+  cta_secondary_font: string;
+  cta_secondary_placement: string;
+  cta_secondary_chef_id: string | null;
+  display_order: number;
+}
+
 export default function EditorialCategoriesEditor({ settings, onSettingsChange }: EditorialCategoriesEditorProps) {
   const { user } = useAuth();
   const [categories, setCategories] = useState<EditorialCategory[]>([]);
   const [editingCategory, setEditingCategory] = useState<Partial<EditorialCategory> | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [articles, setArticles] = useState<EditorialArticle[]>([]);
+  const [editingArticle, setEditingArticle] = useState<Partial<EditorialArticle> | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [currentSubtitleIndex, setCurrentSubtitleIndex] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
+  const [chefs, setChefs] = useState<Array<{id: string, kitchen_name: string}>>([]);
 
   const updateSetting = (key: keyof EditorialCategoriesSettings, value: any) => {
     onSettingsChange({ ...settings, [key]: value });
@@ -97,7 +132,14 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
 
   useEffect(() => {
     fetchCategories();
+    fetchChefs();
   }, []);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      fetchArticles(selectedCategory);
+    }
+  }, [selectedCategory]);
 
   useEffect(() => {
     const subtitleTexts = settings.subtitleTexts || [];
@@ -129,8 +171,38 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
     }
   };
 
-  const handleImageUpload = async (file: File) => {
-    if (!user || !editingCategory) return;
+  const fetchArticles = async (categoryId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('editorial_articles')
+        .select('*')
+        .eq('category_id', categoryId)
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+      setArticles(data || []);
+    } catch (err) {
+      console.error('Error fetching articles:', err);
+    }
+  };
+
+  const fetchChefs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, kitchen_name')
+        .eq('role', 'chef')
+        .order('kitchen_name', { ascending: true });
+
+      if (error) throw error;
+      setChefs(data || []);
+    } catch (err) {
+      console.error('Error fetching chefs:', err);
+    }
+  };
+
+  const handleImageUpload = async (file: File, type: 'category' | 'article') => {
+    if (!user) return;
     setUploadingImage(true);
 
     try {
@@ -148,7 +220,11 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
         .from('product-images')
         .getPublicUrl(filePath);
 
-      setEditingCategory({ ...editingCategory, image_url: data.publicUrl });
+      if (type === 'category' && editingCategory) {
+        setEditingCategory({ ...editingCategory, image_url: data.publicUrl });
+      } else if (type === 'article' && editingArticle) {
+        setEditingArticle({ ...editingArticle, image_url: data.publicUrl });
+      }
     } catch (err) {
       console.error('Error uploading:', err);
       alert('Kunde inte ladda upp. Försök igen.');
@@ -253,6 +329,106 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
       ]);
 
       fetchCategories();
+    } catch (err) {
+      console.error('Error:', err);
+    }
+  };
+
+  const handleSaveArticle = async () => {
+    if (!editingArticle || !editingArticle.title || !selectedCategory) {
+      alert('Titel är obligatorisk och en kategori måste vara vald');
+      return;
+    }
+
+    const articleSlug = editingArticle.slug || editingArticle.title
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[åä]/g, 'a')
+      .replace(/ö/g, 'o')
+      .replace(/[^a-z0-9-]/g, '');
+
+    try {
+      if (editingArticle.id) {
+        const { error } = await supabase
+          .from('editorial_articles')
+          .update({
+            ...editingArticle,
+            slug: articleSlug,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', editingArticle.id);
+
+        if (error) throw error;
+      } else {
+        const maxOrder = articles.length > 0 ? Math.max(...articles.map(a => a.display_order)) : 0;
+        const { error } = await supabase
+          .from('editorial_articles')
+          .insert({
+            ...editingArticle,
+            category_id: selectedCategory,
+            slug: articleSlug,
+            display_order: maxOrder + 1
+          });
+
+        if (error) throw error;
+      }
+
+      setEditingArticle(null);
+      if (selectedCategory) {
+        fetchArticles(selectedCategory);
+      }
+    } catch (err) {
+      console.error('Error saving article:', err);
+      alert('Kunde inte spara. Försök igen.');
+    }
+  };
+
+  const handleDeleteArticle = async (id: string) => {
+    if (!confirm('Ta bort artikel?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('editorial_articles')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      if (selectedCategory) {
+        fetchArticles(selectedCategory);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Kunde inte ta bort.');
+    }
+  };
+
+  const handleMoveArticle = async (article: EditorialArticle, direction: 'up' | 'down') => {
+    const currentIndex = articles.findIndex(a => a.id === article.id);
+    if (
+      (direction === 'up' && currentIndex === 0) ||
+      (direction === 'down' && currentIndex === articles.length - 1)
+    ) {
+      return;
+    }
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const targetArticle = articles[targetIndex];
+
+    try {
+      await Promise.all([
+        supabase
+          .from('editorial_articles')
+          .update({ display_order: targetArticle.display_order })
+          .eq('id', article.id),
+        supabase
+          .from('editorial_articles')
+          .update({ display_order: article.display_order })
+          .eq('id', targetArticle.id)
+      ]);
+
+      if (selectedCategory) {
+        fetchArticles(selectedCategory);
+      }
     } catch (err) {
       console.error('Error:', err);
     }
@@ -624,7 +800,7 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
                       accept="image/*"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
-                        if (file) handleImageUpload(file);
+                        if (file) handleImageUpload(file, 'category');
                       }}
                       className="hidden"
                     />
@@ -1069,6 +1245,524 @@ export default function EditorialCategoriesEditor({ settings, onSettingsChange }
               <p className="text-center text-gray-500 py-8">Inga kategorier skapade ännu</p>
             )}
           </div>
+        </div>
+      </CollapsibleCard>
+
+      <CollapsibleCard title="Artikelhantering" defaultExpanded={true}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Välj kategori att hantera artiklar för
+            </label>
+            <select
+              value={selectedCategory || ''}
+              onChange={(e) => {
+                setSelectedCategory(e.target.value || null);
+                setEditingArticle(null);
+              }}
+              className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+            >
+              <option value="">-- Välj kategori --</option>
+              {categories.map(cat => (
+                <option key={cat.id} value={cat.id}>{cat.title}</option>
+              ))}
+            </select>
+          </div>
+
+          {selectedCategory && (
+            <>
+              <div className="flex items-center justify-between">
+                <h4 className="font-medium text-gray-900">
+                  Artiklar ({articles.length})
+                </h4>
+                <button
+                  onClick={() => setEditingArticle({
+                    title: '',
+                    slug: '',
+                    ingress: '',
+                    body: '',
+                    image_url: '',
+                    hero_image_size: 'large',
+                    hero_image_position: 'center',
+                    hero_wave_style: 'none',
+                    trivia_layout: 'single',
+                    trivia_position: 'below_image',
+                    trivia_column1: '',
+                    trivia_column2: '',
+                    cta_primary_text: 'Läs artikeln',
+                    cta_primary_bg_color: '#a1c798',
+                    cta_primary_text_color: '#ffffff',
+                    cta_primary_bg_opacity: 100,
+                    cta_primary_font: 'sans',
+                    cta_primary_placement: 'left',
+                    cta_secondary_text: 'Till kockens sida',
+                    cta_secondary_bg_color: '#56c5c5',
+                    cta_secondary_text_color: '#ffffff',
+                    cta_secondary_bg_opacity: 100,
+                    cta_secondary_font: 'sans',
+                    cta_secondary_placement: 'left',
+                    cta_secondary_chef_id: null
+                  })}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#56c5c5] text-white rounded-lg"
+                >
+                  <Plus className="w-4 h-4" />
+                  Ny artikel
+                </button>
+              </div>
+
+              {editingArticle && (
+                <div className="p-6 bg-gray-50 border-2 border-gray-300 rounded-lg space-y-6">
+                  <h5 className="text-lg font-bold text-gray-900 pb-2 border-b-2 border-gray-300">
+                    {editingArticle.id ? 'Redigera' : 'Ny'} artikel
+                  </h5>
+
+                  <div className="space-y-4 p-4 bg-white rounded-lg border border-gray-200">
+                    <h6 className="font-semibold text-gray-900">Grundläggande information</h6>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Titel</label>
+                      <input
+                        type="text"
+                        value={editingArticle.title || ''}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, title: e.target.value })}
+                        placeholder="Artikelrubrik..."
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Ingress</label>
+                      <textarea
+                        value={editingArticle.ingress || ''}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, ingress: e.target.value })}
+                        placeholder="Kort introduktion..."
+                        rows={2}
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Brödtext</label>
+                      <textarea
+                        value={editingArticle.body || ''}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, body: e.target.value })}
+                        placeholder="Huvudinnehåll..."
+                        rows={6}
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 p-4 bg-white rounded-lg border border-gray-200">
+                    <h6 className="font-semibold text-gray-900">Huvudbild</h6>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Bild</label>
+                      <div className="flex gap-2 mb-2">
+                        <input
+                          type="file"
+                          id="article-image-upload"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(file, 'article');
+                          }}
+                          className="hidden"
+                        />
+                        <label
+                          htmlFor="article-image-upload"
+                          className={`flex items-center gap-2 px-4 py-2 border-2 border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 ${
+                            uploadingImage ? 'opacity-50' : ''
+                          }`}
+                        >
+                          <Upload className="w-4 h-4" />
+                          {uploadingImage ? 'Laddar...' : 'Ladda upp'}
+                        </label>
+                      </div>
+                      <input
+                        type="text"
+                        value={editingArticle.image_url || ''}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, image_url: e.target.value })}
+                        placeholder="Eller ange bild-URL..."
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                      />
+                      {editingArticle.image_url && (
+                        <img
+                          src={editingArticle.image_url}
+                          alt="Preview"
+                          className="w-full h-48 object-cover rounded-lg mt-2 border-2 border-gray-200"
+                        />
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Bildstorlek</label>
+                      <div className="flex gap-3">
+                        {['medium', 'large', 'full'].map((size) => (
+                          <button
+                            key={size}
+                            onClick={() => setEditingArticle({ ...editingArticle, hero_image_size: size })}
+                            className={`px-4 py-2 rounded-lg border-2 capitalize ${
+                              editingArticle.hero_image_size === size
+                                ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {size === 'medium' ? 'Medium' : size === 'large' ? 'Stor' : 'Full bredd'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Bildpositionering</label>
+                      <div className="flex gap-3">
+                        {['top', 'center', 'bottom'].map((pos) => (
+                          <button
+                            key={pos}
+                            onClick={() => setEditingArticle({ ...editingArticle, hero_image_position: pos })}
+                            className={`px-4 py-2 rounded-lg border-2 capitalize ${
+                              editingArticle.hero_image_position === pos
+                                ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {pos === 'top' ? 'Topp' : pos === 'center' ? 'Center' : 'Botten'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Böljande form</label>
+                      <div className="flex gap-3">
+                        {['none', 'wave1', 'wave2', 'wave3'].map((wave) => (
+                          <button
+                            key={wave}
+                            onClick={() => setEditingArticle({ ...editingArticle, hero_wave_style: wave })}
+                            className={`px-4 py-2 rounded-lg border-2 ${
+                              editingArticle.hero_wave_style === wave
+                                ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {wave === 'none' ? 'Ingen' : `Våg ${wave.replace('wave', '')}`}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 p-4 bg-white rounded-lg border border-gray-200">
+                    <h6 className="font-semibold text-gray-900">Kuriosa-ruta</h6>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                      <div className="flex gap-3">
+                        {['below_image', 'sidebar'].map((pos) => (
+                          <button
+                            key={pos}
+                            onClick={() => setEditingArticle({ ...editingArticle, trivia_position: pos })}
+                            className={`px-4 py-2 rounded-lg border-2 ${
+                              editingArticle.trivia_position === pos
+                                ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {pos === 'below_image' ? 'Under huvudbilden' : 'Sidebar'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Layout</label>
+                      <div className="flex gap-3">
+                        {['single', 'double'].map((layout) => (
+                          <button
+                            key={layout}
+                            onClick={() => setEditingArticle({ ...editingArticle, trivia_layout: layout })}
+                            className={`px-4 py-2 rounded-lg border-2 ${
+                              editingArticle.trivia_layout === layout
+                                ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {layout === 'single' ? 'En kolumn' : 'Två kolumner'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        {editingArticle.trivia_layout === 'double' ? 'Kolumn 1' : 'Kuriosa-text'}
+                      </label>
+                      <textarea
+                        value={editingArticle.trivia_column1 || ''}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, trivia_column1: e.target.value })}
+                        placeholder="Skriv kuriosa-fakta här..."
+                        rows={4}
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                      />
+                    </div>
+
+                    {editingArticle.trivia_layout === 'double' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Kolumn 2</label>
+                        <textarea
+                          value={editingArticle.trivia_column2 || ''}
+                          onChange={(e) => setEditingArticle({ ...editingArticle, trivia_column2: e.target.value })}
+                          placeholder="Skriv mer kuriosa här..."
+                          rows={4}
+                          className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-4 p-4 bg-white rounded-lg border border-gray-200">
+                    <h6 className="font-semibold text-gray-900">Primärknapp (Läs artikeln)</h6>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Knapptext</label>
+                      <input
+                        type="text"
+                        value={editingArticle.cta_primary_text || ''}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, cta_primary_text: e.target.value })}
+                        placeholder="Läs artikeln"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Bakgrundsfärg</label>
+                        <ColorPicker
+                          label=""
+                          value={editingArticle.cta_primary_bg_color || '#a1c798'}
+                          onChange={(color) => setEditingArticle({ ...editingArticle, cta_primary_bg_color: color })}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Textfärg</label>
+                        <ColorPicker
+                          label=""
+                          value={editingArticle.cta_primary_text_color || '#ffffff'}
+                          onChange={(color) => setEditingArticle({ ...editingArticle, cta_primary_text_color: color })}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Bakgrund Opacity: {editingArticle.cta_primary_bg_opacity || 100}%
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={editingArticle.cta_primary_bg_opacity || 100}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, cta_primary_bg_opacity: parseInt(e.target.value) })}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Typsnitt</label>
+                      <select
+                        value={editingArticle.cta_primary_font || 'sans'}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, cta_primary_font: e.target.value })}
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                      >
+                        <option value="lobster">Lobster</option>
+                        <option value="poppins">Poppins</option>
+                        <option value="sans">Sans Serif</option>
+                        <option value="serif">Serif</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                      <div className="flex gap-3">
+                        {['left', 'center', 'right'].map((place) => (
+                          <button
+                            key={place}
+                            onClick={() => setEditingArticle({ ...editingArticle, cta_primary_placement: place })}
+                            className={`px-4 py-2 rounded-lg border-2 ${
+                              editingArticle.cta_primary_placement === place
+                                ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {place === 'left' ? 'Vänster' : place === 'center' ? 'Center' : 'Höger'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4 p-4 bg-white rounded-lg border border-gray-200">
+                    <h6 className="font-semibold text-gray-900">Sekundärknapp (Till kockens sida)</h6>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Knapptext</label>
+                      <input
+                        type="text"
+                        value={editingArticle.cta_secondary_text || ''}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, cta_secondary_text: e.target.value })}
+                        placeholder="Till kockens sida"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Kock att länka till</label>
+                      <select
+                        value={editingArticle.cta_secondary_chef_id || ''}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, cta_secondary_chef_id: e.target.value || null })}
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                      >
+                        <option value="">-- Välj kock --</option>
+                        {chefs.map(chef => (
+                          <option key={chef.id} value={chef.id}>{chef.kitchen_name || chef.id}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Bakgrundsfärg</label>
+                        <ColorPicker
+                          label=""
+                          value={editingArticle.cta_secondary_bg_color || '#56c5c5'}
+                          onChange={(color) => setEditingArticle({ ...editingArticle, cta_secondary_bg_color: color })}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Textfärg</label>
+                        <ColorPicker
+                          label=""
+                          value={editingArticle.cta_secondary_text_color || '#ffffff'}
+                          onChange={(color) => setEditingArticle({ ...editingArticle, cta_secondary_text_color: color })}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Bakgrund Opacity: {editingArticle.cta_secondary_bg_opacity || 100}%
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={editingArticle.cta_secondary_bg_opacity || 100}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, cta_secondary_bg_opacity: parseInt(e.target.value) })}
+                        className="w-full"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Typsnitt</label>
+                      <select
+                        value={editingArticle.cta_secondary_font || 'sans'}
+                        onChange={(e) => setEditingArticle({ ...editingArticle, cta_secondary_font: e.target.value })}
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg"
+                      >
+                        <option value="lobster">Lobster</option>
+                        <option value="poppins">Poppins</option>
+                        <option value="sans">Sans Serif</option>
+                        <option value="serif">Serif</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                      <div className="flex gap-3">
+                        {['left', 'center', 'right'].map((place) => (
+                          <button
+                            key={place}
+                            onClick={() => setEditingArticle({ ...editingArticle, cta_secondary_placement: place })}
+                            className={`px-4 py-2 rounded-lg border-2 ${
+                              editingArticle.cta_secondary_placement === place
+                                ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                                : 'border-gray-300'
+                            }`}
+                          >
+                            {place === 'left' ? 'Vänster' : place === 'center' ? 'Center' : 'Höger'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-4">
+                    <button
+                      onClick={handleSaveArticle}
+                      className="px-6 py-2 bg-[#a1c798] text-white rounded-lg font-medium hover:bg-[#8fb386] transition-colors"
+                    >
+                      Spara artikel
+                    </button>
+                    <button
+                      onClick={() => setEditingArticle(null)}
+                      className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-400 transition-colors"
+                    >
+                      Avbryt
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                {articles.map((article, index) => (
+                  <div
+                    key={article.id}
+                    className="flex items-center gap-3 p-3 rounded-lg border-2 border-gray-200 bg-white"
+                  >
+                    {article.image_url && (
+                      <img src={article.image_url} alt={article.title} className="w-12 h-12 object-cover rounded" />
+                    )}
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{article.title}</p>
+                      <p className="text-sm text-gray-600">{article.ingress}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => handleMoveArticle(article, 'up')}
+                        disabled={index === 0}
+                        className="p-1.5 text-gray-600 hover:bg-gray-100 rounded disabled:opacity-30"
+                      >
+                        <MoveUp className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleMoveArticle(article, 'down')}
+                        disabled={index === articles.length - 1}
+                        className="p-1.5 text-gray-600 hover:bg-gray-100 rounded disabled:opacity-30"
+                      >
+                        <MoveDown className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setEditingArticle(article)}
+                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteArticle(article.id)}
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {articles.length === 0 && (
+                  <p className="text-center text-gray-500 py-8">Inga artiklar skapade ännu</p>
+                )}
+              </div>
+            </>
+          )}
         </div>
       </CollapsibleCard>
 

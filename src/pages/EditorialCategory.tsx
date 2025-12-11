@@ -21,9 +21,34 @@ interface EditorialArticle {
   ingress: string;
   body: string;
   image_url: string;
+  hero_image_size: string;
+  hero_image_position: string;
+  hero_wave_style: string;
+  trivia_layout: string;
+  trivia_position: string;
+  trivia_column1: string;
+  trivia_column2: string;
+  cta_primary_text: string;
+  cta_primary_bg_color: string;
+  cta_primary_text_color: string;
+  cta_primary_bg_opacity: number;
+  cta_primary_font: string;
+  cta_primary_placement: string;
+  cta_secondary_text: string;
+  cta_secondary_bg_color: string;
+  cta_secondary_text_color: string;
+  cta_secondary_bg_opacity: number;
+  cta_secondary_font: string;
+  cta_secondary_placement: string;
+  cta_secondary_chef_id: string | null;
   cta_text: string;
   cta_link: string;
   display_order: number;
+}
+
+interface Profile {
+  id: string;
+  kitchen_name: string | null;
 }
 
 export function EditorialCategory() {
@@ -35,6 +60,7 @@ export function EditorialCategory() {
   const [expandedArticleId, setExpandedArticleId] = useState<string | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [chefProfiles, setChefProfiles] = useState<Record<string, Profile>>({});
 
   useEffect(() => {
     fetchData();
@@ -76,6 +102,22 @@ export function EditorialCategory() {
 
       if (articlesError) throw articlesError;
       setArticles(articlesData || []);
+
+      const chefIds = articlesData?.filter(a => a.cta_secondary_chef_id).map(a => a.cta_secondary_chef_id) || [];
+      if (chefIds.length > 0) {
+        const { data: chefsData } = await supabase
+          .from('profiles')
+          .select('id, kitchen_name')
+          .in('id', chefIds);
+
+        if (chefsData) {
+          const chefsMap = chefsData.reduce((acc, chef) => {
+            acc[chef.id] = chef;
+            return acc;
+          }, {} as Record<string, Profile>);
+          setChefProfiles(chefsMap);
+        }
+      }
     } catch (err) {
       console.error('Error fetching data:', err);
     }
@@ -373,39 +415,137 @@ export function EditorialCategory() {
         )}
 
         <div className="grid gap-8">
-          {articles.map((article) => (
-            <div key={article.id} className="bg-white rounded-xl shadow-md overflow-hidden">
-              {article.image_url && (
-                <img
-                  src={article.image_url}
-                  alt={article.title}
-                  className="w-full h-64 object-cover"
-                />
-              )}
-              <div className="p-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">{article.title}</h2>
-                <p className="text-xl text-gray-700 mb-6">{article.ingress}</p>
-                {expandedArticleId === article.id ? (
-                  <>
-                    <p className="text-gray-600 mb-6 whitespace-pre-line">{article.body}</p>
+          {articles.map((article) => {
+            const imageSizeClasses = {
+              medium: 'h-64',
+              large: 'h-96',
+              full: 'h-screen'
+            };
+            const imagePositionClasses = {
+              top: 'object-top',
+              center: 'object-center',
+              bottom: 'object-bottom'
+            };
+            const wavePathClasses = {
+              wave1: 'M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z',
+              wave2: 'M0,64L48,85.3C96,107,192,149,288,154.7C384,160,480,128,576,128C672,128,768,160,864,154.7C960,149,1056,107,1152,80C1248,53,1344,43,1392,37.3L1440,32L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z',
+              wave3: 'M0,32L48,48C96,64,192,96,288,101.3C384,107,480,85,576,69.3C672,53,768,43,864,58.7C960,75,1056,117,1152,133.3C1248,149,1344,139,1392,133.3L1440,128L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z'
+            };
+            const fontFamilyMap = {
+              lobster: 'Lobster',
+              poppins: 'Poppins, sans-serif',
+              sans: 'sans-serif',
+              serif: 'serif'
+            };
+
+            const triviaBox = (article.trivia_column1 || article.trivia_column2) && (
+              <div className="bg-[#f6f2e0] rounded-lg p-6 my-6">
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Kuriosa</h3>
+                <div className={`${article.trivia_layout === 'double' ? 'grid grid-cols-1 md:grid-cols-2 gap-6' : ''}`}>
+                  {article.trivia_column1 && (
+                    <div className={article.trivia_layout === 'double' ? 'pr-6 border-r border-gray-300' : ''}>
+                      <p className="text-gray-700 whitespace-pre-line">{article.trivia_column1}</p>
+                    </div>
+                  )}
+                  {article.trivia_layout === 'double' && article.trivia_column2 && (
+                    <div>
+                      <p className="text-gray-700 whitespace-pre-line">{article.trivia_column2}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+
+            return (
+              <div key={article.id} className="bg-white rounded-xl shadow-md overflow-hidden">
+                {article.image_url && (
+                  <div className="relative">
+                    <img
+                      src={article.image_url}
+                      alt={article.title}
+                      className={`w-full ${imageSizeClasses[article.hero_image_size as keyof typeof imageSizeClasses] || 'h-96'} ${imagePositionClasses[article.hero_image_position as keyof typeof imagePositionClasses] || 'object-center'} object-cover`}
+                    />
+                    {article.hero_wave_style && article.hero_wave_style !== 'none' && (
+                      <div className="absolute bottom-0 left-0 right-0">
+                        <svg
+                          viewBox="0 0 1440 160"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="w-full h-auto"
+                        >
+                          <path
+                            d={wavePathClasses[article.hero_wave_style as keyof typeof wavePathClasses]}
+                            fill="white"
+                          />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className="p-8">
+                  {article.trivia_position === 'below_image' && triviaBox}
+
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4">{article.title}</h2>
+                  <p className="text-xl text-gray-700 mb-6">{article.ingress}</p>
+
+                  {expandedArticleId === article.id ? (
+                    <>
+                      <p className="text-gray-600 mb-6 whitespace-pre-line">{article.body}</p>
+
+                      {article.trivia_position === 'sidebar' && triviaBox}
+
+                      <div
+                        className="flex flex-wrap gap-4 mt-8"
+                        style={{
+                          justifyContent: article.cta_primary_placement === 'center'
+                            ? 'center'
+                            : article.cta_primary_placement === 'right'
+                            ? 'flex-end'
+                            : 'flex-start'
+                        }}
+                      >
+                        <button
+                          onClick={() => setExpandedArticleId(null)}
+                          style={{
+                            fontFamily: fontFamilyMap[article.cta_primary_font as keyof typeof fontFamilyMap] || 'sans-serif',
+                            backgroundColor: article.cta_primary_bg_color,
+                            color: article.cta_primary_text_color,
+                            opacity: (article.cta_primary_bg_opacity || 100) / 100
+                          }}
+                          className="px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                        >
+                          {article.cta_primary_text}
+                        </button>
+
+                        {article.cta_secondary_chef_id && chefProfiles[article.cta_secondary_chef_id] && (
+                          <Link
+                            to={`/chef/${article.cta_secondary_chef_id}`}
+                            style={{
+                              fontFamily: fontFamilyMap[article.cta_secondary_font as keyof typeof fontFamilyMap] || 'sans-serif',
+                              backgroundColor: article.cta_secondary_bg_color,
+                              color: article.cta_secondary_text_color,
+                              opacity: (article.cta_secondary_bg_opacity || 100) / 100
+                            }}
+                            className="px-6 py-3 rounded-lg font-medium hover:opacity-90 transition-opacity inline-block"
+                          >
+                            {article.cta_secondary_text}
+                          </Link>
+                        )}
+                      </div>
+                    </>
+                  ) : (
                     <button
-                      onClick={() => setExpandedArticleId(null)}
+                      onClick={() => setExpandedArticleId(article.id)}
                       className="text-[#a1c798] hover:text-[#8fb386] font-medium"
                     >
-                      Visa mindre
+                      Läs mer
                     </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => setExpandedArticleId(article.id)}
-                    className="text-[#a1c798] hover:text-[#8fb386] font-medium"
-                  >
-                    Läs mer
-                  </button>
-                )}
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {articles.length === 0 && !isAdmin && (
