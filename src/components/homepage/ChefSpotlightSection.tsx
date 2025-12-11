@@ -80,6 +80,12 @@ interface ChefSpotlightSettings {
   cta2Opacity?: number;
   cta2Link?: string;
   cta2LinkType?: 'chef' | 'internal' | 'external';
+  spacingHeaderToImage?: number;
+  spacingImageToContent?: number;
+  spacingCuriosaToArticle?: number;
+  spacingContentToQuote?: number;
+  spacingQuoteToButtons?: number;
+  spacingBetweenButtons?: number;
   smallImageSize?: number;
   smallImageRotation?: number;
   articleTitleFont?: string;
@@ -333,11 +339,12 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
     >
       <div className="max-w-7xl mx-auto">
         <div
-          className={`mb-12 ${
+          className={`${
             settings.headingAlignment === 'center' || !settings.headingAlignment
               ? 'text-center'
               : 'text-left'
           }`}
+          style={{ marginBottom: `${settings.spacingHeaderToImage || 48}px` }}
         >
           {settings.subtitlePlacement === 'inline' || !settings.subtitlePlacement ? (
             <div className={`flex items-center gap-3 ${settings.headingAlignment === 'center' || !settings.headingAlignment ? 'justify-center' : ''}`}>
@@ -457,13 +464,13 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
             )}
 
             {settings.curiosaPlacement === 'below-image' && (
-              <div className="mt-8">
+              <div style={{ marginTop: `${settings.spacingImageToContent || 32}px` }}>
                 {renderCuriosa()}
               </div>
             )}
           </div>
 
-          <div>
+          <div style={{ marginTop: settings.curiosaPlacement === 'beside-article' ? `${settings.spacingCuriosaToArticle || 24}px` : undefined }}>
             {settings.articleTitle && (
               <h3
                 className={`mb-4 ${
@@ -510,18 +517,22 @@ export const ChefSpotlightSection: React.FC<ChefSpotlightSectionProps> = ({ sett
             {settings.quotePosition === 'after-article' && renderQuote()}
 
             {settings.curiosaPlacement === 'beside-article' && (
-              <div className="mt-6">
+              <div style={{ marginTop: `${settings.spacingCuriosaToArticle || 24}px` }}>
                 {renderCuriosa()}
               </div>
             )}
           </div>
         </div>
 
-        {settings.quotePosition === 'after-curiosa' && settings.curiosaPlacement === 'below-image' && renderQuote()}
+        <div style={{ marginBottom: `${settings.spacingContentToQuote || 48}px` }}>
+          {settings.quotePosition === 'after-curiosa' && settings.curiosaPlacement === 'below-image' && renderQuote()}
+        </div>
 
-        {settings.quotePosition === 'before-cta' && renderQuote()}
+        <div style={{ marginBottom: `${settings.spacingQuoteToButtons || 48}px` }}>
+          {settings.quotePosition === 'before-cta' && renderQuote()}
+        </div>
 
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap" style={{ gap: `${settings.spacingBetweenButtons || 16}px` }}>
           {settings.cta1Text && (
             <div
               className="flex"

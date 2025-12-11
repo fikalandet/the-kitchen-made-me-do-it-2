@@ -86,6 +86,12 @@ interface ChefSpotlightSettings {
   cta2Opacity?: number;
   cta2Link?: string;
   cta2LinkType?: 'chef' | 'internal' | 'external';
+  spacingHeaderToImage?: number;
+  spacingImageToContent?: number;
+  spacingCuriosaToArticle?: number;
+  spacingContentToQuote?: number;
+  spacingQuoteToButtons?: number;
+  spacingBetweenButtons?: number;
 }
 
 interface ChefSpotlightEditorProps {
@@ -1531,7 +1537,102 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
         </div>
       </CollapsibleCard>
 
-      <CollapsibleCard title="Knapp 1" defaultExpanded={true}>
+      <CollapsibleCard title="Spacing" defaultExpanded={true}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Rubrik till bild (px): {settings.spacingHeaderToImage || 48}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="4"
+              value={settings.spacingHeaderToImage || 48}
+              onChange={(e) => updateSetting('spacingHeaderToImage', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Bild till innehåll (px): {settings.spacingImageToContent || 32}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="4"
+              value={settings.spacingImageToContent || 32}
+              onChange={(e) => updateSetting('spacingImageToContent', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Kuriosa till artikel (px): {settings.spacingCuriosaToArticle || 24}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="4"
+              value={settings.spacingCuriosaToArticle || 24}
+              onChange={(e) => updateSetting('spacingCuriosaToArticle', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Innehåll till citat (px): {settings.spacingContentToQuote || 48}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="4"
+              value={settings.spacingContentToQuote || 48}
+              onChange={(e) => updateSetting('spacingContentToQuote', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Citat till knappar (px): {settings.spacingQuoteToButtons || 48}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="4"
+              value={settings.spacingQuoteToButtons || 48}
+              onChange={(e) => updateSetting('spacingQuoteToButtons', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Mellan knappar (px): {settings.spacingBetweenButtons || 16}
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="60"
+              step="4"
+              value={settings.spacingBetweenButtons || 16}
+              onChange={(e) => updateSetting('spacingBetweenButtons', parseInt(e.target.value))}
+              className="w-full"
+            />
+          </div>
+        </div>
+      </CollapsibleCard>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CollapsibleCard title="Knapp 1" defaultExpanded={true}>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1910,6 +2011,7 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
           </div>
         </div>
       </CollapsibleCard>
+      </div>
 
       <CollapsibleCard title="Preview" defaultExpanded={false}>
         <div
@@ -2056,24 +2158,95 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                       color: settings.curiosaTextColor || '#374151'
                     }}
                   >
-                    <h4 className="font-bold text-sm mb-2">Kuriosa</h4>
-                    <div className="space-y-2">
-                      {curiosaItems.slice(0, 3).map((item, index) => (
-                        item.question && (
-                          <div key={index} className="text-xs">
-                            <p className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`}
-                              style={{ fontSize: `${settings.curiosaFontSize || 14}px` }}>
-                              {item.question}:
-                            </p>
-                            <p style={{
-                              fontSize: `${settings.curiosaFontSize || 14}px`,
-                              opacity: 0.8
-                            }}>
-                              {item.answer || 'Svar...'}
-                            </p>
+                    <h4
+                      className={`mb-2 ${settings.curiosaTitleBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaTitleItalic ? 'italic' : ''}`}
+                      style={{
+                        fontSize: `${settings.curiosaTitleSize || 20}px`,
+                        textAlign: settings.curiosaTitleAlignment || 'left',
+                        color: settings.curiosaTitleColor || '#1f2937'
+                      }}
+                    >
+                      {settings.curiosaTitle || 'Kuriosa'}
+                    </h4>
+                    <div className={`${settings.curiosaLayout === 'double' ? 'grid grid-cols-2 gap-4' : 'space-y-2'}`}>
+                      {settings.curiosaLayout === 'double' ? (
+                        <>
+                          <div className="space-y-2 pr-2 border-r border-gray-400">
+                            {curiosaItems.slice(0, Math.ceil(curiosaItems.length / 2)).map((item, index) => (
+                              item.question && (
+                                settings.curiosaItemLayout === 'stacked' ? (
+                                  <div key={index} className="text-xs">
+                                    <p className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`}
+                                      style={{ fontSize: `${settings.curiosaFontSize || 14}px`, color: settings.curiosaTitleColor || '#374151' }}>
+                                      {item.question}
+                                    </p>
+                                    <p style={{
+                                      fontSize: `${settings.curiosaFontSize || 14}px`,
+                                      color: settings.curiosaTextColor || '#4b5563'
+                                    }}>
+                                      {item.answer || 'Svar...'}
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <p key={index} className="text-xs" style={{ fontSize: `${settings.curiosaFontSize || 14}px` }}>
+                                    <span className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`} style={{ color: settings.curiosaTitleColor || '#374151' }}>{item.question}:</span>{' '}
+                                    <span style={{ color: settings.curiosaTextColor || '#4b5563' }}>{item.answer || 'Svar...'}</span>
+                                  </p>
+                                )
+                              )
+                            ))}
                           </div>
-                        )
-                      ))}
+                          <div className="space-y-2">
+                            {curiosaItems.slice(Math.ceil(curiosaItems.length / 2)).map((item, index) => (
+                              item.question && (
+                                settings.curiosaItemLayout === 'stacked' ? (
+                                  <div key={index} className="text-xs">
+                                    <p className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`}
+                                      style={{ fontSize: `${settings.curiosaFontSize || 14}px`, color: settings.curiosaTitleColor || '#374151' }}>
+                                      {item.question}
+                                    </p>
+                                    <p style={{
+                                      fontSize: `${settings.curiosaFontSize || 14}px`,
+                                      color: settings.curiosaTextColor || '#4b5563'
+                                    }}>
+                                      {item.answer || 'Svar...'}
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <p key={index} className="text-xs" style={{ fontSize: `${settings.curiosaFontSize || 14}px` }}>
+                                    <span className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`} style={{ color: settings.curiosaTitleColor || '#374151' }}>{item.question}:</span>{' '}
+                                    <span style={{ color: settings.curiosaTextColor || '#4b5563' }}>{item.answer || 'Svar...'}</span>
+                                  </p>
+                                )
+                              )
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        curiosaItems.map((item, index) => (
+                          item.question && (
+                            settings.curiosaItemLayout === 'stacked' ? (
+                              <div key={index} className="text-xs">
+                                <p className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`}
+                                  style={{ fontSize: `${settings.curiosaFontSize || 14}px`, color: settings.curiosaTitleColor || '#374151' }}>
+                                  {item.question}
+                                </p>
+                                <p style={{
+                                  fontSize: `${settings.curiosaFontSize || 14}px`,
+                                  color: settings.curiosaTextColor || '#4b5563'
+                                }}>
+                                  {item.answer || 'Svar...'}
+                                </p>
+                              </div>
+                            ) : (
+                              <p key={index} className="text-xs" style={{ fontSize: `${settings.curiosaFontSize || 14}px` }}>
+                                <span className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`} style={{ color: settings.curiosaTitleColor || '#374151' }}>{item.question}:</span>{' '}
+                                <span style={{ color: settings.curiosaTextColor || '#4b5563' }}>{item.answer || 'Svar...'}</span>
+                              </p>
+                            )
+                          )
+                        ))
+                      )}
                     </div>
                   </div>
                 )}
@@ -2148,22 +2321,38 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
                       color: settings.curiosaTextColor || '#374151'
                     }}
                   >
-                    <h4 className="font-bold text-sm mb-2">Kuriosa</h4>
+                    <h4
+                      className={`mb-2 ${settings.curiosaTitleBold ? 'font-bold' : 'font-semibold'} ${settings.curiosaTitleItalic ? 'italic' : ''}`}
+                      style={{
+                        fontSize: `${settings.curiosaTitleSize || 20}px`,
+                        textAlign: settings.curiosaTitleAlignment || 'left',
+                        color: settings.curiosaTitleColor || '#1f2937'
+                      }}
+                    >
+                      {settings.curiosaTitle || 'Kuriosa'}
+                    </h4>
                     <div className="space-y-2">
                       {curiosaItems.slice(0, 2).map((item, index) => (
                         item.question && (
-                          <div key={index} className="text-xs">
-                            <p className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`}
-                              style={{ fontSize: `${settings.curiosaFontSize || 14}px` }}>
-                              {item.question}:
+                          settings.curiosaItemLayout === 'stacked' ? (
+                            <div key={index} className="text-xs">
+                              <p className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`}
+                                style={{ fontSize: `${settings.curiosaFontSize || 14}px`, color: settings.curiosaTitleColor || '#374151' }}>
+                                {item.question}
+                              </p>
+                              <p style={{
+                                fontSize: `${settings.curiosaFontSize || 14}px`,
+                                color: settings.curiosaTextColor || '#4b5563'
+                              }}>
+                                {item.answer || 'Svar...'}
+                              </p>
+                            </div>
+                          ) : (
+                            <p key={index} className="text-xs" style={{ fontSize: `${settings.curiosaFontSize || 14}px` }}>
+                              <span className={`${settings.curiosaBold ? 'font-bold' : 'font-semibold'}`} style={{ color: settings.curiosaTitleColor || '#374151' }}>{item.question}:</span>{' '}
+                              <span style={{ color: settings.curiosaTextColor || '#4b5563' }}>{item.answer || 'Svar...'}</span>
                             </p>
-                            <p style={{
-                              fontSize: `${settings.curiosaFontSize || 14}px`,
-                              opacity: 0.8
-                            }}>
-                              {item.answer || 'Svar...'}
-                            </p>
-                          </div>
+                          )
                         )
                       ))}
                     </div>
@@ -2211,23 +2400,62 @@ export default function ChefSpotlightEditor({ settings, onSettingsChange }: Chef
               </blockquote>
             )}
 
-            {settings.ctaText && (
-              <div className={`mb-6 ${
-                settings.ctaAlignment === 'left' ? 'text-left' :
-                settings.ctaAlignment === 'right' ? 'text-right' :
-                'text-center'
-              }`}>
-                <button
-                  className="px-6 py-3 rounded-xl text-white"
+            <div className="flex flex-wrap gap-4">
+              {settings.cta1Text && (
+                <div
+                  className="flex"
                   style={{
-                    backgroundColor: settings.ctaColor || '#56c5c5',
-                    opacity: (settings.ctaOpacity || 100) / 100
+                    justifyContent:
+                      settings.cta1Alignment === 'left' ? 'flex-start' :
+                      settings.cta1Alignment === 'right' ? 'flex-end' :
+                      'center',
+                    flex: settings.cta2Text ? '1' : 'auto'
                   }}
                 >
-                  {settings.ctaText}
+                  <button
+                    className={`rounded-xl font-medium ${
+                      settings.cta1Size === 'small' ? 'px-4 py-2 text-sm' :
+                      settings.cta1Size === 'large' ? 'px-8 py-4 text-lg' :
+                      'px-6 py-3 text-base'
+                    } ${settings.cta1Bold ? 'font-bold' : ''}`}
+                    style={{
+                      backgroundColor: settings.cta1Color || '#56c5c5',
+                      color: settings.cta1TextColor || '#ffffff',
+                      opacity: (settings.cta1Opacity || 100) / 100
+                    }}
+                  >
+                    {settings.cta1Text}
                 </button>
               </div>
             )}
+            {settings.cta2Text && (
+              <div
+                className="flex"
+                style={{
+                  justifyContent:
+                    settings.cta2Alignment === 'left' ? 'flex-start' :
+                    settings.cta2Alignment === 'right' ? 'flex-end' :
+                    'center',
+                  flex: settings.cta1Text ? '1' : 'auto'
+                }}
+              >
+                <button
+                  className={`rounded-xl font-medium ${
+                    settings.cta2Size === 'small' ? 'px-4 py-2 text-sm' :
+                    settings.cta2Size === 'large' ? 'px-8 py-4 text-lg' :
+                    'px-6 py-3 text-base'
+                  } ${settings.cta2Bold ? 'font-bold' : ''}`}
+                  style={{
+                    backgroundColor: settings.cta2Color || '#56c5c5',
+                    color: settings.cta2TextColor || '#ffffff',
+                    opacity: (settings.cta2Opacity || 100) / 100
+                  }}
+                >
+                  {settings.cta2Text}
+                </button>
+              </div>
+            )}
+            </div>
 
             {selectedChef && (
               <div className="mt-8 flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
