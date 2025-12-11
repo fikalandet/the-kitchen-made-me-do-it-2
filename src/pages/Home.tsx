@@ -74,6 +74,7 @@ export const Home: React.FC = () => {
   const [tasteTagsSettings, setTasteTagsSettings] = useState<any>({});
   const [newsSettings, setNewsSettings] = useState<any>({});
   const [editorialCategoriesSettings, setEditorialCategoriesSettings] = useState<any>({});
+  const [chefSpotlightSettings, setChefSpotlightSettings] = useState<any>({});
   const [liveDishes, setLiveDishes] = useState<any[]>([]);
   const [brattomDishes, setBrattomDishes] = useState<any[]>([]);
   const [tjuvkikDishes, setTjuvkikDishes] = useState<any[]>([]);
@@ -250,6 +251,16 @@ export const Home: React.FC = () => {
 
     if (editorialCategoriesSection) {
       setEditorialCategoriesSettings(editorialCategoriesSection.settings || {});
+    }
+
+    const { data: chefSpotlightSection } = await supabase
+      .from('site_sections')
+      .select('settings')
+      .eq('slug', 'kock-i-fokus')
+      .maybeSingle();
+
+    if (chefSpotlightSection) {
+      setChefSpotlightSettings(chefSpotlightSection.settings || {});
     }
 
     const mockChef = {
@@ -915,7 +926,7 @@ export const Home: React.FC = () => {
         events={events}
       />
 
-      <ChefSpotlightSection chef={spotlightChef} />
+      <ChefSpotlightSection settings={chefSpotlightSettings} />
 
       <MoodDishesSection dishes={moodDishes} />
 

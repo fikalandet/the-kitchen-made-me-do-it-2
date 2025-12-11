@@ -79,6 +79,8 @@ export default function SektionEditor() {
         <SectionEditor slug="nyheter" displayName="Nyheter" />
       ) : sectionSlug === 'redaktionella-kategorier' ? (
         <SectionEditor slug="redaktionella-kategorier" displayName="Redaktionella kategorier" />
+      ) : sectionSlug === 'kock-i-fokus' ? (
+        <SectionEditor slug="kock-i-fokus" displayName="Kock i fokus" />
       ) : (
         <>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Sektion: {sectionName}</h2>
