@@ -20,6 +20,7 @@ import TasteTagsEditor from './TasteTagsEditor';
 import NewsEditor from './NewsEditor';
 import EditorialCategoriesEditor from './EditorialCategoriesEditor';
 import ChefSpotlightEditor from './ChefSpotlightEditor';
+import TestimonialsEditor from './TestimonialsEditor';
 import { Save, Loader } from 'lucide-react';
 
 interface SectionEditorProps {
@@ -132,6 +133,10 @@ const sectionConfigs: Record<string, SectionConfig> = {
   'kock-i-fokus': {
     supportsStandardContent: false,
     customPanels: [ChefSpotlightEditor],
+  },
+  'vad-vara-kunder-sager': {
+    supportsStandardContent: false,
+    customPanels: [TestimonialsEditor],
   },
 }
 
