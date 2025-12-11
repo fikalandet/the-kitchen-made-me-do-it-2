@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { Plus, Trash2, Upload } from 'lucide-react';
 import CollapsibleCard from './CollapsibleCard';
 import ColorPicker from './ColorPicker';
-import EmojiPicker from './EmojiPicker';
+import IconPicker from './IconPicker';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../contexts/AuthContext';
 
 interface BecomeChefBenefit {
   id: string;
-  icon: string;
+  icon_key: string;
   text: string;
 }
 
@@ -35,12 +35,14 @@ interface BecomeChefSettings {
   innerTitleBold?: boolean;
   innerTitleSize?: number;
   innerTitleColor?: string;
+  innerTitleAlignment?: 'left' | 'center' | 'right';
   description?: string;
   descriptionFont?: string;
   descriptionBold?: boolean;
   descriptionSize?: number;
   descriptionColor?: string;
-  descriptionAlignment?: 'left' | 'center';
+  descriptionAlignment?: 'left' | 'center' | 'right';
+  titleDescriptionGap?: number;
   image?: {
     url?: string;
     position?: 'none' | 'left' | 'right';
@@ -61,6 +63,7 @@ interface BecomeChefSettings {
     italic?: boolean;
     uppercase?: boolean;
     size?: number;
+    centered?: boolean;
   };
   benefits?: BecomeChefBenefit[];
   benefitsPerRow?: number;
@@ -157,9 +160,10 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
 
   const addBenefit = () => {
     const benefits = settings.benefits || [];
+    if (benefits.length >= 8) return;
     const newBenefit: BecomeChefBenefit = {
       id: `benefit-${Date.now()}`,
-      icon: '',
+      icon_key: '',
       text: ''
     };
     updateSetting('benefits', [...benefits, newBenefit]);
@@ -454,6 +458,7 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
                   <option value="lobster">Lobster</option>
                   <option value="sans">Sans Serif</option>
                   <option value="serif">Serif</option>
+                  <option value="poppins">Poppins</option>
                 </select>
               </div>
 
@@ -490,6 +495,44 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
               onChange={(color) => updateSetting('innerTitleColor', color)}
             />
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Rubrik – Placering
+              </label>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => updateSetting('innerTitleAlignment', 'left')}
+                  className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                    settings.innerTitleAlignment === 'left' || !settings.innerTitleAlignment
+                      ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  Vänster
+                </button>
+                <button
+                  onClick={() => updateSetting('innerTitleAlignment', 'center')}
+                  className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                    settings.innerTitleAlignment === 'center'
+                      ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  Centrerad
+                </button>
+                <button
+                  onClick={() => updateSetting('innerTitleAlignment', 'right')}
+                  className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                    settings.innerTitleAlignment === 'right'
+                      ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  Höger
+                </button>
+              </div>
+            </div>
+
             <div className="border-t pt-4 mt-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -517,6 +560,7 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
                     <option value="lobster">Lobster</option>
                     <option value="sans">Sans Serif</option>
                     <option value="serif">Serif</option>
+                    <option value="poppins">Poppins</option>
                   </select>
                 </div>
 
@@ -552,6 +596,58 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
                 value={settings.descriptionColor || '#374151'}
                 onChange={(color) => updateSetting('descriptionColor', color)}
               />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Beskrivning – Placering
+                </label>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => updateSetting('descriptionAlignment', 'left')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                      settings.descriptionAlignment === 'left' || !settings.descriptionAlignment
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    Vänster
+                  </button>
+                  <button
+                    onClick={() => updateSetting('descriptionAlignment', 'center')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                      settings.descriptionAlignment === 'center'
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    Centrerad
+                  </button>
+                  <button
+                    onClick={() => updateSetting('descriptionAlignment', 'right')}
+                    className={`px-4 py-2 rounded-lg border-2 transition-all ${
+                      settings.descriptionAlignment === 'right'
+                        ? 'border-[#56c5c5] bg-[#56c5c5] text-white'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    Höger
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Avstånd mellan rubrik och text ({settings.titleDescriptionGap || 24}px)
+                </label>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={settings.titleDescriptionGap || 24}
+                  onChange={(e) => updateSetting('titleDescriptionGap', parseInt(e.target.value))}
+                  className="w-full"
+                />
+              </div>
             </div>
           </div>
 
@@ -751,6 +847,18 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
             </div>
           )}
 
+          <div>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={cta.centered || false}
+                onChange={(e) => updateNestedSetting('cta', 'centered', e.target.checked)}
+                className="w-4 h-4 rounded"
+              />
+              <span className="text-sm font-medium text-gray-700">Centrera knapp</span>
+            </label>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <ColorPicker
               label="Knappfärg"
@@ -879,10 +987,10 @@ export default function BecomeChefEditor({ settings, onSettingsChange }: BecomeC
                     </button>
                   </div>
 
-                  <EmojiPicker
-                    label="Emoji/ikon"
-                    value={benefit.icon}
-                    onChange={(emoji) => updateBenefit(benefit.id, 'icon', emoji)}
+                  <IconPicker
+                    label="Ikon"
+                    value={benefit.icon_key}
+                    onChange={(iconKey) => updateBenefit(benefit.id, 'icon_key', iconKey)}
                   />
 
                   <div>

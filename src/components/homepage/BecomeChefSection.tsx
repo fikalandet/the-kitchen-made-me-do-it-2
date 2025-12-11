@@ -1,9 +1,30 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Home, Heart, Star, Crown, Moon, TrendingUp, Users, Lightbulb, Coffee, Zap, Sparkles, Sun, Cloud, Smile, Frown, Meh, ThumbsUp } from 'lucide-react';
+
+const ICON_MAP: Record<string, any> = {
+  'home': Home,
+  'heart': Heart,
+  'star': Star,
+  'crown': Crown,
+  'moon': Moon,
+  'trending-up': TrendingUp,
+  'users': Users,
+  'lightbulb': Lightbulb,
+  'coffee': Coffee,
+  'zap': Zap,
+  'sparkles': Sparkles,
+  'sun': Sun,
+  'cloud': Cloud,
+  'smile': Smile,
+  'frown': Frown,
+  'meh': Meh,
+  'thumbs-up': ThumbsUp
+};
 
 interface BecomeChefBenefit {
   id: string;
-  icon: string;
+  icon_key: string;
   text: string;
 }
 
@@ -30,11 +51,14 @@ interface BecomeChefSectionProps {
     innerTitleBold?: boolean;
     innerTitleSize?: number;
     innerTitleColor?: string;
+    innerTitleAlignment?: 'left' | 'center' | 'right';
     description?: string;
     descriptionFont?: string;
     descriptionBold?: boolean;
     descriptionSize?: number;
     descriptionColor?: string;
+    descriptionAlignment?: 'left' | 'center' | 'right';
+    titleDescriptionGap?: number;
     image?: {
       url?: string;
       position?: 'none' | 'left' | 'right';
@@ -55,6 +79,7 @@ interface BecomeChefSectionProps {
       italic?: boolean;
       uppercase?: boolean;
       size?: number;
+      centered?: boolean;
     };
     benefits?: BecomeChefBenefit[];
     benefitsPerRow?: number;
@@ -93,21 +118,34 @@ export function BecomeChefSection({ settings }: BecomeChefSectionProps) {
     settings.headingFont === 'sans' ? 'sans-serif' :
     undefined;
 
-  const innerTitleFontClass = settings.innerTitleFont === 'lobster' ? 'font-lobster' : '';
+  const innerTitleFontClass = settings.innerTitleFont === 'lobster' ? 'font-lobster' : settings.innerTitleFont === 'poppins' ? 'font-poppins' : '';
   const innerTitleFontFamily =
     settings.innerTitleFont === 'serif' ? 'serif' :
     settings.innerTitleFont === 'sans' ? 'sans-serif' :
+    settings.innerTitleFont === 'poppins' ? 'Poppins' :
     undefined;
 
   const descFontFamily =
     settings.descriptionFont === 'serif' ? 'serif' :
     settings.descriptionFont === 'lobster' ? 'Lobster' :
+    settings.descriptionFont === 'poppins' ? 'Poppins' :
     'sans-serif';
 
   const ctaFontFamily =
     cta.font === 'serif' ? 'serif' :
     cta.font === 'lobster' ? 'Lobster' :
+    cta.font === 'poppins' ? 'Poppins' :
     'sans-serif';
+
+  const innerTitleAlignment =
+    settings.innerTitleAlignment === 'center' ? 'text-center' :
+    settings.innerTitleAlignment === 'right' ? 'text-right' :
+    'text-left';
+
+  const descAlignment =
+    settings.descriptionAlignment === 'center' ? 'text-center' :
+    settings.descriptionAlignment === 'right' ? 'text-right' :
+    'text-left';
 
   const gridColsClass =
     benefitsPerRow === 2 ? 'grid-cols-1 md:grid-cols-2' :
@@ -195,13 +233,14 @@ export function BecomeChefSection({ settings }: BecomeChefSectionProps) {
         >
           {settings.innerTitle && (
             <h3
-              className={`mb-6 ${innerTitleFontClass} ${
+              className={`${innerTitleFontClass} ${
                 settings.innerTitleBold ? 'font-bold' : ''
-              }`}
+              } ${innerTitleAlignment}`}
               style={{
                 fontSize: `${settings.innerTitleSize || 32}px`,
                 fontFamily: innerTitleFontFamily,
-                color: settings.innerTitleColor || '#374151'
+                color: settings.innerTitleColor || '#374151',
+                marginBottom: `${settings.titleDescriptionGap || 24}px`
               }}
             >
               {settings.innerTitle}
@@ -223,10 +262,10 @@ export function BecomeChefSection({ settings }: BecomeChefSectionProps) {
               </div>
             )}
 
-            <div className={image.position === 'none' || !image.url ? 'text-center' : ''}>
+            <div className={image.position === 'none' || !image.url ? (cta.centered ? 'text-center' : descAlignment) : ''}>
               {settings.description && (
                 <p
-                  className="mb-8 max-w-2xl mx-auto"
+                  className={`mb-8 ${descAlignment}`}
                   style={{
                     fontSize: `${settings.descriptionSize || 18}px`,
                     fontFamily: descFontFamily,
@@ -238,43 +277,45 @@ export function BecomeChefSection({ settings }: BecomeChefSectionProps) {
                 </p>
               )}
 
-              {cta.label && (getLinkHref() !== '#') && (
-                isExternalLink ? (
-                  <a
-                    href={getLinkHref()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-8 py-3 rounded-full transition-all hover:shadow-lg hover:opacity-90 inline-block"
-                    style={{
-                      backgroundColor: cta.bgColor || '#56c5c5',
-                      color: cta.textColor || '#ffffff',
-                      fontSize: `${cta.size || 16}px`,
-                      fontFamily: ctaFontFamily,
-                      fontWeight: cta.bold ? 'bold' : 'normal',
-                      fontStyle: cta.italic ? 'italic' : 'normal',
-                      textTransform: cta.uppercase ? 'uppercase' : 'none'
-                    }}
-                  >
-                    {cta.label}
-                  </a>
-                ) : (
-                  <Link
-                    to={getLinkHref()}
-                    className="px-8 py-3 rounded-full transition-all hover:shadow-lg hover:opacity-90 inline-block"
-                    style={{
-                      backgroundColor: cta.bgColor || '#56c5c5',
-                      color: cta.textColor || '#ffffff',
-                      fontSize: `${cta.size || 16}px`,
-                      fontFamily: ctaFontFamily,
-                      fontWeight: cta.bold ? 'bold' : 'normal',
-                      fontStyle: cta.italic ? 'italic' : 'normal',
-                      textTransform: cta.uppercase ? 'uppercase' : 'none'
-                    }}
-                  >
-                    {cta.label}
-                  </Link>
-                )
-              )}
+              <div className={cta.centered ? 'text-center' : ''}>
+                {cta.label && (getLinkHref() !== '#') && (
+                  isExternalLink ? (
+                    <a
+                      href={getLinkHref()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-8 py-3 rounded-full transition-all hover:shadow-lg hover:opacity-90 inline-block"
+                      style={{
+                        backgroundColor: cta.bgColor || '#56c5c5',
+                        color: cta.textColor || '#ffffff',
+                        fontSize: `${cta.size || 16}px`,
+                        fontFamily: ctaFontFamily,
+                        fontWeight: cta.bold ? 'bold' : 'normal',
+                        fontStyle: cta.italic ? 'italic' : 'normal',
+                        textTransform: cta.uppercase ? 'uppercase' : 'none'
+                      }}
+                    >
+                      {cta.label}
+                    </a>
+                  ) : (
+                    <Link
+                      to={getLinkHref()}
+                      className="px-8 py-3 rounded-full transition-all hover:shadow-lg hover:opacity-90 inline-block"
+                      style={{
+                        backgroundColor: cta.bgColor || '#56c5c5',
+                        color: cta.textColor || '#ffffff',
+                        fontSize: `${cta.size || 16}px`,
+                        fontFamily: ctaFontFamily,
+                        fontWeight: cta.bold ? 'bold' : 'normal',
+                        fontStyle: cta.italic ? 'italic' : 'normal',
+                        textTransform: cta.uppercase ? 'uppercase' : 'none'
+                      }}
+                    >
+                      {cta.label}
+                    </Link>
+                  )
+                )}
+              </div>
             </div>
 
             {image.position === 'right' && image.url && (
@@ -294,12 +335,19 @@ export function BecomeChefSection({ settings }: BecomeChefSectionProps) {
 
           {benefits.length > 0 && (
             <div className={`grid ${gridColsClass} gap-6 mt-12`}>
-              {benefits.map((benefit) => (
-                <div key={benefit.id} className="text-center">
-                  <div className="text-5xl mb-3">{benefit.icon}</div>
-                  <p className="text-sm text-gray-700">{benefit.text}</p>
-                </div>
-              ))}
+              {benefits.map((benefit) => {
+                const IconComponent = ICON_MAP[benefit.icon_key];
+                return (
+                  <div key={benefit.id} className="text-center">
+                    {IconComponent ? (
+                      <IconComponent className="w-12 h-12 mx-auto mb-3 text-gray-700" />
+                    ) : (
+                      <div className="w-12 h-12 mx-auto mb-3" />
+                    )}
+                    <p className="text-sm text-gray-700">{benefit.text}</p>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
