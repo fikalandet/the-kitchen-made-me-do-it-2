@@ -21,6 +21,9 @@ import NewsEditor from './NewsEditor';
 import EditorialCategoriesEditor from './EditorialCategoriesEditor';
 import ChefSpotlightEditor from './ChefSpotlightEditor';
 import TestimonialsEditor from './TestimonialsEditor';
+import BecomeChefEditor from './BecomeChefEditor';
+import MoodDishesEditor from './MoodDishesEditor';
+import HoroscopeEditor from './HoroscopeEditor';
 import { Save, Loader } from 'lucide-react';
 
 interface SectionEditorProps {
@@ -137,6 +140,18 @@ const sectionConfigs: Record<string, SectionConfig> = {
   'kundernas-tyckande': {
     supportsStandardContent: false,
     customPanels: [TestimonialsEditor],
+  },
+  'bli-kitchen-kock': {
+    supportsStandardContent: false,
+    customPanels: [BecomeChefEditor],
+  },
+  'humorkak': {
+    supportsStandardContent: false,
+    customPanels: [MoodDishesEditor],
+  },
+  'horoskop': {
+    supportsStandardContent: false,
+    customPanels: [HoroscopeEditor],
   },
 }
 
