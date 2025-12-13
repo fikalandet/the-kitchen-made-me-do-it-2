@@ -2,6 +2,7 @@ import { HeroContent, TextStyle, CTAButton, TextLines } from '../../../../lib/ty
 import TypographyEditor from '../../components/TypographyEditor';
 import CTAButtonEditor from '../../components/CTAButtonEditor';
 import TextLinesEditor from '../../components/TextLinesEditor';
+import { ImageUpload } from '../../../components/ImageUpload';
 
 interface HeroSectionEditorProps {
   content: HeroContent;
@@ -101,23 +102,11 @@ export default function HeroSectionEditor({ content, onChange }: HeroSectionEdit
         <label className="block text-sm font-semibold text-gray-900 mb-3">Bild (valfritt)</label>
 
         <div className="space-y-3">
-          <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">Bild-URL</label>
-            <input
-              type="text"
-              value={content.image || ''}
-              onChange={(e) => updateField('image', e.target.value)}
-              placeholder="https://..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-            />
-            {content.image && (
-              <img
-                src={content.image}
-                alt="Preview"
-                className="mt-2 w-full max-h-48 object-cover rounded-lg border-2 border-gray-200"
-              />
-            )}
-          </div>
+          <ImageUpload
+            label="Intro-bild"
+            value={content.image}
+            onChange={(url) => updateField('image', url)}
+          />
 
           {content.image && (
             <>

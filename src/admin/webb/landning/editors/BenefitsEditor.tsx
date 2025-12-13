@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { BenefitsContent, BenefitCategory, BenefitCard, TextStyle } from '../../../../lib/types/landingPage';
 import TypographyEditor from '../../components/TypographyEditor';
 import IconPicker from '../../components/IconPicker';
+import { ImageUpload } from '../../../components/ImageUpload';
 import { ChevronDown, ChevronUp, Plus, Trash2, MoveUp, MoveDown } from 'lucide-react';
 
 interface BenefitsEditorProps {
@@ -326,13 +327,10 @@ export default function BenefitsEditor({ content, onChange }: BenefitsEditorProp
                                       />
                                     </div>
                                     <div>
-                                      <label className="block text-xs text-gray-600 mb-1">Eller Bild-URL</label>
-                                      <input
-                                        type="text"
-                                        value={card.image || ''}
-                                        onChange={(e) => updateCard(catIndex, cardIndex, { ...card, image: e.target.value })}
-                                        placeholder="https://..."
-                                        className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-[#56c5c5]"
+                                      <ImageUpload
+                                        label="Eller ladda upp bild"
+                                        value={card.image}
+                                        onChange={(url) => updateCard(catIndex, cardIndex, { ...card, image: url })}
                                       />
                                     </div>
                                   </div>

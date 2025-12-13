@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { AdminCard, AdminButton } from '../../components';
+import { AdminCard, AdminButton, Toast, ToastType } from '../../components';
 import { ArrowLeft, Save, Eye, Plus, Trash2, MoveUp, MoveDown, EyeOff, Edit2, ChevronDown, ChevronUp } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { LandingPage, LandingPageSection } from '../../../lib/types/landingPage';
@@ -19,6 +19,7 @@ export default function LandningEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
 
   useEffect(() => {
     if (slug) {
@@ -72,10 +73,10 @@ export default function LandningEditor() {
 
       if (error) throw error;
 
-      alert('Sidan har sparats!');
+      setToast({ message: 'Sidan har sparats!', type: 'success' });
     } catch (error) {
       console.error('Error saving page:', error);
-      alert('Ett fel uppstod när sidan skulle sparas');
+      setToast({ message: 'Ett fel uppstod när sidan skulle sparas', type: 'error' });
     } finally {
       setSaving(false);
     }
@@ -141,10 +142,10 @@ export default function LandningEditor() {
         s.id === sectionId ? { ...s, ...updatedSection } : s
       ));
 
-      alert('Sektionen har sparats!');
+      setToast({ message: 'Sektionen har sparats!', type: 'success' });
     } catch (error) {
       console.error('Error saving section:', error);
-      alert('Ett fel uppstod när sektionen skulle sparas');
+      setToast({ message: 'Ett fel uppstod när sektionen skulle sparas', type: 'error' });
     }
   };
 
@@ -435,6 +436,14 @@ export default function LandningEditor() {
           </div>
         </AdminCard>
       </div>
+
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

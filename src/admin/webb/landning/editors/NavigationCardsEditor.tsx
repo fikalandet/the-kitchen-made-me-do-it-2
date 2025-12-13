@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { NavigationCardsContent, NavigationCard, TextStyle } from '../../../../lib/types/landingPage';
 import TypographyEditor from '../../components/TypographyEditor';
 import IconPicker from '../../components/IconPicker';
-import { ChevronDown, ChevronUp, Plus, Trash2, MoveUp, MoveDown, Upload, Image as ImageIcon } from 'lucide-react';
+import { ImageUpload } from '../../../components/ImageUpload';
+import { ChevronDown, ChevronUp, Plus, Trash2, MoveUp, MoveDown } from 'lucide-react';
 
 interface NavigationCardsEditorProps {
   content: NavigationCardsContent;
@@ -165,13 +166,10 @@ export default function NavigationCardsEditor({ content, onChange }: NavigationC
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">Eller Bild-URL</label>
-                        <input
-                          type="text"
-                          value={card.image || ''}
-                          onChange={(e) => updateCard(index, { ...card, image: e.target.value })}
-                          placeholder="https://..."
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
+                        <ImageUpload
+                          label="Eller ladda upp bild"
+                          value={card.image}
+                          onChange={(url) => updateCard(index, { ...card, image: url })}
                         />
                         <p className="text-xs text-gray-500 mt-1">Om bild anges, används den istället för ikon</p>
                       </div>
@@ -249,16 +247,11 @@ export default function NavigationCardsEditor({ content, onChange }: NavigationC
 
                       {card.use_image_cover && (
                         <div className="space-y-3 mt-3 pt-3 border-t border-gray-200">
-                          <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Bild-URL</label>
-                            <input
-                              type="text"
-                              value={card.cover_image || ''}
-                              onChange={(e) => updateCard(index, { ...card, cover_image: e.target.value })}
-                              placeholder="https://..."
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                            />
-                          </div>
+                          <ImageUpload
+                            label="Omslagsbild"
+                            value={card.cover_image}
+                            onChange={(url) => updateCard(index, { ...card, cover_image: url })}
+                          />
 
                           <div>
                             <label className="block text-xs font-medium text-gray-700 mb-1">Overlay-färg</label>

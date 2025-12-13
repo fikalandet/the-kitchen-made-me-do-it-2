@@ -23,16 +23,50 @@ export function NavigationCardsSection({ content, backgroundColor }: NavigationC
       <div className="max-w-5xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {content.cards.map((card, index) => {
-            const IconComponent = (Icons as any)[card.icon] || Icons.Circle;
+            const IconComponent = card.icon ? (Icons as any)[card.icon] || Icons.Circle : Icons.Circle;
+            const cardBg = card.background_color || '#ffffff';
+            const cardTextColor = card.text_color || '#000000';
 
             return (
               <button
                 key={index}
                 onClick={() => scrollToSection(card.target_section)}
-                className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all cursor-pointer group"
+                className="rounded-xl p-6 shadow-md hover:shadow-lg transition-all cursor-pointer group relative overflow-hidden"
+                style={{
+                  backgroundColor: card.use_image_cover ? 'transparent' : cardBg,
+                  color: cardTextColor
+                }}
               >
-                <IconComponent className="w-10 h-10 mx-auto mb-4 text-[#a1c798] group-hover:scale-110 transition-transform" />
-                <h3 className="font-semibold text-lg text-gray-900">{renderText(card.title)}</h3>
+                {card.use_image_cover && card.cover_image && (
+                  <>
+                    <div
+                      className="absolute inset-0 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${card.cover_image})` }}
+                    />
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        backgroundColor: card.overlay_color || '#000000',
+                        opacity: card.overlay_opacity || 0.3
+                      }}
+                    />
+                  </>
+                )}
+                <div className="relative z-10">
+                  {card.image ? (
+                    <img
+                      src={card.image}
+                      alt={renderText(card.title)}
+                      className="w-10 h-10 mx-auto mb-4 object-contain group-hover:scale-110 transition-transform"
+                    />
+                  ) : (
+                    <IconComponent className="w-10 h-10 mx-auto mb-4 group-hover:scale-110 transition-transform" />
+                  )}
+                  <h3 className="font-semibold text-lg">{renderText(card.title)}</h3>
+                  {card.subtitle && (
+                    <p className="text-sm mt-2 opacity-80">{renderText(card.subtitle)}</p>
+                  )}
+                </div>
               </button>
             );
           })}

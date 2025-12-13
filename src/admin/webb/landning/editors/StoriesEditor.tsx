@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { StoriesContent, Story, TextStyle } from '../../../../lib/types/landingPage';
 import TypographyEditor from '../../components/TypographyEditor';
-import { ChevronDown, ChevronUp, Plus, Trash2, MoveUp, MoveDown, Upload } from 'lucide-react';
+import { ImageUpload } from '../../../components/ImageUpload';
+import { ChevronDown, ChevronUp, Plus, Trash2, MoveUp, MoveDown } from 'lucide-react';
 
 interface StoriesEditorProps {
   content: StoriesContent;
@@ -162,23 +163,11 @@ export default function StoriesEditor({ content, onChange }: StoriesEditorProps)
 
                 {expandedStory === index && (
                   <div className="mt-4 pt-4 border-t border-gray-200 space-y-4">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Bild-URL</label>
-                      <input
-                        type="text"
-                        value={story.image || ''}
-                        onChange={(e) => updateStory(index, { ...story, image: e.target.value })}
-                        placeholder="https://..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                      />
-                      {story.image && (
-                        <img
-                          src={story.image}
-                          alt="Preview"
-                          className="mt-2 w-24 h-24 rounded-full object-cover border-2 border-gray-200"
-                        />
-                      )}
-                    </div>
+                    <ImageUpload
+                      label="Profilbild"
+                      value={story.image}
+                      onChange={(url) => updateStory(index, { ...story, image: url })}
+                    />
 
                     <div className="grid grid-cols-3 gap-3">
                       <div>
