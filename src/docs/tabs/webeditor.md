@@ -108,6 +108,161 @@ Preview
 
 Alla sektioner måste inte ha samma kort.
 
+3.3 Globala standardkort & globala regler (obligatoriska)
+
+Följande inställningar är globala standarder och ska fungera identiskt i alla sektioner där de förekommer.
+
+De får aldrig specialanpassas per sektion.
+
+🎨 Standardkort: Bakgrund
+
+Kortet “Bakgrund” är ett globalt standardkort.
+
+Funktion (ALLTID)
+
+Admin ska kunna:
+
+Välja bakgrundsfärg (via global color picker)
+
+Justera opacity
+
+(Valfritt per sektion) välja bakgrundsbild
+
+Justera padding:
+
+Small
+
+Medium
+
+Large
+
+Regler
+
+Bakgrund påverkar hela sektionen
+
+Bakgrundsinställningar får inte påverka andra sektioner
+
+Samma UI och fält ska användas överallt
+
+🅰️ Standardkort: Huvudrubrik
+
+Kortet “Huvudrubrik” är ett globalt standardkort.
+
+Funktion (ALLTID)
+
+Admin ska kunna ange:
+
+Rubriktext
+
+Typsnitt
+
+Färg
+
+Stil (normal / fet / kursiv)
+
+Storlek
+
+Placering:
+
+Vänster
+
+Centrerad
+
+(Valfritt) Emoji före rubrik
+
+(Valfritt) Emoji efter rubrik
+
+Regler
+
+Huvudrubriken gäller hela sektionen
+
+Rubrikens inställningar får inte “läcka” till kort eller innehåll
+
+UI och beteende ska vara identiskt i alla sektioner
+
+🔁 Standardkort: Textrader
+
+(Detta avsnitt hänvisar till 3.2 – behåll oförändrat)
+
+Textrader är ett globalt UX-mönster med:
+
+Alltid rotation
+
+Valbart intervall i sekunder
+
+Placering:
+
+Efter huvudrubrik
+
+Under huvudrubrik
+
+📍 Global inställning: “Visa endast resultat i mitt närområde”
+
+Denna inställning är ett globalt filter-beteende och ska fungera identiskt över hela webbplatsen.
+
+Funktion (ALLTID)
+
+Toggle: Visa endast resultat i mitt närområde
+
+När aktiv:
+
+Innehåll filtreras baserat på användarens position
+
+Endast objekt inom definierat närområde visas
+
+När inaktiv:
+
+Allt innehåll visas
+
+Regler
+
+Toggle ska:
+
+se likadan ut i alla sektioner
+
+ligga på samma nivå i admin (inte gömd i specialkort)
+
+Samma logik ska återanvändas för:
+
+produkter
+
+kockar
+
+erbjudanden
+
+andra platsbaserade objekt
+
+Detta är en funktionell filterregel, inte en designinställning.
+
+👁️ Global inställning: “Visa / dölj på startsidan”
+
+Denna inställning är obligatorisk för alla sektioner.
+
+Funktion (ALLTID)
+
+Toggle: Visa på startsidan
+
+När avstängd:
+
+Sektionen renderas inte i frontend
+
+Sektionen finns kvar i admin
+
+När påslagen:
+
+Sektionen visas enligt sin ordning och inställningar
+
+Regler
+
+Toggeln ska alltid:
+
+ligga i sektionens header
+
+vara lätt att se
+
+Den får aldrig ligga i ett underkort
+
+
 🧩 4. Kort-nivå-redigering (viktig princip)
 
 Sektioner som visar kort eller objekt (t.ex. Nyheter, Redaktionella kategorier, Produktflöden):
@@ -240,15 +395,18 @@ Sektioner (varje sektion = egen sida med Sektion-editor)
 
 Exempel på sektioner:
 
+På spisen nu
+
+Populärt käk
+
 Nyheter
 
 Redaktionella kategorier (hub)
 
 Produktflöden
 
-Kampanjer
+Schyssta deals
 
-Community-sektioner
 
 Redaktionella teman (Hälsokäk, En sked för mamma etc.) ska inte vara egna sektioner –
 de hanteras som kategorier i den redaktionella hubben.
@@ -359,6 +517,9 @@ preview alltid uppdateras direkt
 admin ser vad som händer visuellt
 
 Aldrig hårdkoda sektioner eller innehåll
+
+Globala UX-regler (får inte brytas)
+Bolt ska identifiera globala UX-mönster (t.ex. Bakgrund, Huvudrubrik, Textrader, Närområde-filter, Visa/dölj) och alltid återanvända samma komponenter, beteenden och UI för dessa – utan variation mellan sektioner.
 
 ✨ 12. Slutord
 
