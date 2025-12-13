@@ -3,6 +3,7 @@ import { Routes, Route, NavLink, useLocation, Navigate } from 'react-router-dom'
 import LayoutOverview from './layout';
 import StartsidaMain from './startsida';
 import SidorMain from './sidor';
+import LandningMain from './landning';
 
 export default function WebbsidanMain() {
   const location = useLocation();
@@ -10,7 +11,8 @@ export default function WebbsidanMain() {
   const tabs = [
     { id: 'layout', label: 'Layout & navigation', path: '/admin/webb/layout' },
     { id: 'startsida', label: 'Startsidan', path: '/admin/webb/startsida' },
-    { id: 'sidor', label: 'Sidor', path: '/admin/webb/sidor' }
+    { id: 'sidor', label: 'Sidor', path: '/admin/webb/sidor' },
+    { id: 'landning', label: 'Landningssidor', path: '/admin/webb/landning' }
   ];
 
   return (
@@ -46,6 +48,7 @@ export default function WebbsidanMain() {
         <Route path="layout/*" element={<LayoutOverview />} />
         <Route path="startsida/*" element={<StartsidaMain />} />
         <Route path="sidor/*" element={<SidorMain />} />
+        <Route path="landning/*" element={<LandningMain />} />
       </Routes>
     </div>
   );

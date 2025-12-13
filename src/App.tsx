@@ -12,6 +12,7 @@ import { BecomeChef } from './pages/BecomeChef';
 import { GoldenSpoon } from './pages/GoldenSpoon';
 import { EditorialCategory } from './pages/EditorialCategory';
 import { StaticPage } from './pages/StaticPage';
+import { LandingPage } from './pages/LandingPage';
 import AdminLayout from './admin/AdminLayout';
 import AdminGuard from './admin/AdminGuard';
 import Dashboard from './admin/dashboard';
@@ -79,7 +80,7 @@ const AppContent = () => {
         path="/bli-kock"
         element={
           <PublicLayout>
-            <BecomeChef />
+            <LandingPage />
           </PublicLayout>
         }
       />
