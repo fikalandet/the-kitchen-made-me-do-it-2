@@ -1,6 +1,7 @@
 import { StoriesContent } from '../../lib/types/landingPage';
 import { getTextStyleClasses, getTextStyleInline } from '../../lib/utils/textStyles';
 import { Quote } from 'lucide-react';
+import { renderText } from '../../utils/text';
 
 interface StoriesSectionProps {
   content: StoriesContent;
@@ -49,8 +50,10 @@ export function StoriesSection({ content, backgroundColor }: StoriesSectionProps
                 <h3 className="font-lobster text-2xl text-gray-800 mb-1">
                   {story.name}
                 </h3>
-                <p className="text-sm text-[#a1c798] mb-4">{story.description}</p>
-                <p className="text-gray-700 italic">{story.story}</p>
+                {story.subtitle && (
+                  <p className="text-sm text-[#a1c798] mb-4">{renderText(story.subtitle)}</p>
+                )}
+                <p className="text-gray-700 italic">{renderText(story.description)}</p>
               </div>
             </div>
           ))}

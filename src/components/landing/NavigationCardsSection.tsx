@@ -1,5 +1,6 @@
 import { NavigationCardsContent } from '../../lib/types/landingPage';
 import * as Icons from 'lucide-react';
+import { renderText } from '../../utils/text';
 
 interface NavigationCardsSectionProps {
   content: NavigationCardsContent;
@@ -31,7 +32,7 @@ export function NavigationCardsSection({ content, backgroundColor }: NavigationC
                 className="bg-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all cursor-pointer group"
               >
                 <IconComponent className="w-10 h-10 mx-auto mb-4 text-[#a1c798] group-hover:scale-110 transition-transform" />
-                <h3 className="font-semibold text-lg text-gray-900">{card.title}</h3>
+                <h3 className="font-semibold text-lg text-gray-900">{renderText(card.title)}</h3>
               </button>
             );
           })}

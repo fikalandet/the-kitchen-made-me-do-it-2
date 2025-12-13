@@ -1,6 +1,7 @@
 import { BenefitsContent } from '../../lib/types/landingPage';
 import { getTextStyleClasses, getTextStyleInline } from '../../lib/utils/textStyles';
 import * as Icons from 'lucide-react';
+import { renderText } from '../../utils/text';
 
 interface BenefitsSectionProps {
   content: BenefitsContent;
@@ -42,9 +43,9 @@ export function BenefitsSection({ content, backgroundColor }: BenefitsSectionPro
               >
                 <IconComponent className="w-12 h-12 text-[#a1c798] mb-4" />
                 <h3 className="font-lobster text-2xl text-gray-800 mb-3">
-                  {card.title}
+                  {renderText(card.title)}
                 </h3>
-                <p className="text-gray-600">{card.text}</p>
+                <p className="text-gray-600">{renderText(card.text)}</p>
               </div>
             );
           })}
