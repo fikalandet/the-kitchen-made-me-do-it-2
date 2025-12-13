@@ -1,61 +1,80 @@
 Webbsidan – Redigeringsinstruktioner (Adminpanel)
 
-Detta dokument definierar alla regler, komponenter, strukturer och standarder som ska användas när vi bygger adminverktygen för att redigera webbsidans layout, startsida och statiska sidor.
+Version 2.0 – Gäller från nu
 
-All utveckling av “Webbsidan”-fliken i adminpanelen måste följa denna fil.
+Detta dokument definierar regler, principer, strukturer och standarder för hur adminverktygen för Webbsidan ska byggas, vidareutvecklas och underhållas.
 
------------------------------------------------------
+Alla förändringar i fliken Webbsidan i adminpanelen måste följa denna fil.
+
 🎯 1. Syfte
------------------------------------------------------
 
-Syftet med dessa instruktioner är att skapa:
+Syftet med dessa instruktioner är att säkerställa:
 
-En enhetlig redigeringsupplevelse för alla delar av webbsidan
+En enhetlig men flexibel redigeringsupplevelse
 
-Standardiserade komponenter som används för ALLA sektioner
+Ett skalbart system för nya sektioner och redaktionellt innehåll
 
-Skalbarhet för framtida sektioner och kampanjmoduler
+Ett konsekvent design- och typografisystem
 
-Ett konsekvent designsystem
+Tydlig separation mellan:
 
-Klara gränser mellan statiskt innehåll och dynamiska sektioner
+sektionslogik
 
-All framtida utveckling av startsidan, statiska sidor, navigation och sidfot ska följa denna standard.
+kortlogik
 
------------------------------------------------------
+innehållslogik
+
+Att adminpanelen är tydlig, begriplig och visuell
+
+Viktig princip:
+Sektion-editorn är ett ramverk, inte en fast mall.
+Alla sektioner följer samma grundstruktur – men får ha egna redigeringskort, visningslägen och logik.
+
 🎨 2. Designsystem & färgstandard
------------------------------------------------------
 
-Alla färgval i systemet (background, card, text, links, etc.) ska använda en custom color picker med förvalda färger från The Kitchen.
+Alla färgval i systemet (bakgrunder, kort, text, knappar, overlays etc.) ska använda en custom color picker med The Kitchens färgpalett.
 
-🎨 Globala färg-presets (måste alltid ligga överst):
+🎨 Globala färg-presets (ska alltid visas överst)
 
-#a1c798 (Mintgrön)
+#a1c798 – Mintgrön
 
-#f6f2e0 (Beige)
+#f6f2e0 – Beige
 
-#56c5c5 (Turkos)
+#56c5c5 – Turkos
 
-#ffffff (Vit)
+#ffffff – Vit
 
-#000000 (Svart)
+#000000 – Svart
 
-Color pickern ska kunna:
+Color pickern ska:
 
 Visa presets överst
 
-Tillåta valfri färg (manual input)
+Tillåta manuell färgkod
 
-Visa senaste använda färger (valfritt)
+(Valfritt) visa nyligen använda färger
 
------------------------------------------------------
-🧱 3. Standardkomponent: “Sektion-editor”
------------------------------------------------------
+Viktigt
 
-Alla redigerbara sektioner på startsidan måste använda exakt samma komponentstruktur, oavsett funktionalitet.
+Färg- och typografival kan förekomma på:
 
-Sektion-editor UI-uppbyggnad:
-1. Header
+sektionsnivå
+
+kortnivå
+
+innehållsnivå
+
+Bolt ska inte anta att design alltid är global per sektion.
+
+🧱 3. Standardkomponent: Sektion-editor (uppdaterad)
+
+Alla redigerbara sektioner på startsidan ska använda samma grundram, men innehållet i editorn är sektion-specifikt.
+
+3.1 Sektion-editor – Grundram (ALLTID)
+
+Varje sektion ska alltid innehålla:
+
+1. Sektion-header
 
 Sektionens namn
 
@@ -63,123 +82,119 @@ Kort beskrivning
 
 Toggle: Visa på startsidan
 
-Förhandsvisning / preview-komponent (alltid högst upp)
+Preview (alltid högst upp)
 
-2. Innehållsinställningar
+2. Redigeringskort (dynamiska)
 
-Fält (alla sektioner ska ha dessa):
+Varje sektion definierar själv:
 
-Rubrik (textfält)
+vilka kort som finns
 
-Underrubrik (textfält)
+i vilken ordning de visas
 
-Beskrivning (textfält)
+Exempel på vanliga kort:
 
-Slug / ID ( används av frontend )
-
-Antal objekt (t.ex. antal produkter/kockar som ska visas)
-
-3. Designinställningar (obligatoriskt i alla sektioner)
 Bakgrund
 
-backgroundColor
+Huvudrubrik
 
-möjlighet till backgroundImage
+Textrader
 
-padding: small / medium / large
+Visningsläge
 
-rounded: none / sm / md / lg
+Innehåll
 
-Kortdesign (standard för sektioner som visar kort)
+Preview
 
-cardBackgroundColor
+Alla sektioner måste inte ha samma kort.
 
-cardBorderColor
+🧩 4. Kort-nivå-redigering (viktig princip)
 
-cardTextColor
+Sektioner som visar kort eller objekt (t.ex. Nyheter, Redaktionella kategorier, Produktflöden):
 
-cardHeadingColor
+Ska visa en lista med kort
 
-cardRadius
+Varje kort redigeras via penn-ikon
 
-cardShadow (none / soft / elevated)
+Allt som är specifikt för ett kort ska redigeras där
 
-Text & typografi
+Exempel på per-kort-inställningar:
 
-headingColor
+Rubrik + typografi
 
-textColor
+Text + typografi
 
-linkColor
-(Dessa kan overridas per sektion även om globala typsnitt finns.)
+Bild
 
-4. Layoutinställningar
+Knapp (text, färg, stil, placering)
 
-Varje sektion måste stödja:
+Featured-status
 
-layoutType: grid / carousel / list / featured / collage
+Accentfärg
 
-antal kolumner (för grid)
+Design ska inte ligga på sektionsnivå om den gäller ett enskilt kort.
 
-card-size presets (small / medium / large)
+📐 5. Visningslägen (ersätter statiska layouttyper)
 
-5. Datakälla (dataSource)
+Varje sektion kan ha ett eller flera visningslägen.
 
-Alla sektioner ska definiera hur innehållet fylls.
+Ett visningsläge beskriver:
 
-Typer:
+hur innehållet renderas i frontend
+
+vilka inställningar som visas i admin
+
+vilka fält som är aktiva
+
+Exempel på visningslägen:
+
+Stor bild & text
+
+Kortflöde
+
+Små kort
+
+Grid
+
+Slider
+
+Collage
+
+Redaktionell hero
+
+Bolt ska inte låsa sektioner till fasta layouttyper som grid/carousel –
+visningslägen är den överordnade modellen.
+
+🗂 6. Datakällor
+6.1 Dynamiska sektioner (produkter, kockar etc.)
+
+Kan använda:
 
 Manuell
 
-Admin väljer specifika objekt:
-
-produkter
-
-kockar
-
-recept
-
-blogginlägg
-
-deals
-
 Automatisk
-
-Systemet hämtar baserat på regler:
-
-nyaste
-
-mest sålda
-
-högst betyg
-
-efter kategori/tagg
-
-kampanjstyrt
 
 Hybrid
 
-automatisk lista
+6.2 Redaktionella sektioner
 
-admin kan “pinna” objekt överst
+Redaktionellt innehåll är alltid manuellt.
 
-6. Synlighet & planering
+Exempel:
 
-Varje sektion måste ha:
+Redaktionella kategorier
 
-toggle: Visible
+Artiklar
 
-visibleFrom (valfritt)
+Blogg
 
-visibleTo (valfritt)
+Story-sektioner
 
-Så admin kan tidsstyra kampanjer.
+Bolt ska inte försöka auto-generera eller auto-hämta redaktionellt innehåll.
 
------------------------------------------------------
-📄 4. Statiska sidor – standardmall
------------------------------------------------------
+📄 7. Statiska sidor – standardmall
 
-Alla statiska sidor (Om oss, Kontakta oss, Samarbeten, Guldskeden etc.) ska använda samma redigeringsmall.
+Alla statiska sidor ska använda samma sid-editor.
 
 Fält:
 
@@ -189,7 +204,7 @@ Underrubrik
 
 Ingress
 
-Innehåll (WYSIWYG, TipTap eller motsvarande)
+Innehåll (WYSIWYG)
 
 Hero-bild (valfri)
 
@@ -203,115 +218,53 @@ URL-slug
 
 Toggle: Visa / Dölj
 
-Alla statiska sidor ska laddas från tabellen: static_pages.
+Datakälla:
 
------------------------------------------------------
-🧭 5. Struktur för “Webbsidan”-fliken i adminpanelen
------------------------------------------------------
+Tabell: static_pages
 
+🧭 8. Struktur för “Webbsidan”-fliken
 Huvudflik: Webbsidan
-
-Underflikar:
-
 A) Layout & Navigation
 
-Topbar
-
-Header & Navigationsmeny
+Header / navigation
 
 Sidfot
 
-Färger & typsnitt (globala designregler)
+Globala färger & typsnitt
 
 B) Startsidan
-1. Ordning & synlighet
 
-Drag & drop av sektionernas ordning
+Ordning & synlighet (drag & drop)
 
-Visa/dölj per sektion
+Sektioner (varje sektion = egen sida med Sektion-editor)
 
-Snabb vy av aktiva/inaktiva
-
-2. Sektioner
-
-Alla följande sektioner får varsin sida med samma “Sektion-editor”-komponent:
-
-Bildspel
-
-Hero
+Exempel på sektioner:
 
 Nyheter
 
-På spisen nu
+Redaktionella kategorier (hub)
 
-Populärt käk
+Produktflöden
 
-Bråttomkäk
+Kampanjer
 
-Nytt på menyn
+Community-sektioner
 
-Kylskåpsmeny
+Redaktionella teman (Hälsokäk, En sked för mamma etc.) ska inte vara egna sektioner –
+de hanteras som kategorier i den redaktionella hubben.
 
-Veckans kockar
+C) Redaktionellt
 
-Schyssta deals
+Redaktionella kategorier
 
-Tjuvkik i köket
+Artiklar per kategori
 
-Hälsokäk
+D) Sidor
 
-Humörkäk
+Alla statiska sidor
 
-Önska käk
-
-Testkäka & Tyck till
-
-Bli en kitchen-kock
-
-Så tycker våra kunder
-
-Horoskop
-
-Evenemang
-
-Kock i fokus
-
-Tävlingar
-
-Blogg-modulen
-
-C) Sidor (statiska sidor)
-
-Om oss
-
-Kontakta oss
-
-Guldskeden
-
-Våra kockar
-
-FAQ
-
-Policys & villkor
-
-Så funkar det
-
-Samarbeten
-
-Press
-
-Blogg & kategorier
-
-Alla ska använda samma sid-editor.
-
------------------------------------------------------
-🧩 6. Databasstruktur
------------------------------------------------------
+🧩 9. Databasstruktur (utökad)
 site_sections
-
-Lagrar alla sektioner på startsidan.
-
-Kolumner:
 
 id
 
@@ -319,21 +272,15 @@ name
 
 slug
 
-settings JSON (rubrik, antal objekt osv.)
+settings (JSON)
 
-design JSON (färger, layout, bakgrund)
-
-dataSourceType (manual/automatic/hybrid)
-
-dataSourceConfig JSON
+design (JSON)
 
 orderIndex
 
-visible (bool)
+visible
 
-static_pages
-
-Kolumner:
+editorial_categories
 
 id
 
@@ -341,55 +288,88 @@ title
 
 slug
 
+settings (JSON: bild, texter, knappar, typografi)
+
+orderIndex
+
+visible
+
+editorial_articles
+
+id
+
+categoryId
+
+title
+
 ingress
 
 content
 
-heroImage
+image
 
-seoTitle
-
-seoDescription
+orderIndex
 
 visible
 
------------------------------------------------------
-🔧 7. API-regler (måste följas)
------------------------------------------------------
-Sektioner:
+static_pages
+
+(se tidigare struktur)
+
+🔧 10. API-regler
+
+Bolt får inte skapa special-endpoints per sektion.
+
+Tillåtna endpoints:
 
 GET /api/site/sections
+
 PATCH /api/site/sections/:id
 
-Sidor:
-
 GET /api/site/pages
+
 PATCH /api/site/pages/:id
 
-Bolt får INTE skapa specialendpoints för enskilda sektioner.
-Allt ska gå genom dessa.
+Redaktionella kategorier och artiklar ska följa samma princip (centrala endpoints).
 
------------------------------------------------------
-🧠 8. Utvecklingsregler för Bolt
------------------------------------------------------
+🧠 11. Utvecklingsregler för Bolt
 
-Återanvänd alltid Sektion-editor-komponenten för alla sektioner.
+Bolt ska alltid:
 
-Återanvänd alltid sid-editorn för statiska sidor.
+Återanvända Sektion-editor-ramen
 
-Alla sektioner ska ha identisk struktur för settings och design.
+Avgöra om en inställning hör hemma på:
 
-Alla färgval ska använda The Kitchens färgpalett som presets.
+sektionsnivå
 
-Gör inga hårdkodade sektioner — allt ska vara dynamiskt.
+kortnivå
 
-Alla preview-komponenter ska ligga i toppen av redigeringssidan.
+Prioritera:
 
-Alla visuella ändringar i admin ska omedelbart reflekteras i preview.
+tydlighet
 
------------------------------------------------------
-✨ 9. Slutord
------------------------------------------------------
+visuell gruppering
 
-Denna fil är den enda källan för sanning kring hur Webbsidan-fliken ska byggas.
-Alla komponenter, API:er, databastabeller och sidor ska följa denna standard.
+att fält inte “flyter ihop”
+
+Säkerställa att:
+
+preview alltid uppdateras direkt
+
+admin ser vad som händer visuellt
+
+Aldrig hårdkoda sektioner eller innehåll
+
+✨ 12. Slutord
+
+Denna fil ersätter alla tidigare instruktioner för Webbsidan-fliken.
+
+All utveckling ska utgå från denna modell:
+
+Ramverk först
+
+Sektionens behov styr
+
+Redaktionellt innehåll är manuellt
+
+Adminpanelen ska vara tydlig, visuell och trygg att använda
