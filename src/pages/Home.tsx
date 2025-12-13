@@ -59,6 +59,7 @@ export const Home: React.FC = () => {
   const navigate = useNavigate();
   const [showFoodModal, setShowFoodModal] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [visibleSections, setVisibleSections] = useState<any[]>([]);
   const [onStoveNowSettings, setOnStoveNowSettings] = useState<any>({});
   const [popularSettings, setPopularSettings] = useState<any>({});
   const [newMenuSettings, setNewMenuSettings] = useState<any>({});
@@ -102,6 +103,16 @@ export const Home: React.FC = () => {
 
   const fetchData = async () => {
     const today = new Date().toISOString().split('T')[0];
+
+    const { data: sectionsData } = await supabase
+      .from('site_sections')
+      .select('slug, visible, order_index')
+      .eq('visible', true)
+      .order('order_index', { ascending: true });
+
+    if (sectionsData) {
+      setVisibleSections(sectionsData);
+    }
 
     const { data: onStoveNowSection } = await supabase
       .from('site_sections')
@@ -858,83 +869,60 @@ export const Home: React.FC = () => {
     setShowFoodModal(false);
   };
 
+  const renderSection = (slug: string) => {
+    switch (slug) {
+      case 'bildspel':
+        return <ImageCarousel key={slug} />;
+      case 'hero':
+        return <HeroSection key={slug} />;
+      case 'pa-spisen-nu':
+        return <OnStoveNowSection key={slug} settings={onStoveNowSettings} liveDishes={liveDishes} liveChefs={liveChefs} />;
+      case 'populart-kak':
+        return <PopularSection key={slug} settings={popularSettings} dishes={popularDishes} />;
+      case 'nytt-pa-menyn':
+        return <NewMenuSection key={slug} settings={newMenuSettings} dishes={newDishes} />;
+      case 'kylskapsmeny':
+        return <FridgeMenuSection key={slug} settings={fridgeMenuSettings} products={fridgeMenuProducts} />;
+      case 'veckans-kockar':
+        return <WeeklyChefsSection key={slug} settings={weeklyChefsSettings} chefs={weeklyChefs} />;
+      case 'brattomkak':
+        return <BrattomkakSection key={slug} settings={brattomkakSettings} dishes={brattomDishes} />;
+      case 'schyssta-deals':
+        return <DealsSection key={slug} settings={dealsSettings} dishes={deals} />;
+      case 'tjuvkik-i-koket':
+        return <TjuvkikSection key={slug} settings={tjuvkikSettings} dishes={tjuvkikDishes} />;
+      case 'smaketiketter':
+        return <TasteTagsSection key={slug} settings={tasteTagsSettings} />;
+      case 'nyheter':
+        return <NewsSection key={slug} settings={newsSettings} />;
+      case 'redaktionella-kategorier':
+        return <EditorialCategoriesSection key={slug} settings={editorialCategoriesSettings} />;
+      case 'tavlingar':
+        return <ContestsSection key={slug} settings={contestsSettings} contests={contests} />;
+      case 'onska-kak':
+        return <WishFoodSection key={slug} settings={wishFoodSettings} />;
+      case 'testkaka-tyck-till':
+        return <TestEatSection key={slug} settings={testEatSettings} />;
+      case 'evenemang':
+        return <EventsSection key={slug} settings={eventsSettings} events={events} />;
+      case 'kock-i-fokus':
+        return <ChefSpotlightSection key={slug} settings={chefSpotlightSettings} />;
+      case 'humorkak':
+        return <MoodDishesSection key={slug} dishes={moodDishes} />;
+      case 'kundernas-tyckande':
+        return <TestimonialsSection key={slug} settings={testimonialsSettings} />;
+      case 'bli-en-kitchen-kock':
+        return <BecomeChefSection key={slug} settings={becomeChefSettings} />;
+      case 'horoskop':
+        return <HoroscopeSection key={slug} horoscopes={horoscopes} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#a1c798' }}>
-      <ImageCarousel />
-
-      <HeroSection />
-
-      <OnStoveNowSection
-        settings={onStoveNowSettings}
-        liveDishes={liveDishes}
-        liveChefs={liveChefs}
-      />
-
-      <PopularSection
-        settings={popularSettings}
-        dishes={popularDishes}
-      />
-
-      <NewMenuSection
-        settings={newMenuSettings}
-        dishes={newDishes}
-      />
-
-      <FridgeMenuSection
-        settings={fridgeMenuSettings}
-        products={fridgeMenuProducts}
-      />
-
-      <WeeklyChefsSection
-        settings={weeklyChefsSettings}
-        chefs={weeklyChefs}
-      />
-
-      <BrattomkakSection
-        settings={brattomkakSettings}
-        dishes={brattomDishes}
-      />
-
-      <DealsSection
-        settings={dealsSettings}
-        dishes={deals}
-      />
-
-      <TjuvkikSection
-        settings={tjuvkikSettings}
-        dishes={tjuvkikDishes}
-      />
-
-      <TasteTagsSection settings={tasteTagsSettings} />
-
-      <NewsSection settings={newsSettings} />
-
-      <EditorialCategoriesSection settings={editorialCategoriesSettings} />
-
-      <ContestsSection
-        settings={contestsSettings}
-        contests={contests}
-      />
-
-      <WishFoodSection settings={wishFoodSettings} />
-
-      <TestEatSection settings={testEatSettings} />
-
-      <EventsSection
-        settings={eventsSettings}
-        events={events}
-      />
-
-      <ChefSpotlightSection settings={chefSpotlightSettings} />
-
-      <MoodDishesSection dishes={moodDishes} />
-
-      <TestimonialsSection settings={testimonialsSettings} />
-
-      <BecomeChefSection settings={becomeChefSettings} />
-
-      <HoroscopeSection horoscopes={horoscopes} />
+      {visibleSections.map((section) => renderSection(section.slug))}
 
       {showFoodModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4">
