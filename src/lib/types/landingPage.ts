@@ -7,6 +7,13 @@ export interface TextStyle {
   color: string;
 }
 
+export interface TextLines {
+  lines: string[];
+  rotate: boolean;
+  interval_seconds: number;
+  placement: 'after_heading' | 'below_heading';
+}
+
 export interface CTAButton {
   text: string;
   link: string;
@@ -18,11 +25,25 @@ export interface HeroContent {
   heading: TextStyle;
   intro: TextStyle;
   cta: CTAButton;
+  text_lines?: TextLines;
+  image?: string;
+  layout?: 'fullwidth' | 'image_left' | 'image_right';
+  height?: 'low' | 'medium' | 'high';
+  overlay_color?: string;
+  overlay_opacity?: number;
 }
 
 export interface NavigationCard {
-  title: string;
-  icon: string;
+  title: TextStyle;
+  subtitle?: TextStyle;
+  icon?: string;
+  image?: string;
+  background_color: string;
+  text_color: string;
+  use_image_cover?: boolean;
+  cover_image?: string;
+  overlay_color?: string;
+  overlay_opacity?: number;
   target_section: string;
 }
 
@@ -31,16 +52,26 @@ export interface NavigationCardsContent {
 }
 
 export interface BenefitCard {
-  icon: string;
-  title: string;
-  text: string;
+  icon?: string;
+  image?: string;
+  title: TextStyle;
+  text: TextStyle;
+  background_color?: string;
+  text_color?: string;
+}
+
+export interface BenefitCategory {
+  name: TextStyle;
+  intro?: TextStyle;
+  background_color?: string;
+  cards: BenefitCard[];
 }
 
 export interface BenefitsContent {
   section_id?: string;
   heading: TextStyle;
   intro?: TextStyle;
-  cards: BenefitCard[];
+  categories: BenefitCategory[];
 }
 
 export interface Step {
@@ -56,10 +87,12 @@ export interface StepsContent {
 }
 
 export interface Story {
-  name: string;
-  description: string;
-  story: string;
   image?: string;
+  name: string;
+  age?: string;
+  city?: string;
+  subtitle?: TextStyle;
+  description: TextStyle;
 }
 
 export interface StoriesContent {
@@ -85,6 +118,7 @@ export interface CTAContent {
   heading: TextStyle;
   text: TextStyle;
   cta: CTAButton;
+  text_lines?: TextLines;
 }
 
 export interface TrustCard {

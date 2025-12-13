@@ -8,6 +8,9 @@ import ColorPicker from '../components/ColorPicker';
 import HeroSectionEditor from './editors/HeroSectionEditor';
 import StepsEditor from './editors/StepsEditor';
 import FAQEditor from './editors/FAQEditor';
+import NavigationCardsEditor from './editors/NavigationCardsEditor';
+import BenefitsEditor from './editors/BenefitsEditor';
+import StoriesEditor from './editors/StoriesEditor';
 
 export default function LandningEditor() {
   const { slug } = useParams<{ slug: string }>();
@@ -153,13 +156,13 @@ export default function LandningEditor() {
 
   const getSectionTypeName = (type: string): string => {
     const names: Record<string, string> = {
-      hero: 'Hero',
+      hero: 'Intro',
       navigation_cards: 'Navigeringskort',
-      benefits: 'Fördelar',
-      steps: 'Steg',
+      benefits: 'Fördelar med The Kitchen',
+      steps: 'Så funkar det',
       stories: 'Framgångshistorier',
       faq: 'FAQ',
-      cta: 'Call-to-Action',
+      cta: 'Avslutande CTA',
       trust: 'Trygghet'
     };
     return names[type] || type;
@@ -361,6 +364,30 @@ export default function LandningEditor() {
                           />
                         )}
 
+                        {/* Navigation Cards Section */}
+                        {section.section_type === 'navigation_cards' && 'cards' in section.content && (
+                          <NavigationCardsEditor
+                            content={section.content}
+                            onChange={(newContent) => updateSectionContent(section.id, newContent)}
+                          />
+                        )}
+
+                        {/* Benefits Section */}
+                        {section.section_type === 'benefits' && 'heading' in section.content && (
+                          <BenefitsEditor
+                            content={section.content}
+                            onChange={(newContent) => updateSectionContent(section.id, newContent)}
+                          />
+                        )}
+
+                        {/* Stories Section */}
+                        {section.section_type === 'stories' && 'heading' in section.content && (
+                          <StoriesEditor
+                            content={section.content}
+                            onChange={(newContent) => updateSectionContent(section.id, newContent)}
+                          />
+                        )}
+
                         {/* CTA Section - using Hero editor since they share similar structure */}
                         {section.section_type === 'cta' && 'heading' in section.content && (
                           <HeroSectionEditor
@@ -370,11 +397,10 @@ export default function LandningEditor() {
                         )}
 
                         {/* Other sections - placeholder */}
-                        {!['hero', 'steps', 'faq', 'cta'].includes(section.section_type) && (
+                        {!['hero', 'steps', 'faq', 'cta', 'navigation_cards', 'benefits', 'stories', 'trust'].includes(section.section_type) && (
                           <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                             <p className="text-sm text-yellow-800">
                               Denna sektionstyp ({getSectionTypeName(section.section_type)}) har ännu inte en dedikerad editor.
-                              Använd databasverktyg för att redigera innehållet för närvarande.
                             </p>
                           </div>
                         )}
