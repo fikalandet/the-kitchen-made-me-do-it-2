@@ -5,6 +5,9 @@ import { ArrowLeft, Save, Eye, Plus, Trash2, MoveUp, MoveDown, EyeOff, Edit2, Ch
 import { supabase } from '../../../lib/supabase';
 import { LandingPage, LandingPageSection } from '../../../lib/types/landingPage';
 import ColorPicker from '../components/ColorPicker';
+import HeroSectionEditor from './editors/HeroSectionEditor';
+import StepsEditor from './editors/StepsEditor';
+import FAQEditor from './editors/FAQEditor';
 
 export default function LandningEditor() {
   const { slug } = useParams<{ slug: string }>();
@@ -335,256 +338,44 @@ export default function LandningEditor() {
                         />
 
                         {/* Hero Section */}
-                        {section.section_type === 'hero' && section.content && 'heading' in section.content && (
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Rubrik</label>
-                              <input
-                                type="text"
-                                value={section.content.heading?.text || ''}
-                                onChange={(e) => {
-                                  const newContent = {
-                                    ...section.content,
-                                    heading: { ...section.content.heading, text: e.target.value }
-                                  };
-                                  updateSectionContent(section.id, newContent);
-                                }}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                              />
-                            </div>
-                            {'intro' in section.content && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Ingress</label>
-                                <textarea
-                                  value={section.content.intro?.text || ''}
-                                  onChange={(e) => {
-                                    const newContent = {
-                                      ...section.content,
-                                      intro: { ...section.content.intro, text: e.target.value }
-                                    };
-                                    updateSectionContent(section.id, newContent);
-                                  }}
-                                  rows={3}
-                                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                                />
-                              </div>
-                            )}
-                            {'cta' in section.content && (
-                              <div className="space-y-3">
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">CTA-text</label>
-                                  <input
-                                    type="text"
-                                    value={section.content.cta?.text || ''}
-                                    onChange={(e) => {
-                                      const newContent = {
-                                        ...section.content,
-                                        cta: { ...section.content.cta, text: e.target.value }
-                                      };
-                                      updateSectionContent(section.id, newContent);
-                                    }}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">CTA-länk</label>
-                                  <input
-                                    type="text"
-                                    value={section.content.cta?.link || ''}
-                                    onChange={(e) => {
-                                      const newContent = {
-                                        ...section.content,
-                                        cta: { ...section.content.cta, link: e.target.value }
-                                      };
-                                      updateSectionContent(section.id, newContent);
-                                    }}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                                  />
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                        {section.section_type === 'hero' && 'heading' in section.content && (
+                          <HeroSectionEditor
+                            content={section.content}
+                            onChange={(newContent) => updateSectionContent(section.id, newContent)}
+                          />
                         )}
 
-                        {/* Benefits, Steps, Trust Sections */}
-                        {(section.section_type === 'benefits' || section.section_type === 'steps' || section.section_type === 'trust') && section.content && 'heading' in section.content && (
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Rubrik</label>
-                              <input
-                                type="text"
-                                value={section.content.heading?.text || ''}
-                                onChange={(e) => {
-                                  const newContent = {
-                                    ...section.content,
-                                    heading: { ...section.content.heading, text: e.target.value }
-                                  };
-                                  updateSectionContent(section.id, newContent);
-                                }}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                              />
-                            </div>
-                            {'intro' in section.content && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Ingress</label>
-                                <textarea
-                                  value={section.content.intro?.text || ''}
-                                  onChange={(e) => {
-                                    const newContent = {
-                                      ...section.content,
-                                      intro: { ...section.content.intro, text: e.target.value }
-                                    };
-                                    updateSectionContent(section.id, newContent);
-                                  }}
-                                  rows={3}
-                                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                                />
-                              </div>
-                            )}
-                            {('cards' in section.content || 'steps' in section.content) && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                  {section.section_type === 'steps' ? 'Steg' : 'Kort'} ({('steps' in section.content ? section.content.steps?.length : section.content.cards?.length) || 0})
-                                </label>
-                                <p className="text-sm text-gray-500">
-                                  För att redigera enskilda kort, klicka på dem nedan
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Stories Section */}
-                        {section.section_type === 'stories' && section.content && 'heading' in section.content && (
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Rubrik</label>
-                              <input
-                                type="text"
-                                value={section.content.heading?.text || ''}
-                                onChange={(e) => {
-                                  const newContent = {
-                                    ...section.content,
-                                    heading: { ...section.content.heading, text: e.target.value }
-                                  };
-                                  updateSectionContent(section.id, newContent);
-                                }}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                              />
-                            </div>
-                            {'stories' in section.content && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                  Historier ({section.content.stories?.length || 0})
-                                </label>
-                                <p className="text-sm text-gray-500">
-                                  För att redigera enskilda historier, använd databasverktyget
-                                </p>
-                              </div>
-                            )}
-                          </div>
+                        {/* Steps Section */}
+                        {section.section_type === 'steps' && 'heading' in section.content && (
+                          <StepsEditor
+                            content={section.content}
+                            onChange={(newContent) => updateSectionContent(section.id, newContent)}
+                          />
                         )}
 
                         {/* FAQ Section */}
-                        {section.section_type === 'faq' && section.content && 'heading' in section.content && (
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Rubrik</label>
-                              <input
-                                type="text"
-                                value={section.content.heading?.text || ''}
-                                onChange={(e) => {
-                                  const newContent = {
-                                    ...section.content,
-                                    heading: { ...section.content.heading, text: e.target.value }
-                                  };
-                                  updateSectionContent(section.id, newContent);
-                                }}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                              />
-                            </div>
-                            {'questions' in section.content && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                  Frågor ({section.content.questions?.length || 0})
-                                </label>
-                                <p className="text-sm text-gray-500">
-                                  För att redigera enskilda frågor, använd databasverktyget
-                                </p>
-                              </div>
-                            )}
-                          </div>
+                        {section.section_type === 'faq' && 'heading' in section.content && (
+                          <FAQEditor
+                            content={section.content}
+                            onChange={(newContent) => updateSectionContent(section.id, newContent)}
+                          />
                         )}
 
-                        {/* CTA Section */}
-                        {section.section_type === 'cta' && section.content && 'heading' in section.content && (
-                          <div className="space-y-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">Rubrik</label>
-                              <input
-                                type="text"
-                                value={section.content.heading?.text || ''}
-                                onChange={(e) => {
-                                  const newContent = {
-                                    ...section.content,
-                                    heading: { ...section.content.heading, text: e.target.value }
-                                  };
-                                  updateSectionContent(section.id, newContent);
-                                }}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                              />
-                            </div>
-                            {'text' in section.content && (
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Text</label>
-                                <textarea
-                                  value={section.content.text?.text || ''}
-                                  onChange={(e) => {
-                                    const newContent = {
-                                      ...section.content,
-                                      text: { ...section.content.text, text: e.target.value }
-                                    };
-                                    updateSectionContent(section.id, newContent);
-                                  }}
-                                  rows={3}
-                                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                                />
-                              </div>
-                            )}
-                            {'cta' in section.content && (
-                              <div className="space-y-3">
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">CTA-text</label>
-                                  <input
-                                    type="text"
-                                    value={section.content.cta?.text || ''}
-                                    onChange={(e) => {
-                                      const newContent = {
-                                        ...section.content,
-                                        cta: { ...section.content.cta, text: e.target.value }
-                                      };
-                                      updateSectionContent(section.id, newContent);
-                                    }}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                                  />
-                                </div>
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 mb-2">CTA-länk</label>
-                                  <input
-                                    type="text"
-                                    value={section.content.cta?.link || ''}
-                                    onChange={(e) => {
-                                      const newContent = {
-                                        ...section.content,
-                                        cta: { ...section.content.cta, link: e.target.value }
-                                      };
-                                      updateSectionContent(section.id, newContent);
-                                    }}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#a1c798]"
-                                  />
-                                </div>
-                              </div>
-                            )}
+                        {/* CTA Section - using Hero editor since they share similar structure */}
+                        {section.section_type === 'cta' && 'heading' in section.content && (
+                          <HeroSectionEditor
+                            content={section.content}
+                            onChange={(newContent) => updateSectionContent(section.id, newContent)}
+                          />
+                        )}
+
+                        {/* Other sections - placeholder */}
+                        {!['hero', 'steps', 'faq', 'cta'].includes(section.section_type) && (
+                          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <p className="text-sm text-yellow-800">
+                              Denna sektionstyp ({getSectionTypeName(section.section_type)}) har ännu inte en dedikerad editor.
+                              Använd databasverktyg för att redigera innehållet för närvarande.
+                            </p>
                           </div>
                         )}
 
