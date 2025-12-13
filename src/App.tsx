@@ -11,6 +11,7 @@ import { Membership } from './pages/Membership';
 import { BecomeChef } from './pages/BecomeChef';
 import { GoldenSpoon } from './pages/GoldenSpoon';
 import { EditorialCategory } from './pages/EditorialCategory';
+import { StaticPage } from './pages/StaticPage';
 import AdminLayout from './admin/AdminLayout';
 import AdminGuard from './admin/AdminGuard';
 import Dashboard from './admin/dashboard';
@@ -93,7 +94,145 @@ const AppContent = () => {
       <Route
         path="/redaktion/:slug"
         element={
-          <EditorialCategory />
+          <PublicLayout>
+            <EditorialCategory />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/om-oss"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/kontakta-oss"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/samarbeten"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/sa-funkar-det"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/faq"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/blogg"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/vara-kockar"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/kock-i-fokus"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/butik"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/policys-villkor"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/hallbarhet"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/press"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/halsokak"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/en-sked-for-mamma"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/koksknep"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/vardagsmat"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
+        }
+      />
+      <Route
+        path="/for-hela-familjen"
+        element={
+          <PublicLayout>
+            <StaticPage />
+          </PublicLayout>
         }
       />
       <Route
