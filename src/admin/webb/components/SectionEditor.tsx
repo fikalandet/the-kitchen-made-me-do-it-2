@@ -141,7 +141,7 @@ const sectionConfigs: Record<string, SectionConfig> = {
     supportsStandardContent: false,
     customPanels: [TestimonialsEditor],
   },
-  'bli-kitchen-kock': {
+  'sadla-om': {
     supportsStandardContent: false,
     customPanels: [BecomeChefEditor],
   },

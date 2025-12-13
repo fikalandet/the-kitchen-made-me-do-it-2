@@ -287,7 +287,7 @@ export const Home: React.FC = () => {
     const { data: becomeChefSection } = await supabase
       .from('site_sections')
       .select('settings')
-      .eq('slug', 'bli-en-kitchen-kock')
+      .eq('slug', 'sadla-om')
       .maybeSingle();
 
     if (becomeChefSection) {
@@ -911,7 +911,7 @@ export const Home: React.FC = () => {
         return <MoodDishesSection key={slug} dishes={moodDishes} />;
       case 'kundernas-tyckande':
         return <TestimonialsSection key={slug} settings={testimonialsSettings} />;
-      case 'bli-en-kitchen-kock':
+      case 'sadla-om':
         return <BecomeChefSection key={slug} settings={becomeChefSettings} />;
       case 'horoskop':
         return <HoroscopeSection key={slug} horoscopes={horoscopes} />;

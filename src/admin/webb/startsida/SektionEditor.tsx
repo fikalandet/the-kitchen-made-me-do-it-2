@@ -19,12 +19,11 @@ export default function SektionEditor() {
     'schyssta-deals': 'Schyssta deals',
     'tjuvkik-i-koket': 'Tjuvkik i köket',
     'smaketiketter': 'Smaketiketter',
-    'halsokak': 'Hälsokäk',
     'humorkak': 'Humörkäk',
     'onska-kak': 'Önska käk',
     'testkaka-tyck-till': 'Testkäka & Tyck till',
     'redaktionella-kategorier': 'Redaktionella kategorier',
-    'bli-kitchen-kock': 'Bli en kitchen-kock',
+    'sadla-om': 'Sadla om',
     'kundernas-tyckande': 'Så tycker våra kunder',
     'horoskop': 'Horoskop',
     'evenemang': 'Evenemang',
@@ -83,8 +82,8 @@ export default function SektionEditor() {
         <SectionEditor slug="kock-i-fokus" displayName="Kock i fokus" />
       ) : sectionSlug === 'kundernas-tyckande' ? (
         <SectionEditor slug="kundernas-tyckande" displayName="Så tycker våra kunder" />
-      ) : sectionSlug === 'bli-kitchen-kock' ? (
-        <SectionEditor slug="bli-kitchen-kock" displayName="Bli en kitchen-kock" />
+      ) : sectionSlug === 'sadla-om' ? (
+        <SectionEditor slug="sadla-om" displayName="Sadla om" />
       ) : sectionSlug === 'humorkak' ? (
         <SectionEditor slug="humorkak" displayName="Humörkäk" />
       ) : sectionSlug === 'horoskop' ? (
