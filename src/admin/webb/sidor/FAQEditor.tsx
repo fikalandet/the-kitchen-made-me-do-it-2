@@ -35,6 +35,7 @@ interface FAQPageData {
 interface FAQCategory {
   id?: string;
   title: string;
+  category_description: string | null;
   styles: {
     font: string;
     weight: string;
@@ -44,6 +45,12 @@ interface FAQCategory {
     background_color: string;
     icon: string | null;
   };
+  header_background_color: string;
+  header_title_font: string;
+  header_title_weight: string;
+  header_title_size: string;
+  header_title_color: string;
+  header_title_align: string;
   question_background_color: string;
   answer_background_color: string;
   question_font: string;
@@ -150,6 +157,7 @@ export default function FAQEditor() {
   const addCategory = async () => {
     const newCategory: FAQCategory = {
       title: 'Ny kategori',
+      category_description: null,
       styles: {
         font: 'poppins',
         weight: 'semibold',
@@ -159,6 +167,12 @@ export default function FAQEditor() {
         background_color: '#ffffff',
         icon: null
       },
+      header_background_color: '#f6f2e0',
+      header_title_font: 'lobster',
+      header_title_weight: 'bold',
+      header_title_size: 'xl',
+      header_title_color: '#000000',
+      header_title_align: 'center',
       question_background_color: '#f9fafb',
       answer_background_color: '#ffffff',
       question_font: 'poppins',
@@ -494,21 +508,89 @@ export default function FAQEditor() {
           </div>
         </AdminCard>
 
-        <AdminCard title="Textrader">
+        <AdminCard title="Textrader (roterande)">
           <TextLinesEditor
+            label="Textrader"
             value={pageData.text_lines}
             onChange={(textLines) => setPageData({ ...pageData, text_lines: textLines })}
-            fontValue={pageData.tagline_font}
-            onFontChange={(font) => setPageData({ ...pageData, tagline_font: font })}
-            weightValue={pageData.tagline_weight}
-            onWeightChange={(weight) => setPageData({ ...pageData, tagline_weight: weight })}
-            sizeValue={pageData.tagline_size}
-            onSizeChange={(size) => setPageData({ ...pageData, tagline_size: size })}
-            colorValue={pageData.tagline_color}
-            onColorChange={(color) => setPageData({ ...pageData, tagline_color: color })}
-            alignValue={pageData.tagline_align}
-            onAlignChange={(align) => setPageData({ ...pageData, tagline_align: align })}
           />
+
+          <div className="mt-6 space-y-4">
+            <h4 className="font-semibold text-gray-900">Typografi för textrader</h4>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
+                <select
+                  value={pageData.tagline_font}
+                  onChange={(e) => setPageData({ ...pageData, tagline_font: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="poppins">Poppins</option>
+                  <option value="lobster">Lobster</option>
+                  <option value="inter">Inter</option>
+                  <option value="merriweather">Merriweather</option>
+                  <option value="roboto">Roboto</option>
+                  <option value="playfair">Playfair</option>
+                  <option value="montserrat">Montserrat</option>
+                  <option value="lato">Lato</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Stil</label>
+                <select
+                  value={pageData.tagline_weight}
+                  onChange={(e) => setPageData({ ...pageData, tagline_weight: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="thin">Tunn</option>
+                  <option value="light">Lätt</option>
+                  <option value="normal">Normal</option>
+                  <option value="medium">Medium</option>
+                  <option value="semibold">Semibold</option>
+                  <option value="bold">Fet</option>
+                  <option value="black">Svart</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
+                <select
+                  value={pageData.tagline_size}
+                  onChange={(e) => setPageData({ ...pageData, tagline_size: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="sm">Liten</option>
+                  <option value="md">Medium</option>
+                  <option value="lg">Stor</option>
+                  <option value="xl">XL</option>
+                  <option value="2xl">2XL</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <ColorPicker
+                label="Färg"
+                value={pageData.tagline_color}
+                onChange={(color) => setPageData({ ...pageData, tagline_color: color })}
+              />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                <select
+                  value={pageData.tagline_align}
+                  onChange={(e) => setPageData({ ...pageData, tagline_align: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="left">Vänster</option>
+                  <option value="center">Centrerad</option>
+                  <option value="right">Höger</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </AdminCard>
 
         <AdminCard title="Ingress">
@@ -642,7 +724,7 @@ export default function FAQEditor() {
             {categories.map((category, index) => (
               <div key={category.id} className="border border-gray-200 rounded-lg p-4 space-y-4">
                 {editingCategory === category.id ? (
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Kategorinamn</label>
                       <input
@@ -658,144 +740,249 @@ export default function FAQEditor() {
                       />
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
-                        <select
-                          value={category.styles.font}
-                          onChange={(e) => {
-                            const updated = categories.map(cat =>
-                              cat.id === category.id
-                                ? { ...cat, styles: { ...cat.styles, font: e.target.value } }
-                                : cat
-                            );
-                            setCategories(updated);
-                          }}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                        >
-                          <option value="poppins">Poppins</option>
-                          <option value="lobster">Lobster</option>
-                          <option value="inter">Inter</option>
-                          <option value="merriweather">Merriweather</option>
-                          <option value="roboto">Roboto</option>
-                        </select>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Beskrivning (valfri)</label>
+                      <textarea
+                        value={category.category_description || ''}
+                        onChange={(e) => {
+                          const updated = categories.map(cat =>
+                            cat.id === category.id ? { ...cat, category_description: e.target.value } : cat
+                          );
+                          setCategories(updated);
+                        }}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        rows={2}
+                      />
+                    </div>
+
+                    <div className="border-t pt-4">
+                      <h4 className="font-semibold mb-3">Kategorikortstyling</h4>
+                      <div className="grid grid-cols-3 gap-4 mb-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
+                          <select
+                            value={category.styles.font}
+                            onChange={(e) => {
+                              const updated = categories.map(cat =>
+                                cat.id === category.id
+                                  ? { ...cat, styles: { ...cat.styles, font: e.target.value } }
+                                  : cat
+                              );
+                              setCategories(updated);
+                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                          >
+                            <option value="poppins">Poppins</option>
+                            <option value="lobster">Lobster</option>
+                            <option value="inter">Inter</option>
+                            <option value="merriweather">Merriweather</option>
+                            <option value="roboto">Roboto</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Stil</label>
+                          <select
+                            value={category.styles.weight}
+                            onChange={(e) => {
+                              const updated = categories.map(cat =>
+                                cat.id === category.id
+                                  ? { ...cat, styles: { ...cat.styles, weight: e.target.value } }
+                                  : cat
+                              );
+                              setCategories(updated);
+                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                          >
+                            <option value="normal">Normal</option>
+                            <option value="medium">Medium</option>
+                            <option value="semibold">Semibold</option>
+                            <option value="bold">Fet</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
+                          <select
+                            value={category.styles.size}
+                            onChange={(e) => {
+                              const updated = categories.map(cat =>
+                                cat.id === category.id
+                                  ? { ...cat, styles: { ...cat.styles, size: e.target.value } }
+                                  : cat
+                              );
+                              setCategories(updated);
+                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                          >
+                            <option value="sm">Liten</option>
+                            <option value="md">Medium</option>
+                            <option value="lg">Stor</option>
+                            <option value="xl">XL</option>
+                          </select>
+                        </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Stil</label>
-                        <select
-                          value={category.styles.weight}
-                          onChange={(e) => {
+                      <div className="grid grid-cols-2 gap-4">
+                        <ColorPicker
+                          label="Textfärg"
+                          value={category.styles.color}
+                          onChange={(color) => {
                             const updated = categories.map(cat =>
                               cat.id === category.id
-                                ? { ...cat, styles: { ...cat.styles, weight: e.target.value } }
+                                ? { ...cat, styles: { ...cat.styles, color } }
                                 : cat
                             );
                             setCategories(updated);
                           }}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                        >
-                          <option value="normal">Normal</option>
-                          <option value="medium">Medium</option>
-                          <option value="semibold">Semibold</option>
-                          <option value="bold">Fet</option>
-                        </select>
-                      </div>
+                        />
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
-                        <select
-                          value={category.styles.size}
-                          onChange={(e) => {
+                        <ColorPicker
+                          label="Bakgrundsfärg"
+                          value={category.styles.background_color}
+                          onChange={(color) => {
                             const updated = categories.map(cat =>
                               cat.id === category.id
-                                ? { ...cat, styles: { ...cat.styles, size: e.target.value } }
+                                ? { ...cat, styles: { ...cat.styles, background_color: color } }
                                 : cat
                             );
                             setCategories(updated);
                           }}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                        >
-                          <option value="sm">Liten</option>
-                          <option value="md">Medium</option>
-                          <option value="lg">Stor</option>
-                          <option value="xl">XL</option>
-                        </select>
+                        />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Textfärg</label>
-                        <input
-                          type="color"
-                          value={category.styles.color}
-                          onChange={(e) => {
-                            const updated = categories.map(cat =>
-                              cat.id === category.id
-                                ? { ...cat, styles: { ...cat.styles, color: e.target.value } }
-                                : cat
-                            );
-                            setCategories(updated);
-                          }}
-                          className="w-full h-10 rounded-lg"
-                        />
+                    <div className="border-t pt-4">
+                      <h4 className="font-semibold mb-3">Header-styling (när kategori är vald)</h4>
+
+                      <ColorPicker
+                        label="Header bakgrundsfärg"
+                        value={category.header_background_color}
+                        onChange={(color) => {
+                          const updated = categories.map(cat =>
+                            cat.id === category.id ? { ...cat, header_background_color: color } : cat
+                          );
+                          setCategories(updated);
+                        }}
+                      />
+
+                      <div className="grid grid-cols-3 gap-4 mt-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
+                          <select
+                            value={category.header_title_font}
+                            onChange={(e) => {
+                              const updated = categories.map(cat =>
+                                cat.id === category.id ? { ...cat, header_title_font: e.target.value } : cat
+                              );
+                              setCategories(updated);
+                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                          >
+                            <option value="poppins">Poppins</option>
+                            <option value="lobster">Lobster</option>
+                            <option value="inter">Inter</option>
+                            <option value="merriweather">Merriweather</option>
+                            <option value="roboto">Roboto</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Stil</label>
+                          <select
+                            value={category.header_title_weight}
+                            onChange={(e) => {
+                              const updated = categories.map(cat =>
+                                cat.id === category.id ? { ...cat, header_title_weight: e.target.value } : cat
+                              );
+                              setCategories(updated);
+                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                          >
+                            <option value="normal">Normal</option>
+                            <option value="medium">Medium</option>
+                            <option value="semibold">Semibold</option>
+                            <option value="bold">Fet</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
+                          <select
+                            value={category.header_title_size}
+                            onChange={(e) => {
+                              const updated = categories.map(cat =>
+                                cat.id === category.id ? { ...cat, header_title_size: e.target.value } : cat
+                              );
+                              setCategories(updated);
+                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                          >
+                            <option value="sm">Liten</option>
+                            <option value="md">Medium</option>
+                            <option value="lg">Stor</option>
+                            <option value="xl">XL</option>
+                            <option value="2xl">2XL</option>
+                          </select>
+                        </div>
                       </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Bakgrundsfärg</label>
-                        <input
-                          type="color"
-                          value={category.styles.background_color}
-                          onChange={(e) => {
+                      <div className="grid grid-cols-2 gap-4 mt-4">
+                        <ColorPicker
+                          label="Textfärg"
+                          value={category.header_title_color}
+                          onChange={(color) => {
                             const updated = categories.map(cat =>
-                              cat.id === category.id
-                                ? { ...cat, styles: { ...cat.styles, background_color: e.target.value } }
-                                : cat
+                              cat.id === category.id ? { ...cat, header_title_color: color } : cat
                             );
                             setCategories(updated);
                           }}
-                          className="w-full h-10 rounded-lg"
                         />
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                          <select
+                            value={category.header_title_align}
+                            onChange={(e) => {
+                              const updated = categories.map(cat =>
+                                cat.id === category.id ? { ...cat, header_title_align: e.target.value } : cat
+                              );
+                              setCategories(updated);
+                            }}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                          >
+                            <option value="left">Vänster</option>
+                            <option value="center">Centrerad</option>
+                            <option value="right">Höger</option>
+                          </select>
+                        </div>
                       </div>
                     </div>
 
                     <div className="border-t pt-4">
                       <h4 className="font-semibold mb-3">Frågor & svar-styling</h4>
                       <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Fråga bakgrund</label>
-                          <input
-                            type="color"
-                            value={category.question_background_color}
-                            onChange={(e) => {
-                              const updated = categories.map(cat =>
-                                cat.id === category.id
-                                  ? { ...cat, question_background_color: e.target.value }
-                                  : cat
-                              );
-                              setCategories(updated);
-                            }}
-                            className="w-full h-10 rounded-lg"
-                          />
-                        </div>
+                        <ColorPicker
+                          label="Fråga bakgrund"
+                          value={category.question_background_color}
+                          onChange={(color) => {
+                            const updated = categories.map(cat =>
+                              cat.id === category.id ? { ...cat, question_background_color: color } : cat
+                            );
+                            setCategories(updated);
+                          }}
+                        />
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-2">Svar bakgrund</label>
-                          <input
-                            type="color"
-                            value={category.answer_background_color}
-                            onChange={(e) => {
-                              const updated = categories.map(cat =>
-                                cat.id === category.id
-                                  ? { ...cat, answer_background_color: e.target.value }
-                                  : cat
-                              );
-                              setCategories(updated);
-                            }}
-                            className="w-full h-10 rounded-lg"
-                          />
-                        </div>
+                        <ColorPicker
+                          label="Svar bakgrund"
+                          value={category.answer_background_color}
+                          onChange={(color) => {
+                            const updated = categories.map(cat =>
+                              cat.id === category.id ? { ...cat, answer_background_color: color } : cat
+                            );
+                            setCategories(updated);
+                          }}
+                        />
                       </div>
                     </div>
 

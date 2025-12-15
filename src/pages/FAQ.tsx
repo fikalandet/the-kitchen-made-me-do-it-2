@@ -36,6 +36,7 @@ interface FAQPageData {
 interface FAQCategory {
   id: string;
   title: string;
+  category_description: string | null;
   styles: {
     font: string;
     weight: string;
@@ -45,6 +46,12 @@ interface FAQCategory {
     background_color: string;
     icon: string | null;
   };
+  header_background_color: string;
+  header_title_font: string;
+  header_title_weight: string;
+  header_title_size: string;
+  header_title_color: string;
+  header_title_align: string;
   question_background_color: string;
   answer_background_color: string;
   question_font: string;
@@ -75,7 +82,7 @@ export function FAQ() {
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [openItem, setOpenItem] = useState<string | null>(null);
 
-  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const categoryHeaderRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -167,15 +174,20 @@ export function FAQ() {
   };
 
   const handleCategoryClick = (categoryId: string) => {
-    setActiveCategory(categoryId);
-    setOpenItem(null);
+    if (activeCategory === categoryId) {
+      setActiveCategory(null);
+      setOpenItem(null);
+    } else {
+      setActiveCategory(categoryId);
+      setOpenItem(null);
 
-    setTimeout(() => {
-      categoryRefs.current[categoryId]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }, 100);
+      setTimeout(() => {
+        categoryHeaderRef.current?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }, 100);
+    }
   };
 
   const toggleItem = (itemId: string) => {
@@ -185,6 +197,8 @@ export function FAQ() {
   const getCategoryItems = (categoryId: string) => {
     return items.filter(item => item.category_id === categoryId);
   };
+
+  const activeCateg = categories.find(c => c.id === activeCategory);
 
   if (loading) {
     return (
@@ -203,44 +217,70 @@ export function FAQ() {
       }
     : { backgroundColor: pageData?.background_color || '#f6f2e0' };
 
+  const renderTextLines = () => {
+    if (!pageData?.text_lines?.lines || pageData.text_lines.lines.length === 0) return null;
+
+    const content = pageData.text_lines.rotate ? (
+      <p className="animate-fadeIn">
+        {pageData.text_lines.lines[currentLineIndex]}
+      </p>
+    ) : (
+      pageData.text_lines.lines.map((line, idx) => (
+        <p key={idx}>{line}</p>
+      ))
+    );
+
+    return (
+      <div
+        className="transition-opacity duration-500"
+        style={{
+          fontFamily: getFontFamily(pageData.tagline_font),
+          fontWeight: getFontWeight(pageData.tagline_weight),
+          fontSize: getTextSize(pageData.tagline_size),
+          color: pageData.tagline_color,
+          textAlign: pageData.tagline_align as any
+        }}
+      >
+        {content}
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f6f2e0' }}>
       <div style={bgStyle} className="py-24 md:py-32">
         <div className="max-w-[860px] mx-auto px-4">
           <div className="text-center space-y-6 mb-12">
-            <h1
-              style={{
-                fontFamily: getFontFamily(pageData?.title_font || 'lobster'),
-                fontWeight: getFontWeight(pageData?.title_weight || 'bold'),
-                fontSize: getTitleSize(pageData?.title_size || 'xl'),
-                color: pageData?.title_color || '#000000',
-                textAlign: pageData?.title_align as any || 'center'
-              }}
-            >
-              {pageData?.title_text || 'Vanliga frågor'}
-            </h1>
-
-            {pageData?.text_lines?.lines && pageData.text_lines.lines.length > 0 && (
-              <div
-                className="min-h-[2rem] transition-opacity duration-500"
-                style={{
-                  fontFamily: getFontFamily(pageData.tagline_font),
-                  fontWeight: getFontWeight(pageData.tagline_weight),
-                  fontSize: getTextSize(pageData.tagline_size),
-                  color: pageData.tagline_color,
-                  textAlign: pageData.tagline_align as any
-                }}
-              >
-                {pageData.text_lines.rotate ? (
-                  <p className="animate-fadeIn">
-                    {pageData.text_lines.lines[currentLineIndex]}
-                  </p>
-                ) : (
-                  pageData.text_lines.lines.map((line, idx) => (
-                    <p key={idx}>{line}</p>
-                  ))
-                )}
+            {pageData?.text_lines?.placement === 'after_heading' ? (
+              <div className="flex items-center justify-center gap-4 flex-wrap">
+                <h1
+                  style={{
+                    fontFamily: getFontFamily(pageData?.title_font || 'lobster'),
+                    fontWeight: getFontWeight(pageData?.title_weight || 'bold'),
+                    fontSize: getTitleSize(pageData?.title_size || 'xl'),
+                    color: pageData?.title_color || '#000000',
+                    textAlign: pageData?.title_align as any || 'center'
+                  }}
+                >
+                  {pageData?.title_text || 'Vanliga frågor'}
+                </h1>
+                {renderTextLines()}
               </div>
+            ) : (
+              <>
+                <h1
+                  style={{
+                    fontFamily: getFontFamily(pageData?.title_font || 'lobster'),
+                    fontWeight: getFontWeight(pageData?.title_weight || 'bold'),
+                    fontSize: getTitleSize(pageData?.title_size || 'xl'),
+                    color: pageData?.title_color || '#000000',
+                    textAlign: pageData?.title_align as any || 'center'
+                  }}
+                >
+                  {pageData?.title_text || 'Vanliga frågor'}
+                </h1>
+                {renderTextLines()}
+              </>
             )}
 
             {pageData?.ingress_text && (
@@ -265,124 +305,124 @@ export function FAQ() {
             </div>
           )}
 
-          {categories.length > 0 && !activeCategory && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
-              {categories.map(category => (
-                <button
-                  key={category.id}
-                  onClick={() => handleCategoryClick(category.id)}
-                  className="px-6 py-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
-                  style={{
-                    backgroundColor: category.styles.background_color,
-                    fontFamily: getFontFamily(category.styles.font),
-                    fontWeight: getFontWeight(category.styles.weight),
-                    fontSize: getTextSize(category.styles.size),
-                    color: category.styles.color,
-                    textAlign: category.styles.align as any
-                  }}
+          {categories.length > 0 && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+                {categories.map(category => (
+                  <button
+                    key={category.id}
+                    onClick={() => handleCategoryClick(category.id)}
+                    className={`px-6 py-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ${
+                      activeCategory === category.id ? 'ring-2 ring-gray-900 ring-offset-2' : ''
+                    }`}
+                    style={{
+                      backgroundColor: category.styles.background_color,
+                      fontFamily: getFontFamily(category.styles.font),
+                      fontWeight: getFontWeight(category.styles.weight),
+                      fontSize: getTextSize(category.styles.size),
+                      color: category.styles.color,
+                      textAlign: category.styles.align as any
+                    }}
+                  >
+                    {category.title}
+                  </button>
+                ))}
+              </div>
+
+              {activeCateg && (
+                <div
+                  ref={categoryHeaderRef}
+                  className="mb-8 py-8 px-6 rounded-lg"
+                  style={{ backgroundColor: activeCateg.header_background_color }}
                 >
-                  {category.title}
-                </button>
-              ))}
-            </div>
-          )}
+                  <h2
+                    style={{
+                      fontFamily: getFontFamily(activeCateg.header_title_font),
+                      fontWeight: getFontWeight(activeCateg.header_title_weight),
+                      fontSize: getTitleSize(activeCateg.header_title_size),
+                      color: activeCateg.header_title_color,
+                      textAlign: activeCateg.header_title_align as any
+                    }}
+                    className="mb-3"
+                  >
+                    {activeCateg.title}
+                  </h2>
 
-          {activeCategory && (
-            <div className="space-y-8">
-              <button
-                onClick={() => {
-                  setActiveCategory(null);
-                  setOpenItem(null);
-                }}
-                className="text-sm text-gray-600 hover:text-gray-900 mb-4"
-              >
-                ← Tillbaka till kategorier
-              </button>
-
-              {categories
-                .filter(cat => cat.id === activeCategory)
-                .map(category => {
-                  const categoryItems = getCategoryItems(category.id);
-
-                  return (
-                    <div
-                      key={category.id}
-                      ref={el => categoryRefs.current[category.id] = el}
-                      className="space-y-4"
+                  {activeCateg.category_description && (
+                    <p
+                      style={{
+                        fontFamily: getFontFamily(activeCateg.header_title_font),
+                        fontSize: getTextSize('md'),
+                        color: activeCateg.header_title_color,
+                        textAlign: activeCateg.header_title_align as any,
+                        opacity: 0.8
+                      }}
                     >
-                      <h2
-                        className="mb-6"
-                        style={{
-                          fontFamily: getFontFamily(category.styles.font),
-                          fontWeight: getFontWeight(category.styles.weight),
-                          fontSize: getTitleSize(category.styles.size),
-                          color: category.styles.color,
-                          textAlign: category.styles.align as any
-                        }}
-                      >
-                        {category.title}
-                      </h2>
+                      {activeCateg.category_description}
+                    </p>
+                  )}
+                </div>
+              )}
 
-                      {categoryItems.length === 0 ? (
-                        <p className="text-gray-600 text-center py-8">
-                          Inga frågor i denna kategori ännu.
-                        </p>
-                      ) : (
-                        <div className="space-y-2">
-                          {categoryItems.map(item => {
-                            const isOpen = openItem === item.id;
+              {activeCateg && (
+                <div className="space-y-2 mb-12">
+                  {getCategoryItems(activeCateg.id).length === 0 ? (
+                    <p className="text-gray-600 text-center py-8">
+                      Inga frågor i denna kategori ännu.
+                    </p>
+                  ) : (
+                    getCategoryItems(activeCateg.id).map(item => {
+                      const isOpen = openItem === item.id;
 
-                            return (
-                              <div
-                                key={item.id}
-                                className="rounded-lg overflow-hidden shadow-sm"
-                              >
-                                <button
-                                  onClick={() => toggleItem(item.id)}
-                                  className="w-full px-6 py-4 flex items-center justify-between text-left transition-colors hover:opacity-90"
-                                  style={{
-                                    backgroundColor: category.question_background_color,
-                                    fontFamily: getFontFamily(category.question_font),
-                                    fontWeight: getFontWeight(category.question_weight),
-                                    fontSize: getTextSize(category.question_size),
-                                    color: category.question_color
-                                  }}
-                                >
-                                  <span dangerouslySetInnerHTML={{ __html: item.question }} />
-                                  <ChevronDown
-                                    className={`w-5 h-5 flex-shrink-0 ml-4 transition-transform duration-200 ${
-                                      isOpen ? 'rotate-180' : ''
-                                    }`}
-                                  />
-                                </button>
+                      return (
+                        <div
+                          key={item.id}
+                          className="rounded-lg overflow-hidden shadow-sm"
+                        >
+                          <button
+                            onClick={() => toggleItem(item.id)}
+                            className="w-full px-6 py-4 flex items-center justify-between text-left transition-colors hover:opacity-90"
+                            style={{
+                              backgroundColor: activeCateg.question_background_color,
+                              fontFamily: getFontFamily(activeCateg.question_font),
+                              fontWeight: getFontWeight(activeCateg.question_weight),
+                              fontSize: getTextSize(activeCateg.question_size),
+                              color: activeCateg.question_color
+                            }}
+                          >
+                            <span dangerouslySetInnerHTML={{ __html: item.question }} />
+                            <ChevronDown
+                              className={`w-5 h-5 flex-shrink-0 ml-4 transition-transform duration-200 ${
+                                isOpen ? 'rotate-180' : ''
+                              }`}
+                            />
+                          </button>
 
-                                <div
-                                  className="overflow-hidden transition-all duration-300"
-                                  style={{
-                                    maxHeight: isOpen ? '1000px' : '0'
-                                  }}
-                                >
-                                  <div
-                                    className="px-6 py-4"
-                                    style={{
-                                      backgroundColor: category.answer_background_color,
-                                      fontFamily: getFontFamily(category.answer_font),
-                                      fontWeight: getFontWeight(category.answer_weight),
-                                      fontSize: getTextSize(category.answer_size),
-                                      color: category.answer_color
-                                    }}
-                                    dangerouslySetInnerHTML={{ __html: item.answer }}
-                                  />
-                                </div>
-                              </div>
-                            );
-                          })}
+                          <div
+                            className="overflow-hidden transition-all duration-300"
+                            style={{
+                              maxHeight: isOpen ? '1000px' : '0'
+                            }}
+                          >
+                            <div
+                              className="px-6 py-4"
+                              style={{
+                                backgroundColor: activeCateg.answer_background_color,
+                                fontFamily: getFontFamily(activeCateg.answer_font),
+                                fontWeight: getFontWeight(activeCateg.answer_weight),
+                                fontSize: getTextSize(activeCateg.answer_size),
+                                color: activeCateg.answer_color
+                              }}
+                              dangerouslySetInnerHTML={{ __html: item.answer }}
+                            />
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-            </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
