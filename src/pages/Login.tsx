@@ -51,8 +51,12 @@ export const Login: React.FC = () => {
 
           if (profile?.role === 'admin') {
             navigate('/admin');
-          } else {
+          } else if (profile?.role === 'buyer') {
+            navigate('/kundpanel');
+          } else if (profile?.role === 'seller') {
             navigate('/chef-panel');
+          } else {
+            navigate('/');
           }
         } else {
           navigate('/');

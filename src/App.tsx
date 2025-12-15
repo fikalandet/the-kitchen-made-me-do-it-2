@@ -6,6 +6,7 @@ import { Home } from './pages/Home';
 import { Marketplace } from './pages/Marketplace';
 import { MarketplaceFilter } from './pages/MarketplaceFilter';
 import { NewChefPanel } from './pages/NewChefPanel';
+import { CustomerPanel } from './pages/CustomerPanel';
 import { ProductForm } from './pages/ProductForm';
 import { Membership } from './pages/Membership';
 import { BecomeChef } from './pages/BecomeChef';
@@ -18,6 +19,7 @@ import { FAQ } from './pages/FAQ';
 import { LandingPage } from './pages/LandingPage';
 import AdminLayout from './admin/AdminLayout';
 import AdminGuard from './admin/AdminGuard';
+import CustomerGuard from './components/CustomerGuard';
 import Dashboard from './admin/dashboard';
 import Kockar from './admin/kockar';
 import ChefDetail from './admin/kockar/ChefDetail';
@@ -245,6 +247,14 @@ const AppContent = () => {
           <ProtectedRoute>
             <NewChefPanel />
           </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/kundpanel"
+        element={
+          <CustomerGuard>
+            <CustomerPanel />
+          </CustomerGuard>
         }
       />
       <Route
