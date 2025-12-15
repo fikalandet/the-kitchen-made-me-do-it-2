@@ -133,6 +133,8 @@ export function AboutUs() {
       lato: 'Lato, sans-serif',
       playfair: 'Playfair Display, serif',
       montserrat: 'Montserrat, sans-serif',
+      merriweather: 'Merriweather, serif',
+      inter: 'Inter, sans-serif',
       default: 'system-ui, sans-serif'
     };
     return fonts[font || 'default'] || fonts.default;

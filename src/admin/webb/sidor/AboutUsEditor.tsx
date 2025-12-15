@@ -421,7 +421,7 @@ export default function AboutUsEditor() {
       </div>
 
       <div className="space-y-6">
-        <AdminCard title="Toppsektion">
+        <AdminCard title="INTRO - Hero-sektion">
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Bakgrundstyp</label>
@@ -573,10 +573,14 @@ export default function AboutUsEditor() {
                   onChange={(e) => setAboutPage({ ...aboutPage, title_font: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 >
-                  <option value="lobster">Lobster</option>
                   <option value="poppins">Poppins</option>
+                  <option value="lobster">Lobster</option>
+                  <option value="inter">Inter</option>
+                  <option value="merriweather">Merriweather</option>
                   <option value="roboto">Roboto</option>
                   <option value="playfair">Playfair</option>
+                  <option value="montserrat">Montserrat</option>
+                  <option value="lato">Lato</option>
                 </select>
               </div>
 
@@ -647,10 +651,14 @@ export default function AboutUsEditor() {
                   onChange={(e) => setAboutPage({ ...aboutPage, tagline_font: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 >
-                  <option value="lobster">Lobster</option>
                   <option value="poppins">Poppins</option>
+                  <option value="lobster">Lobster</option>
+                  <option value="inter">Inter</option>
+                  <option value="merriweather">Merriweather</option>
                   <option value="roboto">Roboto</option>
                   <option value="playfair">Playfair</option>
+                  <option value="montserrat">Montserrat</option>
+                  <option value="lato">Lato</option>
                 </select>
               </div>
 
@@ -721,10 +729,14 @@ export default function AboutUsEditor() {
                   onChange={(e) => setAboutPage({ ...aboutPage, ingress_font: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                 >
-                  <option value="lobster">Lobster</option>
                   <option value="poppins">Poppins</option>
+                  <option value="lobster">Lobster</option>
+                  <option value="inter">Inter</option>
+                  <option value="merriweather">Merriweather</option>
                   <option value="roboto">Roboto</option>
                   <option value="playfair">Playfair</option>
+                  <option value="montserrat">Montserrat</option>
+                  <option value="lato">Lato</option>
                 </select>
               </div>
 
@@ -791,7 +803,7 @@ export default function AboutUsEditor() {
           </div>
         </AdminCard>
 
-        <AdminCard title={`2-kolumnersblock (${rows.length} rader)`}>
+        <AdminCard title={`TVÅ KOLUMNER - Innehållsrader (${rows.length})`}>
           <div className="space-y-4">
             {rows.map((row) => (
               <div key={row.row_order} className="border border-gray-200 rounded-lg p-4">
@@ -840,10 +852,14 @@ export default function AboutUsEditor() {
                           }}
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                         >
-                          <option value="lobster">Lobster</option>
                           <option value="poppins">Poppins</option>
+                          <option value="lobster">Lobster</option>
+                          <option value="inter">Inter</option>
+                          <option value="merriweather">Merriweather</option>
                           <option value="roboto">Roboto</option>
                           <option value="playfair">Playfair</option>
+                          <option value="montserrat">Montserrat</option>
+                          <option value="lato">Lato</option>
                         </select>
                       </div>
 
@@ -931,10 +947,14 @@ export default function AboutUsEditor() {
                           }}
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                         >
-                          <option value="lobster">Lobster</option>
                           <option value="poppins">Poppins</option>
+                          <option value="lobster">Lobster</option>
+                          <option value="inter">Inter</option>
+                          <option value="merriweather">Merriweather</option>
                           <option value="roboto">Roboto</option>
                           <option value="playfair">Playfair</option>
+                          <option value="montserrat">Montserrat</option>
+                          <option value="lato">Lato</option>
                         </select>
                       </div>
 
@@ -1048,7 +1068,7 @@ export default function AboutUsEditor() {
           </div>
         </AdminCard>
 
-        <AdminCard title='Sektion: "Våra värderingar"'>
+        <AdminCard title='SEKTION - Våra värderingar'>
           <div className="space-y-4">
             <label className="flex items-center gap-2">
               <input
@@ -1102,9 +1122,14 @@ export default function AboutUsEditor() {
                         onChange={(e) => setValuesSettings({ ...valuesSettings, title_font: e.target.value })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                       >
+                        <option value="poppins">Poppins</option>
                         <option value="lobster">Lobster</option>
                         <option value="inter">Inter</option>
                         <option value="merriweather">Merriweather</option>
+                        <option value="roboto">Roboto</option>
+                        <option value="playfair">Playfair</option>
+                        <option value="montserrat">Montserrat</option>
+                        <option value="lato">Lato</option>
                       </select>
                     </div>
                     <div>
@@ -1115,9 +1140,7 @@ export default function AboutUsEditor() {
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                       >
                         <option value="normal">Normal</option>
-                        <option value="medium">Medium</option>
-                        <option value="semibold">Semibold</option>
-                        <option value="bold">Bold</option>
+                        <option value="bold">Fet</option>
                       </select>
                     </div>
                     <div>
@@ -1164,9 +1187,14 @@ export default function AboutUsEditor() {
                         onChange={(e) => setValuesSettings({ ...valuesSettings, tagline_font: e.target.value })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                       >
+                        <option value="poppins">Poppins</option>
                         <option value="lobster">Lobster</option>
                         <option value="inter">Inter</option>
                         <option value="merriweather">Merriweather</option>
+                        <option value="roboto">Roboto</option>
+                        <option value="playfair">Playfair</option>
+                        <option value="montserrat">Montserrat</option>
+                        <option value="lato">Lato</option>
                       </select>
                     </div>
                     <div>
@@ -1212,9 +1240,14 @@ export default function AboutUsEditor() {
                         onChange={(e) => setValuesSettings({ ...valuesSettings, ingress_font: e.target.value })}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                       >
+                        <option value="poppins">Poppins</option>
                         <option value="lobster">Lobster</option>
                         <option value="inter">Inter</option>
                         <option value="merriweather">Merriweather</option>
+                        <option value="roboto">Roboto</option>
+                        <option value="playfair">Playfair</option>
+                        <option value="montserrat">Montserrat</option>
+                        <option value="lato">Lato</option>
                       </select>
                     </div>
                     <div>
@@ -1564,7 +1597,7 @@ export default function AboutUsEditor() {
           </div>
         </AdminCard>
 
-        <AdminCard title='Sektion: "Upptäck The Kitchen"'>
+        <AdminCard title='SEKTION - Upptäck The Kitchen'>
           <div className="space-y-4">
             <label className="flex items-center gap-2">
               <input
@@ -1605,6 +1638,179 @@ export default function AboutUsEditor() {
                     onChange={(e) => setDiscoverSettings({ ...discoverSettings, section_ingress: e.target.value })}
                     rows={3}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  />
+                </div>
+
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="font-medium text-gray-900 mb-4">Typografi - Rubrik</h3>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
+                      <select
+                        value={discoverSettings.title_font}
+                        onChange={(e) => setDiscoverSettings({ ...discoverSettings, title_font: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="poppins">Poppins</option>
+                        <option value="lobster">Lobster</option>
+                        <option value="inter">Inter</option>
+                        <option value="merriweather">Merriweather</option>
+                        <option value="roboto">Roboto</option>
+                        <option value="playfair">Playfair</option>
+                        <option value="montserrat">Montserrat</option>
+                        <option value="lato">Lato</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Stil</label>
+                      <select
+                        value={discoverSettings.title_weight}
+                        onChange={(e) => setDiscoverSettings({ ...discoverSettings, title_weight: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="normal">Normal</option>
+                        <option value="bold">Fet</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
+                      <select
+                        value={discoverSettings.title_size}
+                        onChange={(e) => setDiscoverSettings({ ...discoverSettings, title_size: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="lg">L</option>
+                        <option value="xl">XL</option>
+                        <option value="2xl">2XL</option>
+                        <option value="3xl">3XL</option>
+                        <option value="4xl">4XL</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                      <select
+                        value={discoverSettings.title_align}
+                        onChange={(e) => setDiscoverSettings({ ...discoverSettings, title_align: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="left">Vänster</option>
+                        <option value="center">Centrerad</option>
+                        <option value="right">Höger</option>
+                      </select>
+                    </div>
+                  </div>
+                  <ColorPicker
+                    label="Färg - Rubrik"
+                    value={discoverSettings.title_color}
+                    onChange={(color) => setDiscoverSettings({ ...discoverSettings, title_color: color })}
+                  />
+                </div>
+
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="font-medium text-gray-900 mb-4">Typografi - Textrad</h3>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
+                      <select
+                        value={discoverSettings.tagline_font}
+                        onChange={(e) => setDiscoverSettings({ ...discoverSettings, tagline_font: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="poppins">Poppins</option>
+                        <option value="lobster">Lobster</option>
+                        <option value="inter">Inter</option>
+                        <option value="merriweather">Merriweather</option>
+                        <option value="roboto">Roboto</option>
+                        <option value="playfair">Playfair</option>
+                        <option value="montserrat">Montserrat</option>
+                        <option value="lato">Lato</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
+                      <select
+                        value={discoverSettings.tagline_size}
+                        onChange={(e) => setDiscoverSettings({ ...discoverSettings, tagline_size: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="sm">S</option>
+                        <option value="md">M</option>
+                        <option value="lg">L</option>
+                        <option value="xl">XL</option>
+                        <option value="2xl">2XL</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                      <select
+                        value={discoverSettings.tagline_align}
+                        onChange={(e) => setDiscoverSettings({ ...discoverSettings, tagline_align: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="left">Vänster</option>
+                        <option value="center">Centrerad</option>
+                        <option value="right">Höger</option>
+                      </select>
+                    </div>
+                  </div>
+                  <ColorPicker
+                    label="Färg - Textrad"
+                    value={discoverSettings.tagline_color}
+                    onChange={(color) => setDiscoverSettings({ ...discoverSettings, tagline_color: color })}
+                  />
+                </div>
+
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="font-medium text-gray-900 mb-4">Typografi - Ingress</h3>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
+                      <select
+                        value={discoverSettings.ingress_font}
+                        onChange={(e) => setDiscoverSettings({ ...discoverSettings, ingress_font: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="poppins">Poppins</option>
+                        <option value="lobster">Lobster</option>
+                        <option value="inter">Inter</option>
+                        <option value="merriweather">Merriweather</option>
+                        <option value="roboto">Roboto</option>
+                        <option value="playfair">Playfair</option>
+                        <option value="montserrat">Montserrat</option>
+                        <option value="lato">Lato</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
+                      <select
+                        value={discoverSettings.ingress_size}
+                        onChange={(e) => setDiscoverSettings({ ...discoverSettings, ingress_size: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="xs">XS</option>
+                        <option value="sm">S</option>
+                        <option value="base">M</option>
+                        <option value="lg">L</option>
+                        <option value="xl">XL</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                      <select
+                        value={discoverSettings.ingress_align}
+                        onChange={(e) => setDiscoverSettings({ ...discoverSettings, ingress_align: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="left">Vänster</option>
+                        <option value="center">Centrerad</option>
+                        <option value="right">Höger</option>
+                      </select>
+                    </div>
+                  </div>
+                  <ColorPicker
+                    label="Färg - Ingress"
+                    value={discoverSettings.ingress_color}
+                    onChange={(color) => setDiscoverSettings({ ...discoverSettings, ingress_color: color })}
                   />
                 </div>
 
