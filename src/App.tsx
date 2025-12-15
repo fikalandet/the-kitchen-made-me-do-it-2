@@ -12,6 +12,7 @@ import { BecomeChef } from './pages/BecomeChef';
 import { GoldenSpoon } from './pages/GoldenSpoon';
 import { EditorialCategory } from './pages/EditorialCategory';
 import { StaticPage } from './pages/StaticPage';
+import { AboutUs } from './pages/AboutUs';
 import { LandingPage } from './pages/LandingPage';
 import AdminLayout from './admin/AdminLayout';
 import AdminGuard from './admin/AdminGuard';
@@ -104,7 +105,7 @@ const AppContent = () => {
         path="/om-oss"
         element={
           <PublicLayout>
-            <StaticPage />
+            <AboutUs />
           </PublicLayout>
         }
       />

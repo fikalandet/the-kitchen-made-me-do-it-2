@@ -59,7 +59,27 @@ export default function SidorList() {
         Redigera innehåll för statiska sidor på webbplatsen
       </p>
 
-      <AdminCard>
+      <div className="mb-6">
+        <AdminCard title="Specialsidor">
+          <div className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium text-gray-900">Om oss</h3>
+                <p className="text-sm text-gray-600">Specialdesignad Om oss-sida med hero-kort och flexibelt innehåll</p>
+              </div>
+              <Link
+                to="/admin/webb/sidor/om-oss-editor"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#a1c798] text-white rounded-lg hover:bg-[#8fb386] transition-colors"
+              >
+                <Edit className="w-4 h-4" />
+                Redigera
+              </Link>
+            </div>
+          </div>
+        </AdminCard>
+      </div>
+
+      <AdminCard title="Standardsidor">
         <AdminTable>
           <thead>
             <tr>
