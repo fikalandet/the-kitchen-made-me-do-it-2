@@ -18,7 +18,17 @@ interface AboutPageData {
   title_color: string;
   title_align: string;
   tagline_text: string | null;
+  tagline_font: string;
+  tagline_weight: string;
+  tagline_size: string;
+  tagline_color: string;
+  tagline_align: string;
   ingress_text: string | null;
+  ingress_font: string;
+  ingress_weight: string;
+  ingress_size: string;
+  ingress_color: string;
+  ingress_align: string;
   hero_gallery_images?: GalleryImage[];
   hero_gallery_border_color?: string;
   hero_gallery_style?: string;
@@ -53,9 +63,18 @@ interface SectionSettings {
   section_ingress: string | null;
   show_section: boolean;
   title_font: string;
+  title_weight: string;
   title_size: string;
   title_color: string;
   title_align: string;
+  tagline_font: string;
+  tagline_size: string;
+  tagline_color: string;
+  tagline_align: string;
+  ingress_font: string;
+  ingress_size: string;
+  ingress_color: string;
+  ingress_align: string;
 }
 
 interface HeroCard {
@@ -234,13 +253,31 @@ export function AboutUs() {
           </h1>
 
           {aboutPage?.tagline_text && (
-            <p className="text-xl mb-4" style={{ textAlign: (aboutPage?.title_align as any) || 'center' }}>
+            <p
+              className="mb-4"
+              style={{
+                fontFamily: getFontFamily(aboutPage?.tagline_font),
+                fontWeight: aboutPage?.tagline_weight === 'bold' ? '700' : '400',
+                fontSize: getTextSize(aboutPage?.tagline_size),
+                color: aboutPage?.tagline_color || '#000000',
+                textAlign: (aboutPage?.tagline_align as any) || 'center'
+              }}
+            >
               {aboutPage.tagline_text}
             </p>
           )}
 
           {aboutPage?.ingress_text && (
-            <p className="text-lg text-gray-700 mb-8" style={{ textAlign: (aboutPage?.title_align as any) || 'center' }}>
+            <p
+              className="mb-8"
+              style={{
+                fontFamily: getFontFamily(aboutPage?.ingress_font),
+                fontWeight: aboutPage?.ingress_weight === 'bold' ? '700' : '400',
+                fontSize: getTextSize(aboutPage?.ingress_size),
+                color: aboutPage?.ingress_color || '#374151',
+                textAlign: (aboutPage?.ingress_align as any) || 'center'
+              }}
+            >
               {aboutPage.ingress_text}
             </p>
           )}
@@ -366,6 +403,7 @@ export function AboutUs() {
                 className="mb-2"
                 style={{
                   fontFamily: getFontFamily(valuesSettings.title_font),
+                  fontWeight: valuesSettings.title_weight === 'bold' ? '700' : '400',
                   fontSize: getTitleSize(valuesSettings.title_size),
                   color: valuesSettings.title_color,
                   textAlign: (valuesSettings.title_align as any)
@@ -374,10 +412,29 @@ export function AboutUs() {
                 {valuesSettings.section_title}
               </h2>
               {valuesSettings.section_tagline && (
-                <p className="text-lg text-gray-700">{valuesSettings.section_tagline}</p>
+                <p
+                  style={{
+                    fontFamily: getFontFamily(valuesSettings.tagline_font),
+                    fontSize: getTextSize(valuesSettings.tagline_size),
+                    color: valuesSettings.tagline_color,
+                    textAlign: (valuesSettings.tagline_align as any)
+                  }}
+                >
+                  {valuesSettings.section_tagline}
+                </p>
               )}
               {valuesSettings.section_ingress && (
-                <p className="text-base text-gray-600 mt-2">{valuesSettings.section_ingress}</p>
+                <p
+                  className="mt-2"
+                  style={{
+                    fontFamily: getFontFamily(valuesSettings.ingress_font),
+                    fontSize: getTextSize(valuesSettings.ingress_size),
+                    color: valuesSettings.ingress_color,
+                    textAlign: (valuesSettings.ingress_align as any)
+                  }}
+                >
+                  {valuesSettings.section_ingress}
+                </p>
               )}
             </div>
 
@@ -476,6 +533,7 @@ export function AboutUs() {
                 className="mb-2"
                 style={{
                   fontFamily: getFontFamily(discoverSettings.title_font),
+                  fontWeight: discoverSettings.title_weight === 'bold' ? '700' : '400',
                   fontSize: getTitleSize(discoverSettings.title_size),
                   color: discoverSettings.title_color,
                   textAlign: (discoverSettings.title_align as any)
@@ -484,10 +542,29 @@ export function AboutUs() {
                 {discoverSettings.section_title}
               </h2>
               {discoverSettings.section_tagline && (
-                <p className="text-lg text-gray-700">{discoverSettings.section_tagline}</p>
+                <p
+                  style={{
+                    fontFamily: getFontFamily(discoverSettings.tagline_font),
+                    fontSize: getTextSize(discoverSettings.tagline_size),
+                    color: discoverSettings.tagline_color,
+                    textAlign: (discoverSettings.tagline_align as any)
+                  }}
+                >
+                  {discoverSettings.section_tagline}
+                </p>
               )}
               {discoverSettings.section_ingress && (
-                <p className="text-base text-gray-600 mt-2">{discoverSettings.section_ingress}</p>
+                <p
+                  className="mt-2"
+                  style={{
+                    fontFamily: getFontFamily(discoverSettings.ingress_font),
+                    fontSize: getTextSize(discoverSettings.ingress_size),
+                    color: discoverSettings.ingress_color,
+                    textAlign: (discoverSettings.ingress_align as any)
+                  }}
+                >
+                  {discoverSettings.section_ingress}
+                </p>
               )}
             </div>
 

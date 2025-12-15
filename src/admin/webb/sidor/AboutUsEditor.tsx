@@ -23,7 +23,17 @@ interface AboutPageData {
   title_color: string;
   title_align: string;
   tagline_text: string | null;
+  tagline_font: string;
+  tagline_weight: string;
+  tagline_size: string;
+  tagline_color: string;
+  tagline_align: string;
   ingress_text: string | null;
+  ingress_font: string;
+  ingress_weight: string;
+  ingress_size: string;
+  ingress_color: string;
+  ingress_align: string;
   hero_gallery_images?: GalleryImage[];
   hero_gallery_border_color?: string;
   hero_gallery_style?: string;
@@ -96,7 +106,17 @@ export default function AboutUsEditor() {
     title_color: '#000000',
     title_align: 'center',
     tagline_text: null,
+    tagline_font: 'poppins',
+    tagline_weight: 'normal',
+    tagline_size: 'xl',
+    tagline_color: '#000000',
+    tagline_align: 'center',
     ingress_text: null,
+    ingress_font: 'poppins',
+    ingress_weight: 'normal',
+    ingress_size: 'lg',
+    ingress_color: '#374151',
+    ingress_align: 'center',
     hero_gallery_images: [],
     hero_gallery_border_color: '#a1c798',
     hero_gallery_style: 'overlap',
@@ -545,7 +565,7 @@ export default function AboutUsEditor() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
                 <select
@@ -557,6 +577,18 @@ export default function AboutUsEditor() {
                   <option value="poppins">Poppins</option>
                   <option value="roboto">Roboto</option>
                   <option value="playfair">Playfair</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Stil</label>
+                <select
+                  value={aboutPage.title_weight}
+                  onChange={(e) => setAboutPage({ ...aboutPage, title_weight: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="normal">Normal</option>
+                  <option value="bold">Fet</option>
                 </select>
               </div>
 
@@ -607,6 +639,70 @@ export default function AboutUsEditor() {
               />
             </div>
 
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
+                <select
+                  value={aboutPage.tagline_font}
+                  onChange={(e) => setAboutPage({ ...aboutPage, tagline_font: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="lobster">Lobster</option>
+                  <option value="poppins">Poppins</option>
+                  <option value="roboto">Roboto</option>
+                  <option value="playfair">Playfair</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Stil</label>
+                <select
+                  value={aboutPage.tagline_weight}
+                  onChange={(e) => setAboutPage({ ...aboutPage, tagline_weight: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="normal">Normal</option>
+                  <option value="bold">Fet</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
+                <select
+                  value={aboutPage.tagline_size}
+                  onChange={(e) => setAboutPage({ ...aboutPage, tagline_size: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="sm">S</option>
+                  <option value="md">M</option>
+                  <option value="lg">L</option>
+                  <option value="xl">XL</option>
+                  <option value="2xl">2XL</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <ColorPicker
+                label="Textfärg"
+                value={aboutPage.tagline_color}
+                onChange={(color) => setAboutPage({ ...aboutPage, tagline_color: color })}
+              />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                <select
+                  value={aboutPage.tagline_align}
+                  onChange={(e) => setAboutPage({ ...aboutPage, tagline_align: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="left">Vänster</option>
+                  <option value="center">Centrerad</option>
+                  <option value="right">Höger</option>
+                </select>
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Ingress</label>
               <textarea
@@ -615,6 +711,70 @@ export default function AboutUsEditor() {
                 rows={3}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg"
               />
+            </div>
+
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
+                <select
+                  value={aboutPage.ingress_font}
+                  onChange={(e) => setAboutPage({ ...aboutPage, ingress_font: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="lobster">Lobster</option>
+                  <option value="poppins">Poppins</option>
+                  <option value="roboto">Roboto</option>
+                  <option value="playfair">Playfair</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Stil</label>
+                <select
+                  value={aboutPage.ingress_weight}
+                  onChange={(e) => setAboutPage({ ...aboutPage, ingress_weight: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="normal">Normal</option>
+                  <option value="bold">Fet</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
+                <select
+                  value={aboutPage.ingress_size}
+                  onChange={(e) => setAboutPage({ ...aboutPage, ingress_size: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="sm">S</option>
+                  <option value="md">M</option>
+                  <option value="lg">L</option>
+                  <option value="xl">XL</option>
+                  <option value="2xl">2XL</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <ColorPicker
+                label="Textfärg"
+                value={aboutPage.ingress_color}
+                onChange={(color) => setAboutPage({ ...aboutPage, ingress_color: color })}
+              />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                <select
+                  value={aboutPage.ingress_align}
+                  onChange={(e) => setAboutPage({ ...aboutPage, ingress_align: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="left">Vänster</option>
+                  <option value="center">Centrerad</option>
+                  <option value="right">Höger</option>
+                </select>
+              </div>
             </div>
 
             <div>
