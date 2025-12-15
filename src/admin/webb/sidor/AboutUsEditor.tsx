@@ -347,6 +347,14 @@ export default function AboutUsEditor() {
       </div>
 
       <div className="space-y-6">
+        <div className="bg-green-500 text-white p-6 rounded-lg text-center font-bold text-2xl mb-6">
+          🎉 OM OSS-EDITOR UPPDATERAD - NYA FUNKTIONER AKTIVERADE 🎉
+          <p className="text-sm mt-2 font-normal">
+            Om du ser detta meddelande = editorn är uppdaterad.
+            Scrolla ner för att se: Bildgalleri (3-5 bilder), Typografi för rader, Lägg till/ta bort rader.
+          </p>
+        </div>
+
         <AdminCard title="Toppsektion">
           <div className="space-y-4">
             <div>
