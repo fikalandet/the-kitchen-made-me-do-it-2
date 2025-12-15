@@ -248,8 +248,8 @@ export function ContactUs() {
     const radiuses: Record<string, string> = {
       none: '0',
       small: '0.375rem',
-      medium: '0.5rem',
-      large: '1rem'
+      medium: '1.25rem',
+      large: '1.5rem'
     };
     return radiuses[radius] || radiuses.medium;
   };
@@ -484,12 +484,17 @@ export function ContactUs() {
     </div>
   );
 
+  const borderRadius = getBorderRadius(pageData?.form_border_radius || 'medium');
+
   const imageSection = pageData?.image_url ? (
-    <div className="flex items-center justify-center">
+    <div
+      className="h-full min-h-[280px] md:min-h-0 overflow-hidden shadow-lg"
+      style={{ borderRadius }}
+    >
       <img
         src={pageData.image_url}
         alt="Kontakta oss"
-        className="w-full h-auto rounded-lg shadow-lg"
+        className="w-full h-full object-cover"
       />
     </div>
   ) : null;
@@ -499,19 +504,30 @@ export function ContactUs() {
       <div style={bgStyle} className="py-16">
         <div className="max-w-7xl mx-auto px-4">
           {pageData?.image_url ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-              {imageOnLeft ? (
-                <>
-                  {imageSection}
-                  {contentSection}
-                </>
-              ) : (
-                <>
-                  {contentSection}
-                  {imageSection}
-                </>
-              )}
-            </div>
+            <>
+              <div
+                className="hidden md:grid gap-8 items-stretch"
+                style={{
+                  gridTemplateColumns: imageOnLeft ? '40fr 60fr' : '60fr 40fr'
+                }}
+              >
+                {imageOnLeft ? (
+                  <>
+                    {imageSection}
+                    {contentSection}
+                  </>
+                ) : (
+                  <>
+                    {contentSection}
+                    {imageSection}
+                  </>
+                )}
+              </div>
+              <div className="md:hidden space-y-8">
+                {imageSection}
+                {contentSection}
+              </div>
+            </>
           ) : (
             <div className="max-w-2xl mx-auto">
               {contentSection}
