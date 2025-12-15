@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
+interface GalleryImage {
+  url: string;
+  rotation: number;
+}
+
 interface AboutPageData {
   background_type: string;
   background_color: string;
@@ -14,10 +19,11 @@ interface AboutPageData {
   title_align: string;
   tagline_text: string | null;
   ingress_text: string | null;
-  hero_gallery_images?: string[];
+  hero_gallery_images?: GalleryImage[];
   hero_gallery_border_color?: string;
   hero_gallery_style?: string;
   hero_gallery_max_images?: number;
+  hero_gallery_spacing?: number;
   container_mode: string;
 }
 
@@ -81,7 +87,12 @@ export function AboutUs() {
         supabase.from('about_page_discover_cards').select('*').order('card_order')
       ]);
 
-      if (aboutRes.data) setAboutPage(aboutRes.data);
+      if (aboutRes.data) {
+        const normalizedImages = (aboutRes.data.hero_gallery_images || []).map((img: any) =>
+          typeof img === 'string' ? { url: img, rotation: 0 } : img
+        );
+        setAboutPage({ ...aboutRes.data, hero_gallery_images: normalizedImages });
+      }
       if (rowsRes.data) setRows(rowsRes.data);
       if (valuesSettingsRes.data) setValuesSettings(valuesSettingsRes.data);
       if (valuesCardsRes.data) setValuesCards(valuesCardsRes.data);
@@ -162,6 +173,7 @@ export function AboutUs() {
 
   const galleryImages = aboutPage?.hero_gallery_images || [];
   const galleryBorderColor = aboutPage?.hero_gallery_border_color || '#a1c798';
+  const gallerySpacing = aboutPage?.hero_gallery_spacing || 16;
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f6f2e0' }}>
@@ -169,14 +181,17 @@ export function AboutUs() {
         <div className={aboutPage?.container_mode === 'full-width' ? 'w-full px-4' : 'max-w-4xl mx-auto px-4'}>
           {galleryImages.length > 0 && (
             <div className="mb-12 relative">
-              <div className="flex items-center justify-center gap-2 flex-wrap">
+              <div className="flex items-center justify-center flex-wrap" style={{ gap: `${gallerySpacing}px` }}>
                 {galleryImages.map((img, idx) => {
                   const offsets = [
                     { translateY: '-10px', zIndex: 3 },
                     { translateY: '10px', zIndex: 2 },
                     { translateY: '0px', zIndex: 4 },
                     { translateY: '15px', zIndex: 1 },
-                    { translateY: '-5px', zIndex: 2 }
+                    { translateY: '-5px', zIndex: 2 },
+                    { translateY: '5px', zIndex: 3 },
+                    { translateY: '-8px', zIndex: 2 },
+                    { translateY: '12px', zIndex: 1 }
                   ];
                   const offset = offsets[idx] || offsets[0];
 
@@ -185,13 +200,13 @@ export function AboutUs() {
                       key={idx}
                       className="relative"
                       style={{
-                        transform: `translateY(${offset.translateY})`,
+                        transform: `translateY(${offset.translateY}) rotate(${img.rotation}deg)`,
                         zIndex: offset.zIndex,
-                        marginLeft: idx > 0 ? '-20px' : '0'
+                        marginLeft: idx > 0 && gallerySpacing < 16 ? '-20px' : '0'
                       }}
                     >
                       <img
-                        src={img}
+                        src={img.url}
                         alt={`Gallery ${idx + 1}`}
                         className="w-48 h-64 object-cover rounded-lg shadow-xl transition-transform hover:scale-105"
                         style={{

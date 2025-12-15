@@ -176,7 +176,12 @@ export default function AboutUsEditor() {
         supabase.from('about_page_discover_cards').select('*').order('card_order')
       ]);
 
-      if (aboutRes.data) setAboutPage({ ...aboutRes.data, hero_gallery_images: aboutRes.data.hero_gallery_images || [] });
+      if (aboutRes.data) {
+        const normalizedImages = (aboutRes.data.hero_gallery_images || []).map((img: any) =>
+          typeof img === 'string' ? { url: img, rotation: 0 } : img
+        );
+        setAboutPage({ ...aboutRes.data, hero_gallery_images: normalizedImages });
+      }
       if (rowsRes.data) setRows(rowsRes.data);
       if (valuesSettingsRes.data) setValuesSettings(valuesSettingsRes.data);
       if (valuesCardsRes.data) setValuesCards(valuesCardsRes.data);
@@ -361,9 +366,7 @@ export default function AboutUsEditor() {
     return <div>Laddar...</div>;
   }
 
-  const galleryImages = (aboutPage.hero_gallery_images || []).map((img: any) =>
-    typeof img === 'string' ? { url: img, rotation: 0 } : img
-  );
+  const galleryImages = aboutPage.hero_gallery_images || [];
   const maxImages = aboutPage.hero_gallery_max_images || 3;
 
   return (
