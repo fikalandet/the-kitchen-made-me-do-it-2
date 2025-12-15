@@ -127,6 +127,13 @@ export const Header: React.FC = () => {
                 >
                   Kontakta oss
                 </Link>
+                <Link
+                  to="/faq"
+                  className="block px-4 py-2 text-sm text-gray-800 hover:bg-white transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  FAQ
+                </Link>
               </div>
             )}
           </button>

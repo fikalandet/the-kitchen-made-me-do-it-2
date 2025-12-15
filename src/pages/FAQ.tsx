@@ -1,0 +1,391 @@
+import { useState, useEffect, useRef } from 'react';
+import { supabase } from '../lib/supabase';
+import { ChevronDown } from 'lucide-react';
+
+interface TextLines {
+  lines: string[];
+  rotate: boolean;
+  interval_seconds: number;
+  placement: string;
+}
+
+interface FAQPageData {
+  title_text: string;
+  title_font: string;
+  title_weight: string;
+  title_size: string;
+  title_color: string;
+  title_align: string;
+  text_lines: TextLines;
+  tagline_font: string;
+  tagline_weight: string;
+  tagline_size: string;
+  tagline_color: string;
+  tagline_align: string;
+  ingress_text: string | null;
+  ingress_font: string;
+  ingress_weight: string;
+  ingress_size: string;
+  ingress_color: string;
+  ingress_align: string;
+  background_type: string;
+  background_color: string;
+  background_image: string | null;
+}
+
+interface FAQCategory {
+  id: string;
+  title: string;
+  styles: {
+    font: string;
+    weight: string;
+    size: string;
+    color: string;
+    align: string;
+    background_color: string;
+    icon: string | null;
+  };
+  question_background_color: string;
+  answer_background_color: string;
+  question_font: string;
+  question_weight: string;
+  question_size: string;
+  question_color: string;
+  answer_font: string;
+  answer_weight: string;
+  answer_size: string;
+  answer_color: string;
+  order_index: number;
+}
+
+interface FAQItem {
+  id: string;
+  category_id: string;
+  question: string;
+  answer: string;
+  order_index: number;
+}
+
+export function FAQ() {
+  const [pageData, setPageData] = useState<FAQPageData | null>(null);
+  const [categories, setCategories] = useState<FAQCategory[]>([]);
+  const [items, setItems] = useState<FAQItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [openItem, setOpenItem] = useState<string | null>(null);
+
+  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (!pageData?.text_lines?.rotate || !pageData.text_lines.lines.length) return;
+
+    const interval = setInterval(() => {
+      setCurrentLineIndex(prev => (prev + 1) % pageData.text_lines.lines.length);
+    }, (pageData.text_lines.interval_seconds || 10) * 1000);
+
+    return () => clearInterval(interval);
+  }, [pageData]);
+
+  const fetchData = async () => {
+    try {
+      const [pageRes, categoriesRes, itemsRes] = await Promise.all([
+        supabase.from('faq_page').select('*').maybeSingle(),
+        supabase.from('faq_categories').select('*').eq('is_published', true).order('order_index'),
+        supabase.from('faq_items').select('*').eq('is_published', true).order('order_index')
+      ]);
+
+      if (pageRes.error) throw pageRes.error;
+      if (categoriesRes.error) throw categoriesRes.error;
+      if (itemsRes.error) throw itemsRes.error;
+
+      if (pageRes.data) setPageData(pageRes.data);
+      if (categoriesRes.data) setCategories(categoriesRes.data);
+      if (itemsRes.data) setItems(itemsRes.data);
+    } catch (err) {
+      console.error('Error fetching FAQ data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getFontFamily = (font: string) => {
+    const fonts: Record<string, string> = {
+      poppins: 'Poppins, sans-serif',
+      lobster: 'Lobster, cursive',
+      roboto: 'Roboto, sans-serif',
+      open_sans: 'Open Sans, sans-serif',
+      lato: 'Lato, sans-serif',
+      playfair: 'Playfair Display, serif',
+      montserrat: 'Montserrat, sans-serif',
+      merriweather: 'Merriweather, serif',
+      inter: 'Inter, sans-serif',
+      default: 'system-ui, sans-serif'
+    };
+    return fonts[font] || fonts.default;
+  };
+
+  const getTextSize = (size: string) => {
+    const sizes: Record<string, string> = {
+      sm: '0.875rem',
+      md: '1rem',
+      lg: '1.125rem',
+      xl: '1.25rem',
+      '2xl': '1.5rem',
+      '3xl': '1.875rem',
+      '4xl': '2.25rem'
+    };
+    return sizes[size] || sizes.md;
+  };
+
+  const getTitleSize = (size: string) => {
+    const sizes: Record<string, string> = {
+      sm: '1.5rem',
+      md: '2rem',
+      lg: '2.5rem',
+      xl: '3rem',
+      '2xl': '4rem'
+    };
+    return sizes[size] || sizes.xl;
+  };
+
+  const getFontWeight = (weight: string) => {
+    const weights: Record<string, string> = {
+      thin: '100',
+      light: '300',
+      normal: '400',
+      medium: '500',
+      semibold: '600',
+      bold: '700',
+      black: '900'
+    };
+    return weights[weight] || weights.normal;
+  };
+
+  const handleCategoryClick = (categoryId: string) => {
+    setActiveCategory(categoryId);
+    setOpenItem(null);
+
+    setTimeout(() => {
+      categoryRefs.current[categoryId]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }, 100);
+  };
+
+  const toggleItem = (itemId: string) => {
+    setOpenItem(openItem === itemId ? null : itemId);
+  };
+
+  const getCategoryItems = (categoryId: string) => {
+    return items.filter(item => item.category_id === categoryId);
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f6f2e0' }}>
+        <p className="text-gray-600">Laddar...</p>
+      </div>
+    );
+  }
+
+  const bgStyle: React.CSSProperties = pageData?.background_type === 'image' && pageData.background_image
+    ? {
+        backgroundImage: `url(${pageData.background_image})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }
+    : { backgroundColor: pageData?.background_color || '#f6f2e0' };
+
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: '#f6f2e0' }}>
+      <div style={bgStyle} className="py-24 md:py-32">
+        <div className="max-w-[860px] mx-auto px-4">
+          <div className="text-center space-y-6 mb-12">
+            <h1
+              style={{
+                fontFamily: getFontFamily(pageData?.title_font || 'lobster'),
+                fontWeight: getFontWeight(pageData?.title_weight || 'bold'),
+                fontSize: getTitleSize(pageData?.title_size || 'xl'),
+                color: pageData?.title_color || '#000000',
+                textAlign: pageData?.title_align as any || 'center'
+              }}
+            >
+              {pageData?.title_text || 'Vanliga frågor'}
+            </h1>
+
+            {pageData?.text_lines?.lines && pageData.text_lines.lines.length > 0 && (
+              <div
+                className="min-h-[2rem] transition-opacity duration-500"
+                style={{
+                  fontFamily: getFontFamily(pageData.tagline_font),
+                  fontWeight: getFontWeight(pageData.tagline_weight),
+                  fontSize: getTextSize(pageData.tagline_size),
+                  color: pageData.tagline_color,
+                  textAlign: pageData.tagline_align as any
+                }}
+              >
+                {pageData.text_lines.rotate ? (
+                  <p className="animate-fadeIn">
+                    {pageData.text_lines.lines[currentLineIndex]}
+                  </p>
+                ) : (
+                  pageData.text_lines.lines.map((line, idx) => (
+                    <p key={idx}>{line}</p>
+                  ))
+                )}
+              </div>
+            )}
+
+            {pageData?.ingress_text && (
+              <p
+                style={{
+                  fontFamily: getFontFamily(pageData.ingress_font),
+                  fontWeight: getFontWeight(pageData.ingress_weight),
+                  fontSize: getTextSize(pageData.ingress_size),
+                  color: pageData.ingress_color,
+                  textAlign: pageData.ingress_align as any
+                }}
+                className="max-w-[640px] mx-auto"
+              >
+                {pageData.ingress_text}
+              </p>
+            )}
+          </div>
+
+          {categories.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-600">Inga kategorier ännu.</p>
+            </div>
+          )}
+
+          {categories.length > 0 && !activeCategory && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+              {categories.map(category => (
+                <button
+                  key={category.id}
+                  onClick={() => handleCategoryClick(category.id)}
+                  className="px-6 py-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200"
+                  style={{
+                    backgroundColor: category.styles.background_color,
+                    fontFamily: getFontFamily(category.styles.font),
+                    fontWeight: getFontWeight(category.styles.weight),
+                    fontSize: getTextSize(category.styles.size),
+                    color: category.styles.color,
+                    textAlign: category.styles.align as any
+                  }}
+                >
+                  {category.title}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {activeCategory && (
+            <div className="space-y-8">
+              <button
+                onClick={() => {
+                  setActiveCategory(null);
+                  setOpenItem(null);
+                }}
+                className="text-sm text-gray-600 hover:text-gray-900 mb-4"
+              >
+                ← Tillbaka till kategorier
+              </button>
+
+              {categories
+                .filter(cat => cat.id === activeCategory)
+                .map(category => {
+                  const categoryItems = getCategoryItems(category.id);
+
+                  return (
+                    <div
+                      key={category.id}
+                      ref={el => categoryRefs.current[category.id] = el}
+                      className="space-y-4"
+                    >
+                      <h2
+                        className="mb-6"
+                        style={{
+                          fontFamily: getFontFamily(category.styles.font),
+                          fontWeight: getFontWeight(category.styles.weight),
+                          fontSize: getTitleSize(category.styles.size),
+                          color: category.styles.color,
+                          textAlign: category.styles.align as any
+                        }}
+                      >
+                        {category.title}
+                      </h2>
+
+                      {categoryItems.length === 0 ? (
+                        <p className="text-gray-600 text-center py-8">
+                          Inga frågor i denna kategori ännu.
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          {categoryItems.map(item => {
+                            const isOpen = openItem === item.id;
+
+                            return (
+                              <div
+                                key={item.id}
+                                className="rounded-lg overflow-hidden shadow-sm"
+                              >
+                                <button
+                                  onClick={() => toggleItem(item.id)}
+                                  className="w-full px-6 py-4 flex items-center justify-between text-left transition-colors hover:opacity-90"
+                                  style={{
+                                    backgroundColor: category.question_background_color,
+                                    fontFamily: getFontFamily(category.question_font),
+                                    fontWeight: getFontWeight(category.question_weight),
+                                    fontSize: getTextSize(category.question_size),
+                                    color: category.question_color
+                                  }}
+                                >
+                                  <span dangerouslySetInnerHTML={{ __html: item.question }} />
+                                  <ChevronDown
+                                    className={`w-5 h-5 flex-shrink-0 ml-4 transition-transform duration-200 ${
+                                      isOpen ? 'rotate-180' : ''
+                                    }`}
+                                  />
+                                </button>
+
+                                <div
+                                  className="overflow-hidden transition-all duration-300"
+                                  style={{
+                                    maxHeight: isOpen ? '1000px' : '0'
+                                  }}
+                                >
+                                  <div
+                                    className="px-6 py-4"
+                                    style={{
+                                      backgroundColor: category.answer_background_color,
+                                      fontFamily: getFontFamily(category.answer_font),
+                                      fontWeight: getFontWeight(category.answer_weight),
+                                      fontSize: getTextSize(category.answer_size),
+                                      color: category.answer_color
+                                    }}
+                                    dangerouslySetInnerHTML={{ __html: item.answer }}
+                                  />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

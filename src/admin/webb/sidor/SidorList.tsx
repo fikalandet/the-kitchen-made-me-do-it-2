@@ -92,6 +92,21 @@ export default function SidorList() {
                 </Link>
               </div>
             </div>
+            <div className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-gray-900">FAQ</h3>
+                  <p className="text-sm text-gray-600">Vanliga frågor med kategorier och accordion</p>
+                </div>
+                <Link
+                  to="/admin/webb/sidor/faq-editor"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#a1c798] text-white rounded-lg hover:bg-[#8fb386] transition-colors"
+                >
+                  <Edit className="w-4 h-4" />
+                  Redigera
+                </Link>
+              </div>
+            </div>
           </div>
         </AdminCard>
       </div>

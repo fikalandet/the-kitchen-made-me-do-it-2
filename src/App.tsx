@@ -14,6 +14,7 @@ import { EditorialCategory } from './pages/EditorialCategory';
 import { StaticPage } from './pages/StaticPage';
 import { AboutUs } from './pages/AboutUs';
 import { ContactUs } from './pages/ContactUs';
+import { FAQ } from './pages/FAQ';
 import { LandingPage } from './pages/LandingPage';
 import AdminLayout from './admin/AdminLayout';
 import AdminGuard from './admin/AdminGuard';
@@ -138,7 +139,7 @@ const AppContent = () => {
         path="/faq"
         element={
           <PublicLayout>
-            <StaticPage />
+            <FAQ />
           </PublicLayout>
         }
       />
