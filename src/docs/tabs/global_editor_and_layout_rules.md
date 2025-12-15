@@ -1,5 +1,17 @@
 1. Syfte
 
+## ⚠️ OBLIGATORISKT FÖR ALL NY UI (inkl. kundpanel)
+
+Alla nya vyer, paneler och komponenter ska:
+- använda befintliga färgtokens (brand swatches)
+- använda befintliga typsnitt (Poppins, Lobster m.fl. från central lista)
+- använda samma former (kort, border-radius, knappar, spacing)
+- återanvända befintliga komponenter före nya skapas
+
+Avvikelser är inte tillåtna.
+Vid osäkerhet: fråga innan implementation.
+
+
 Denna fil definierar globala regler för:
 
 admin-redigering
