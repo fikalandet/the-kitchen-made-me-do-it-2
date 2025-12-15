@@ -19,6 +19,11 @@ interface ContactUsPageData {
   title_color: string;
   title_align: string;
   text_lines: TextLines;
+  tagline_font: string;
+  tagline_weight: string;
+  tagline_size: string;
+  tagline_color: string;
+  tagline_align: string;
   ingress_text: string | null;
   ingress_font: string;
   ingress_weight: string;
@@ -49,6 +54,11 @@ export default function ContactUsEditor() {
       interval_seconds: 10,
       placement: 'after_heading'
     },
+    tagline_font: 'poppins',
+    tagline_weight: 'normal',
+    tagline_size: 'lg',
+    tagline_color: '#374151',
+    tagline_align: 'center',
     ingress_text: null,
     ingress_font: 'poppins',
     ingress_weight: 'normal',
@@ -293,6 +303,78 @@ export default function ContactUsEditor() {
           <p className="text-sm text-gray-600 mt-2">
             Textraderna visas under rubriken och kan rotera automatiskt.
           </p>
+        </AdminCard>
+
+        <AdminCard title="Typografi - Textrader">
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
+                <select
+                  value={pageData.tagline_font}
+                  onChange={(e) => setPageData({ ...pageData, tagline_font: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="poppins">Poppins</option>
+                  <option value="lobster">Lobster</option>
+                  <option value="inter">Inter</option>
+                  <option value="merriweather">Merriweather</option>
+                  <option value="roboto">Roboto</option>
+                  <option value="playfair">Playfair</option>
+                  <option value="montserrat">Montserrat</option>
+                  <option value="lato">Lato</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Stil</label>
+                <select
+                  value={pageData.tagline_weight}
+                  onChange={(e) => setPageData({ ...pageData, tagline_weight: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="normal">Normal</option>
+                  <option value="bold">Fet</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
+                <select
+                  value={pageData.tagline_size}
+                  onChange={(e) => setPageData({ ...pageData, tagline_size: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="sm">S</option>
+                  <option value="md">M</option>
+                  <option value="lg">L</option>
+                  <option value="xl">XL</option>
+                  <option value="2xl">2XL</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <ColorPicker
+                label="Textfärg"
+                value={pageData.tagline_color}
+                onChange={(color) => setPageData({ ...pageData, tagline_color: color })}
+              />
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                <select
+                  value={pageData.tagline_align}
+                  onChange={(e) => setPageData({ ...pageData, tagline_align: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="left">Vänster</option>
+                  <option value="center">Centrerad</option>
+                  <option value="right">Höger</option>
+                </select>
+              </div>
+            </div>
+          </div>
         </AdminCard>
 
         <AdminCard title="Ingress">

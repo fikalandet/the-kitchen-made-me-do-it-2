@@ -20,6 +20,11 @@ interface ContactUsPageData {
   title_color: string;
   title_align: string;
   text_lines: TextLines;
+  tagline_font: string;
+  tagline_weight: string;
+  tagline_size: string;
+  tagline_color: string;
+  tagline_align: string;
   ingress_text: string | null;
   ingress_font: string;
   ingress_weight: string;
@@ -254,19 +259,13 @@ export function ContactUs() {
     return radiuses[radius] || radiuses.medium;
   };
 
-  const getPadding = (padding: string) => {
-    const paddings: Record<string, string> = {
-      small: '1.5rem',
-      medium: '2rem',
-      large: '3rem'
-    };
-    return paddings[padding] || paddings.medium;
-  };
-
   const formWrapperStyle: React.CSSProperties = {
     backgroundColor: pageData?.form_background_color || '#ffffff',
     borderRadius: getBorderRadius(pageData?.form_border_radius || 'medium'),
-    padding: getPadding(pageData?.form_padding || 'medium')
+    padding: '24px',
+    maxWidth: '580px',
+    marginLeft: 'auto',
+    marginRight: 'auto'
   };
 
   const imageOnLeft = pageData?.image_placement === 'left';
@@ -290,11 +289,11 @@ export function ContactUs() {
         <p
           className="mb-4 transition-opacity duration-500"
           style={{
-            fontFamily: getFontFamily(pageData?.title_font || 'poppins'),
-            fontWeight: '400',
-            fontSize: getTextSize('lg'),
-            color: pageData?.title_color || '#000000',
-            textAlign: (pageData?.title_align as any) || 'center'
+            fontFamily: getFontFamily(pageData?.tagline_font || 'poppins'),
+            fontWeight: pageData?.tagline_weight === 'bold' ? '700' : '400',
+            fontSize: getTextSize(pageData?.tagline_size || 'lg'),
+            color: pageData?.tagline_color || '#374151',
+            textAlign: (pageData?.tagline_align as any) || 'center'
           }}
         >
           {currentLine}
@@ -337,7 +336,7 @@ export function ContactUs() {
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} style={formWrapperStyle} className="shadow-sm space-y-6">
+          <form onSubmit={handleSubmit} style={formWrapperStyle} className="shadow-sm" >
             <div style={{ position: 'absolute', left: '-9999px' }}>
               <label htmlFor="honeypot">Lämna detta fält tomt</label>
               <input
@@ -351,7 +350,7 @@ export function ContactUs() {
               />
             </div>
 
-            <div>
+            <div style={{ marginBottom: '16px' }}>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
                 Namn <span className="text-red-500">*</span>
               </label>
@@ -369,7 +368,7 @@ export function ContactUs() {
             </div>
 
             {user && (
-              <div>
+              <div style={{ marginBottom: '16px' }}>
                 <label htmlFor="customer_id" className="block text-sm font-medium text-gray-700 mb-2">
                   Kund-ID
                 </label>
@@ -384,7 +383,7 @@ export function ContactUs() {
               </div>
             )}
 
-            <div>
+            <div style={{ marginBottom: '16px' }}>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
                 E-post {!user && <span className="text-red-500">*</span>}
               </label>
@@ -402,7 +401,7 @@ export function ContactUs() {
               {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             </div>
 
-            <div>
+            <div style={{ marginBottom: '16px' }}>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
                 Telefon (valfritt)
               </label>
@@ -416,7 +415,7 @@ export function ContactUs() {
               />
             </div>
 
-            <div>
+            <div style={{ marginBottom: '16px' }}>
               <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
                 Ämne <span className="text-red-500">*</span>
               </label>
@@ -441,7 +440,7 @@ export function ContactUs() {
               {errors.subject && <p className="text-red-500 text-sm mt-1">{errors.subject}</p>}
             </div>
 
-            <div>
+            <div style={{ marginBottom: '16px' }}>
               <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
                 Meddelande <span className="text-red-500">*</span>
               </label>
@@ -459,7 +458,7 @@ export function ContactUs() {
             </div>
 
             {errors.submit && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg" style={{ marginBottom: '16px' }}>
                 <p className="text-red-600 text-sm">{errors.submit}</p>
               </div>
             )}
@@ -488,7 +487,7 @@ export function ContactUs() {
 
   const imageSection = pageData?.image_url ? (
     <div
-      className="h-full min-h-[280px] md:min-h-0 overflow-hidden shadow-lg"
+      className="min-h-[280px] md:max-h-[280px] overflow-hidden shadow-lg"
       style={{ borderRadius }}
     >
       <img
@@ -501,12 +500,12 @@ export function ContactUs() {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f6f2e0' }}>
-      <div style={bgStyle} className="py-16">
-        <div className="max-w-7xl mx-auto px-4">
+      <div style={bgStyle} className="py-24 md:py-32">
+        <div className="max-w-[960px] mx-auto px-4">
           {pageData?.image_url ? (
             <>
               <div
-                className="hidden md:grid gap-8 items-stretch"
+                className="hidden md:grid gap-12"
                 style={{
                   gridTemplateColumns: imageOnLeft ? '40fr 60fr' : '60fr 40fr'
                 }}
@@ -529,7 +528,7 @@ export function ContactUs() {
               </div>
             </>
           ) : (
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-[580px] mx-auto">
               {contentSection}
             </div>
           )}
