@@ -6,6 +6,11 @@ import { supabase } from '../../../lib/supabase';
 import { ImageUpload } from '../../components/ImageUpload';
 import ColorPicker from '../components/ColorPicker';
 
+interface GalleryImage {
+  url: string;
+  rotation: number;
+}
+
 interface AboutPageData {
   id?: string;
   background_type: string;
@@ -19,10 +24,11 @@ interface AboutPageData {
   title_align: string;
   tagline_text: string | null;
   ingress_text: string | null;
-  hero_gallery_images?: string[];
+  hero_gallery_images?: GalleryImage[];
   hero_gallery_border_color?: string;
   hero_gallery_style?: string;
   hero_gallery_max_images?: number;
+  hero_gallery_spacing?: number;
   container_mode: string;
 }
 
@@ -55,9 +61,21 @@ interface SectionSettings {
   section_ingress: string | null;
   show_section: boolean;
   title_font: string;
+  title_weight: string;
   title_size: string;
   title_color: string;
   title_align: string;
+  tagline_font: string;
+  tagline_size: string;
+  tagline_color: string;
+  tagline_align: string;
+  ingress_font: string;
+  ingress_size: string;
+  ingress_color: string;
+  ingress_align: string;
+  cta_text: string | null;
+  cta_link: string | null;
+  cta_style: string;
 }
 
 interface HeroCard {
@@ -83,6 +101,7 @@ export default function AboutUsEditor() {
     hero_gallery_border_color: '#a1c798',
     hero_gallery_style: 'overlap',
     hero_gallery_max_images: 3,
+    hero_gallery_spacing: 16,
     container_mode: 'contained'
   });
 
@@ -94,9 +113,21 @@ export default function AboutUsEditor() {
     section_ingress: null,
     show_section: true,
     title_font: 'lobster',
+    title_weight: 'bold',
     title_size: 'xl',
     title_color: '#000000',
-    title_align: 'center'
+    title_align: 'center',
+    tagline_font: 'inter',
+    tagline_size: 'lg',
+    tagline_color: '#000000',
+    tagline_align: 'center',
+    ingress_font: 'inter',
+    ingress_size: 'base',
+    ingress_color: '#000000',
+    ingress_align: 'center',
+    cta_text: null,
+    cta_link: null,
+    cta_style: 'primary'
   });
   const [valuesCards, setValuesCards] = useState<HeroCard[]>([]);
   const [discoverSettings, setDiscoverSettings] = useState<SectionSettings>({
@@ -106,9 +137,21 @@ export default function AboutUsEditor() {
     section_ingress: null,
     show_section: true,
     title_font: 'lobster',
+    title_weight: 'bold',
     title_size: 'xl',
     title_color: '#000000',
-    title_align: 'center'
+    title_align: 'center',
+    tagline_font: 'inter',
+    tagline_size: 'lg',
+    tagline_color: '#000000',
+    tagline_align: 'center',
+    ingress_font: 'inter',
+    ingress_size: 'base',
+    ingress_color: '#000000',
+    ingress_align: 'center',
+    cta_text: null,
+    cta_link: null,
+    cta_style: 'primary'
   });
   const [discoverCards, setDiscoverCards] = useState<HeroCard[]>([]);
 
@@ -299,7 +342,7 @@ export default function AboutUsEditor() {
     const currentImages = aboutPage.hero_gallery_images || [];
     const maxImages = aboutPage.hero_gallery_max_images || 3;
     if (currentImages.length < maxImages) {
-      setAboutPage({ ...aboutPage, hero_gallery_images: [...currentImages, url] });
+      setAboutPage({ ...aboutPage, hero_gallery_images: [...currentImages, { url, rotation: 0 }] });
     }
   };
 
@@ -308,11 +351,19 @@ export default function AboutUsEditor() {
     setAboutPage({ ...aboutPage, hero_gallery_images: currentImages.filter((_, i) => i !== index) });
   };
 
+  const updateImageRotation = (index: number, rotation: number) => {
+    const currentImages = aboutPage.hero_gallery_images || [];
+    const updated = currentImages.map((img, idx) => idx === index ? { ...img, rotation } : img);
+    setAboutPage({ ...aboutPage, hero_gallery_images: updated });
+  };
+
   if (loading) {
     return <div>Laddar...</div>;
   }
 
-  const galleryImages = aboutPage.hero_gallery_images || [];
+  const galleryImages = (aboutPage.hero_gallery_images || []).map((img: any) =>
+    typeof img === 'string' ? { url: img, rotation: 0 } : img
+  );
   const maxImages = aboutPage.hero_gallery_max_images || 3;
 
   return (
@@ -347,14 +398,6 @@ export default function AboutUsEditor() {
       </div>
 
       <div className="space-y-6">
-        <div className="bg-green-500 text-white p-6 rounded-lg text-center font-bold text-2xl mb-6">
-          🎉 OM OSS-EDITOR UPPDATERAD - NYA FUNKTIONER AKTIVERADE 🎉
-          <p className="text-sm mt-2 font-normal">
-            Om du ser detta meddelande = editorn är uppdaterad.
-            Scrolla ner för att se: Bildgalleri (3-5 bilder), Typografi för rader, Lägg till/ta bort rader.
-          </p>
-        </div>
-
         <AdminCard title="Toppsektion">
           <div className="space-y-4">
             <div>
@@ -386,17 +429,38 @@ export default function AboutUsEditor() {
             <div className="border-t pt-4 mt-4">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Bildgalleri (visas ovanför rubriken)</h3>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Antal bilder (3-5)</label>
-                <select
-                  value={maxImages}
-                  onChange={(e) => setAboutPage({ ...aboutPage, hero_gallery_max_images: parseInt(e.target.value) })}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4"
-                >
-                  <option value="3">3 bilder</option>
-                  <option value="4">4 bilder</option>
-                  <option value="5">5 bilder</option>
-                </select>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Antal bilder (3-8)</label>
+                  <select
+                    value={maxImages}
+                    onChange={(e) => setAboutPage({ ...aboutPage, hero_gallery_max_images: parseInt(e.target.value) })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                  >
+                    <option value="3">3 bilder</option>
+                    <option value="4">4 bilder</option>
+                    <option value="5">5 bilder</option>
+                    <option value="6">6 bilder</option>
+                    <option value="7">7 bilder</option>
+                    <option value="8">8 bilder</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Avstånd mellan bilder (px)</label>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="range"
+                      min="0"
+                      max="48"
+                      step="4"
+                      value={aboutPage.hero_gallery_spacing || 16}
+                      onChange={(e) => setAboutPage({ ...aboutPage, hero_gallery_spacing: parseInt(e.target.value) })}
+                      className="flex-1"
+                    />
+                    <span className="text-sm font-medium text-gray-700 w-12">{aboutPage.hero_gallery_spacing || 16}px</span>
+                  </div>
+                </div>
               </div>
 
               <ColorPicker
@@ -419,17 +483,44 @@ export default function AboutUsEditor() {
                 )}
 
                 {galleryImages.length > 0 && (
-                  <div className="mt-4 grid grid-cols-3 gap-4">
+                  <div className="mt-4 grid grid-cols-2 gap-4">
                     {galleryImages.map((img, idx) => (
-                      <div key={idx} className="relative">
-                        <img src={img} alt={`Galleri ${idx + 1}`} className="w-full h-32 object-cover rounded-lg" />
-                        <button
-                          onClick={() => removeGalleryImage(idx)}
-                          className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                        <p className="text-xs text-center mt-1 text-gray-600">Bild {idx + 1}</p>
+                      <div key={idx} className="border border-gray-200 rounded-lg p-4">
+                        <div className="relative mb-3">
+                          <img
+                            src={img.url}
+                            alt={`Galleri ${idx + 1}`}
+                            className="w-full h-32 object-cover rounded-lg"
+                            style={{ transform: `rotate(${img.rotation}deg)` }}
+                          />
+                          <button
+                            onClick={() => removeGalleryImage(idx)}
+                            className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <p className="text-xs font-medium text-gray-700 mb-2">Bild {idx + 1} - Rotation</p>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="range"
+                            min="-15"
+                            max="15"
+                            step="1"
+                            value={img.rotation}
+                            onChange={(e) => updateImageRotation(idx, parseInt(e.target.value))}
+                            className="flex-1"
+                          />
+                          <span className="text-xs font-medium text-gray-700 w-10">{img.rotation}°</span>
+                          {img.rotation !== 0 && (
+                            <button
+                              onClick={() => updateImageRotation(idx, 0)}
+                              className="text-xs text-blue-600 hover:text-blue-800"
+                            >
+                              Nollställ
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -839,6 +930,201 @@ export default function AboutUsEditor() {
                 </div>
 
                 <div className="border-t pt-4 mt-4">
+                  <h3 className="font-medium text-gray-900 mb-4">Typografi - Rubrik</h3>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
+                      <select
+                        value={valuesSettings.title_font}
+                        onChange={(e) => setValuesSettings({ ...valuesSettings, title_font: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="lobster">Lobster</option>
+                        <option value="inter">Inter</option>
+                        <option value="merriweather">Merriweather</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Stil</label>
+                      <select
+                        value={valuesSettings.title_weight}
+                        onChange={(e) => setValuesSettings({ ...valuesSettings, title_weight: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="normal">Normal</option>
+                        <option value="medium">Medium</option>
+                        <option value="semibold">Semibold</option>
+                        <option value="bold">Bold</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
+                      <select
+                        value={valuesSettings.title_size}
+                        onChange={(e) => setValuesSettings({ ...valuesSettings, title_size: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="lg">Liten</option>
+                        <option value="xl">Medium</option>
+                        <option value="2xl">Stor</option>
+                        <option value="3xl">Större</option>
+                        <option value="4xl">Störst</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                      <select
+                        value={valuesSettings.title_align}
+                        onChange={(e) => setValuesSettings({ ...valuesSettings, title_align: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="left">Vänster</option>
+                        <option value="center">Centrerad</option>
+                        <option value="right">Höger</option>
+                      </select>
+                    </div>
+                  </div>
+                  <ColorPicker
+                    label="Färg - Rubrik"
+                    value={valuesSettings.title_color}
+                    onChange={(color) => setValuesSettings({ ...valuesSettings, title_color: color })}
+                  />
+                </div>
+
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="font-medium text-gray-900 mb-4">Typografi - Textrad</h3>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
+                      <select
+                        value={valuesSettings.tagline_font}
+                        onChange={(e) => setValuesSettings({ ...valuesSettings, tagline_font: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="lobster">Lobster</option>
+                        <option value="inter">Inter</option>
+                        <option value="merriweather">Merriweather</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
+                      <select
+                        value={valuesSettings.tagline_size}
+                        onChange={(e) => setValuesSettings({ ...valuesSettings, tagline_size: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="sm">Liten</option>
+                        <option value="base">Medium</option>
+                        <option value="lg">Stor</option>
+                        <option value="xl">Större</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                      <select
+                        value={valuesSettings.tagline_align}
+                        onChange={(e) => setValuesSettings({ ...valuesSettings, tagline_align: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="left">Vänster</option>
+                        <option value="center">Centrerad</option>
+                        <option value="right">Höger</option>
+                      </select>
+                    </div>
+                  </div>
+                  <ColorPicker
+                    label="Färg - Textrad"
+                    value={valuesSettings.tagline_color}
+                    onChange={(color) => setValuesSettings({ ...valuesSettings, tagline_color: color })}
+                  />
+                </div>
+
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="font-medium text-gray-900 mb-4">Typografi - Ingress</h3>
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Typsnitt</label>
+                      <select
+                        value={valuesSettings.ingress_font}
+                        onChange={(e) => setValuesSettings({ ...valuesSettings, ingress_font: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="lobster">Lobster</option>
+                        <option value="inter">Inter</option>
+                        <option value="merriweather">Merriweather</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
+                      <select
+                        value={valuesSettings.ingress_size}
+                        onChange={(e) => setValuesSettings({ ...valuesSettings, ingress_size: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="sm">Liten</option>
+                        <option value="base">Medium</option>
+                        <option value="lg">Stor</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                      <select
+                        value={valuesSettings.ingress_align}
+                        onChange={(e) => setValuesSettings({ ...valuesSettings, ingress_align: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="left">Vänster</option>
+                        <option value="center">Centrerad</option>
+                        <option value="right">Höger</option>
+                      </select>
+                    </div>
+                  </div>
+                  <ColorPicker
+                    label="Färg - Ingress"
+                    value={valuesSettings.ingress_color}
+                    onChange={(color) => setValuesSettings({ ...valuesSettings, ingress_color: color })}
+                  />
+                </div>
+
+                <div className="border-t pt-4 mt-4">
+                  <h3 className="font-medium text-gray-900 mb-4">CTA-knapp</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Knapptext</label>
+                      <input
+                        type="text"
+                        value={valuesSettings.cta_text || ''}
+                        onChange={(e) => setValuesSettings({ ...valuesSettings, cta_text: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        placeholder="t.ex. Läs mer"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Länk</label>
+                      <input
+                        type="text"
+                        value={valuesSettings.cta_link || ''}
+                        onChange={(e) => setValuesSettings({ ...valuesSettings, cta_link: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        placeholder="/kontakt"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Stil</label>
+                      <select
+                        value={valuesSettings.cta_style}
+                        onChange={(e) => setValuesSettings({ ...valuesSettings, cta_style: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                      >
+                        <option value="primary">Primär (Grön)</option>
+                        <option value="secondary">Sekundär (Beige)</option>
+                        <option value="outline">Kontur</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border-t pt-4 mt-4">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-medium text-gray-900">Hero-kort ({valuesCards.length})</h3>
                     <button
@@ -917,6 +1203,193 @@ export default function AboutUsEditor() {
                                 setValuesCards(updated);
                               }}
                             />
+
+                            <div className="border-t pt-4 mt-4">
+                              <h4 className="text-sm font-medium text-gray-900 mb-3">Typografi - Rubrik</h4>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Typsnitt</label>
+                                  <select
+                                    value={card.settings.heading_font || 'inter'}
+                                    onChange={(e) => {
+                                      const updated = valuesCards.map(c => c.card_order === card.card_order ? { ...c, settings: { ...c.settings, heading_font: e.target.value } } : c);
+                                      setValuesCards(updated);
+                                    }}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                  >
+                                    <option value="lobster">Lobster</option>
+                                    <option value="inter">Inter</option>
+                                    <option value="merriweather">Merriweather</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Stil</label>
+                                  <select
+                                    value={card.settings.heading_weight || 'bold'}
+                                    onChange={(e) => {
+                                      const updated = valuesCards.map(c => c.card_order === card.card_order ? { ...c, settings: { ...c.settings, heading_weight: e.target.value } } : c);
+                                      setValuesCards(updated);
+                                    }}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                  >
+                                    <option value="normal">Normal</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="semibold">Semibold</option>
+                                    <option value="bold">Bold</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Storlek</label>
+                                  <select
+                                    value={card.settings.heading_size || 'lg'}
+                                    onChange={(e) => {
+                                      const updated = valuesCards.map(c => c.card_order === card.card_order ? { ...c, settings: { ...c.settings, heading_size: e.target.value } } : c);
+                                      setValuesCards(updated);
+                                    }}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                  >
+                                    <option value="sm">Liten</option>
+                                    <option value="base">Medium</option>
+                                    <option value="lg">Stor</option>
+                                    <option value="xl">Större</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Placering</label>
+                                  <select
+                                    value={card.settings.heading_align || 'center'}
+                                    onChange={(e) => {
+                                      const updated = valuesCards.map(c => c.card_order === card.card_order ? { ...c, settings: { ...c.settings, heading_align: e.target.value } } : c);
+                                      setValuesCards(updated);
+                                    }}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                  >
+                                    <option value="left">Vänster</option>
+                                    <option value="center">Centrerad</option>
+                                    <option value="right">Höger</option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div className="mt-3">
+                                <ColorPicker
+                                  label="Färg - Rubrik"
+                                  value={card.settings.heading_color || '#000000'}
+                                  onChange={(color) => {
+                                    const updated = valuesCards.map(c => c.card_order === card.card_order ? { ...c, settings: { ...c.settings, heading_color: color } } : c);
+                                    setValuesCards(updated);
+                                  }}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="border-t pt-4 mt-4">
+                              <h4 className="text-sm font-medium text-gray-900 mb-3">Typografi - Text</h4>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Typsnitt</label>
+                                  <select
+                                    value={card.settings.text_font || 'inter'}
+                                    onChange={(e) => {
+                                      const updated = valuesCards.map(c => c.card_order === card.card_order ? { ...c, settings: { ...c.settings, text_font: e.target.value } } : c);
+                                      setValuesCards(updated);
+                                    }}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                  >
+                                    <option value="lobster">Lobster</option>
+                                    <option value="inter">Inter</option>
+                                    <option value="merriweather">Merriweather</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Storlek</label>
+                                  <select
+                                    value={card.settings.text_size || 'base'}
+                                    onChange={(e) => {
+                                      const updated = valuesCards.map(c => c.card_order === card.card_order ? { ...c, settings: { ...c.settings, text_size: e.target.value } } : c);
+                                      setValuesCards(updated);
+                                    }}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                  >
+                                    <option value="xs">Liten</option>
+                                    <option value="sm">Mindre</option>
+                                    <option value="base">Medium</option>
+                                    <option value="lg">Stor</option>
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Placering</label>
+                                  <select
+                                    value={card.settings.text_align || 'center'}
+                                    onChange={(e) => {
+                                      const updated = valuesCards.map(c => c.card_order === card.card_order ? { ...c, settings: { ...c.settings, text_align: e.target.value } } : c);
+                                      setValuesCards(updated);
+                                    }}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                  >
+                                    <option value="left">Vänster</option>
+                                    <option value="center">Centrerad</option>
+                                    <option value="right">Höger</option>
+                                  </select>
+                                </div>
+                              </div>
+                              <div className="mt-3">
+                                <ColorPicker
+                                  label="Färg - Text"
+                                  value={card.settings.text_color || '#000000'}
+                                  onChange={(color) => {
+                                    const updated = valuesCards.map(c => c.card_order === card.card_order ? { ...c, settings: { ...c.settings, text_color: color } } : c);
+                                    setValuesCards(updated);
+                                  }}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="border-t pt-4 mt-4">
+                              <h4 className="text-sm font-medium text-gray-900 mb-3">CTA-knapp</h4>
+                              <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Knapptext</label>
+                                  <input
+                                    type="text"
+                                    value={card.settings.cta_text || ''}
+                                    onChange={(e) => {
+                                      const updated = valuesCards.map(c => c.card_order === card.card_order ? { ...c, settings: { ...c.settings, cta_text: e.target.value } } : c);
+                                      setValuesCards(updated);
+                                    }}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                    placeholder="t.ex. Läs mer"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Länk</label>
+                                  <input
+                                    type="text"
+                                    value={card.settings.cta_link || ''}
+                                    onChange={(e) => {
+                                      const updated = valuesCards.map(c => c.card_order === card.card_order ? { ...c, settings: { ...c.settings, cta_link: e.target.value } } : c);
+                                      setValuesCards(updated);
+                                    }}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                    placeholder="/kontakt"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">Stil</label>
+                                  <select
+                                    value={card.settings.cta_style || 'primary'}
+                                    onChange={(e) => {
+                                      const updated = valuesCards.map(c => c.card_order === card.card_order ? { ...c, settings: { ...c.settings, cta_style: e.target.value } } : c);
+                                      setValuesCards(updated);
+                                    }}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg"
+                                  >
+                                    <option value="primary">Primär (Grön)</option>
+                                    <option value="secondary">Sekundär (Beige)</option>
+                                    <option value="outline">Kontur</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
