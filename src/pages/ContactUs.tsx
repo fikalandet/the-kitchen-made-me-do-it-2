@@ -12,6 +12,7 @@ interface TextLines {
 
 interface ContactUsPageData {
   image_url: string | null;
+  image_placement: string;
   title_text: string;
   title_font: string;
   title_weight: string;
@@ -28,6 +29,9 @@ interface ContactUsPageData {
   background_type: string;
   background_color: string;
   background_image: string | null;
+  form_background_color: string;
+  form_border_radius: string;
+  form_padding: string;
 }
 
 interface FormData {
@@ -240,68 +244,81 @@ export function ContactUs() {
     ? textLines.lines[currentLineIndex]
     : null;
 
-  return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f6f2e0' }}>
-      <div style={bgStyle} className="py-16">
-        <div className="max-w-4xl mx-auto px-4">
-          {pageData?.image_url && (
-            <div className="mb-8 text-center">
-              <img
-                src={pageData.image_url}
-                alt="Kontakta oss"
-                className="w-full max-w-2xl mx-auto h-auto rounded-lg shadow-lg"
-              />
-            </div>
-          )}
+  const getBorderRadius = (radius: string) => {
+    const radiuses: Record<string, string> = {
+      none: '0',
+      small: '0.375rem',
+      medium: '0.5rem',
+      large: '1rem'
+    };
+    return radiuses[radius] || radiuses.medium;
+  };
 
-          <h1
-            className="mb-4"
-            style={{
-              fontFamily: getFontFamily(pageData?.title_font || 'lobster'),
-              fontWeight: pageData?.title_weight === 'bold' ? '700' : '400',
-              fontSize: getTitleSize(pageData?.title_size || 'xl'),
-              color: pageData?.title_color || '#000000',
-              textAlign: (pageData?.title_align as any) || 'center'
-            }}
-          >
-            {pageData?.title_text || 'Kontakta oss'}
-          </h1>
+  const getPadding = (padding: string) => {
+    const paddings: Record<string, string> = {
+      small: '1.5rem',
+      medium: '2rem',
+      large: '3rem'
+    };
+    return paddings[padding] || paddings.medium;
+  };
 
-          {currentLine && (
-            <p
-              className="mb-4 transition-opacity duration-500"
-              style={{
-                fontFamily: getFontFamily(pageData?.title_font || 'poppins'),
-                fontWeight: '400',
-                fontSize: getTextSize('lg'),
-                color: pageData?.title_color || '#000000',
-                textAlign: (pageData?.title_align as any) || 'center'
-              }}
-            >
-              {currentLine}
-            </p>
-          )}
+  const formWrapperStyle: React.CSSProperties = {
+    backgroundColor: pageData?.form_background_color || '#ffffff',
+    borderRadius: getBorderRadius(pageData?.form_border_radius || 'medium'),
+    padding: getPadding(pageData?.form_padding || 'medium')
+  };
 
-          {pageData?.ingress_text && (
-            <p
-              className="mb-8"
-              style={{
-                fontFamily: getFontFamily(pageData?.ingress_font || 'poppins'),
-                fontWeight: pageData?.ingress_weight === 'bold' ? '700' : '400',
-                fontSize: getTextSize(pageData?.ingress_size || 'lg'),
-                color: pageData?.ingress_color || '#374151',
-                textAlign: (pageData?.ingress_align as any) || 'center'
-              }}
-            >
-              {pageData.ingress_text}
-            </p>
-          )}
-        </div>
-      </div>
+  const imageOnLeft = pageData?.image_placement === 'left';
 
-      <div className="max-w-2xl mx-auto px-4 py-16">
+  const contentSection = (
+    <div>
+      <h1
+        className="mb-4"
+        style={{
+          fontFamily: getFontFamily(pageData?.title_font || 'lobster'),
+          fontWeight: pageData?.title_weight === 'bold' ? '700' : '400',
+          fontSize: getTitleSize(pageData?.title_size || 'xl'),
+          color: pageData?.title_color || '#000000',
+          textAlign: (pageData?.title_align as any) || 'center'
+        }}
+      >
+        {pageData?.title_text || 'Kontakta oss'}
+      </h1>
+
+      {currentLine && (
+        <p
+          className="mb-4 transition-opacity duration-500"
+          style={{
+            fontFamily: getFontFamily(pageData?.title_font || 'poppins'),
+            fontWeight: '400',
+            fontSize: getTextSize('lg'),
+            color: pageData?.title_color || '#000000',
+            textAlign: (pageData?.title_align as any) || 'center'
+          }}
+        >
+          {currentLine}
+        </p>
+      )}
+
+      {pageData?.ingress_text && (
+        <p
+          className="mb-8"
+          style={{
+            fontFamily: getFontFamily(pageData?.ingress_font || 'poppins'),
+            fontWeight: pageData?.ingress_weight === 'bold' ? '700' : '400',
+            fontSize: getTextSize(pageData?.ingress_size || 'lg'),
+            color: pageData?.ingress_color || '#374151',
+            textAlign: (pageData?.ingress_align as any) || 'center'
+          }}
+        >
+          {pageData.ingress_text}
+        </p>
+      )}
+
+      <div className="mt-8">
         {submitted ? (
-          <div className="bg-white rounded-lg p-8 shadow-sm text-center">
+          <div style={formWrapperStyle} className="shadow-sm text-center">
             <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Send className="w-8 h-8 text-green-600" />
             </div>
@@ -320,7 +337,7 @@ export function ContactUs() {
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="bg-white rounded-lg p-8 shadow-sm space-y-6">
+          <form onSubmit={handleSubmit} style={formWrapperStyle} className="shadow-sm space-y-6">
             <div style={{ position: 'absolute', left: '-9999px' }}>
               <label htmlFor="honeypot">Lämna detta fält tomt</label>
               <input
@@ -463,6 +480,44 @@ export function ContactUs() {
             </button>
           </form>
         )}
+      </div>
+    </div>
+  );
+
+  const imageSection = pageData?.image_url ? (
+    <div className="flex items-center justify-center">
+      <img
+        src={pageData.image_url}
+        alt="Kontakta oss"
+        className="w-full h-auto rounded-lg shadow-lg"
+      />
+    </div>
+  ) : null;
+
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: '#f6f2e0' }}>
+      <div style={bgStyle} className="py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          {pageData?.image_url ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+              {imageOnLeft ? (
+                <>
+                  {imageSection}
+                  {contentSection}
+                </>
+              ) : (
+                <>
+                  {contentSection}
+                  {imageSection}
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="max-w-2xl mx-auto">
+              {contentSection}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

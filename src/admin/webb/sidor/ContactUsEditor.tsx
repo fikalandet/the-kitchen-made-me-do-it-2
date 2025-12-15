@@ -11,6 +11,7 @@ import { TextLines } from '../../../lib/types/landingPage';
 interface ContactUsPageData {
   id?: string;
   image_url: string | null;
+  image_placement: string;
   title_text: string;
   title_font: string;
   title_weight: string;
@@ -27,11 +28,15 @@ interface ContactUsPageData {
   background_type: string;
   background_color: string;
   background_image: string | null;
+  form_background_color: string;
+  form_border_radius: string;
+  form_padding: string;
 }
 
 export default function ContactUsEditor() {
   const [pageData, setPageData] = useState<ContactUsPageData>({
     image_url: null,
+    image_placement: 'left',
     title_text: 'Kontakta oss',
     title_font: 'lobster',
     title_weight: 'bold',
@@ -52,7 +57,10 @@ export default function ContactUsEditor() {
     ingress_align: 'center',
     background_type: 'color',
     background_color: '#f6f2e0',
-    background_image: null
+    background_image: null,
+    form_background_color: '#ffffff',
+    form_border_radius: 'medium',
+    form_padding: 'medium'
   });
 
   const [loading, setLoading] = useState(true);
@@ -170,15 +178,28 @@ export default function ContactUsEditor() {
           </div>
         </AdminCard>
 
-        <AdminCard title="Bild (visas överst)">
-          <ImageUpload
-            label="Toppbild"
-            value={pageData.image_url}
-            onChange={(url) => setPageData({ ...pageData, image_url: url })}
-          />
-          <p className="text-sm text-gray-600 mt-2">
-            Denna bild visas högst upp på sidan, ovanför rubriken.
-          </p>
+        <AdminCard title="Bild">
+          <div className="space-y-4">
+            <ImageUpload
+              label="Bild"
+              value={pageData.image_url}
+              onChange={(url) => setPageData({ ...pageData, image_url: url })}
+            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Bildplacering</label>
+              <select
+                value={pageData.image_placement}
+                onChange={(e) => setPageData({ ...pageData, image_placement: e.target.value })}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+              >
+                <option value="left">Vänster</option>
+                <option value="right">Höger</option>
+              </select>
+              <p className="text-sm text-gray-600 mt-2">
+                På desktop visas bilden i vänster eller höger kolumn. Text och formulär visas i motsatt kolumn.
+              </p>
+            </div>
+          </div>
         </AdminCard>
 
         <AdminCard title="Rubrik">
@@ -357,15 +378,52 @@ export default function ContactUsEditor() {
         </AdminCard>
 
         <AdminCard title="Kontaktformulär">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-900">
-              <strong>Formuläret</strong> visas automatiskt under innehållet. Det hanterar alla fält:
-              namn, kund-ID (auto för inloggade), e-post, telefon, ämne och meddelande.
-            </p>
-            <p className="text-sm text-blue-900 mt-2">
-              <strong>Ärenden</strong> sparas i tabellen <code className="bg-white px-1 rounded">contact_tickets</code> och
-              kan hanteras under Admin → Kommunikation → Kontaktärenden.
-            </p>
+          <div className="space-y-4">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <p className="text-sm text-blue-900">
+                <strong>Formuläret</strong> visas automatiskt under innehållet. Det hanterar alla fält:
+                namn, kund-ID (auto för inloggade), e-post, telefon, ämne och meddelande.
+              </p>
+              <p className="text-sm text-blue-900 mt-2">
+                <strong>Ärenden</strong> sparas i tabellen <code className="bg-white px-1 rounded">contact_tickets</code> och
+                kan hanteras under Admin → Kommunikation → Kontaktärenden.
+              </p>
+            </div>
+
+            <ColorPicker
+              label="Bakgrundsfärg - kontaktformulär"
+              value={pageData.form_background_color}
+              onChange={(color) => setPageData({ ...pageData, form_background_color: color })}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Rundade hörn</label>
+                <select
+                  value={pageData.form_border_radius}
+                  onChange={(e) => setPageData({ ...pageData, form_border_radius: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="none">Inga</option>
+                  <option value="small">Små</option>
+                  <option value="medium">Medel</option>
+                  <option value="large">Stora</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Inre padding</label>
+                <select
+                  value={pageData.form_padding}
+                  onChange={(e) => setPageData({ ...pageData, form_padding: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                >
+                  <option value="small">S</option>
+                  <option value="medium">M</option>
+                  <option value="large">L</option>
+                </select>
+              </div>
+            </div>
           </div>
         </AdminCard>
       </div>
