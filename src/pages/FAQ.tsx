@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { ChevronDown } from 'lucide-react';
 
@@ -81,8 +81,6 @@ export function FAQ() {
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [openItem, setOpenItem] = useState<string | null>(null);
-
-  const categoryHeaderRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -180,13 +178,6 @@ export function FAQ() {
     } else {
       setActiveCategory(categoryId);
       setOpenItem(null);
-
-      setTimeout(() => {
-        categoryHeaderRef.current?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
-      }, 100);
     }
   };
 
@@ -246,20 +237,22 @@ export function FAQ() {
     );
   };
 
+  const shouldShowTextLinesAfter = pageData?.title_align === 'left';
+  const shouldShowTextLinesBelow = pageData?.title_align === 'center';
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f6f2e0' }}>
       <div style={bgStyle} className="py-24 md:py-32">
         <div className="max-w-[860px] mx-auto px-4">
-          <div className="text-center space-y-6 mb-12">
-            {pageData?.text_lines?.placement === 'after_heading' ? (
-              <div className="flex items-center justify-center gap-4 flex-wrap">
+          <div className="space-y-6 mb-12" style={{ textAlign: pageData?.title_align as any || 'center' }}>
+            {shouldShowTextLinesAfter ? (
+              <div className="flex items-center gap-4">
                 <h1
                   style={{
                     fontFamily: getFontFamily(pageData?.title_font || 'lobster'),
                     fontWeight: getFontWeight(pageData?.title_weight || 'bold'),
                     fontSize: getTitleSize(pageData?.title_size || 'xl'),
-                    color: pageData?.title_color || '#000000',
-                    textAlign: pageData?.title_align as any || 'center'
+                    color: pageData?.title_color || '#000000'
                   }}
                 >
                   {pageData?.title_text || 'Vanliga frågor'}
@@ -273,13 +266,12 @@ export function FAQ() {
                     fontFamily: getFontFamily(pageData?.title_font || 'lobster'),
                     fontWeight: getFontWeight(pageData?.title_weight || 'bold'),
                     fontSize: getTitleSize(pageData?.title_size || 'xl'),
-                    color: pageData?.title_color || '#000000',
-                    textAlign: pageData?.title_align as any || 'center'
+                    color: pageData?.title_color || '#000000'
                   }}
                 >
                   {pageData?.title_text || 'Vanliga frågor'}
                 </h1>
-                {renderTextLines()}
+                {shouldShowTextLinesBelow && renderTextLines()}
               </>
             )}
 
@@ -307,13 +299,13 @@ export function FAQ() {
 
           {categories.length > 0 && (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                 {categories.map(category => (
                   <button
                     key={category.id}
                     onClick={() => handleCategoryClick(category.id)}
                     className={`px-6 py-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ${
-                      activeCategory === category.id ? 'ring-2 ring-gray-900 ring-offset-2' : ''
+                      activeCategory === category.id ? 'ring-4 ring-gray-900' : ''
                     }`}
                     style={{
                       backgroundColor: category.styles.background_color,
@@ -321,48 +313,14 @@ export function FAQ() {
                       fontWeight: getFontWeight(category.styles.weight),
                       fontSize: getTextSize(category.styles.size),
                       color: category.styles.color,
-                      textAlign: category.styles.align as any
+                      textAlign: category.styles.align as any,
+                      opacity: activeCategory && activeCategory !== category.id ? 0.6 : 1
                     }}
                   >
                     {category.title}
                   </button>
                 ))}
               </div>
-
-              {activeCateg && (
-                <div
-                  ref={categoryHeaderRef}
-                  className="mb-8 py-8 px-6 rounded-lg"
-                  style={{ backgroundColor: activeCateg.header_background_color }}
-                >
-                  <h2
-                    style={{
-                      fontFamily: getFontFamily(activeCateg.header_title_font),
-                      fontWeight: getFontWeight(activeCateg.header_title_weight),
-                      fontSize: getTitleSize(activeCateg.header_title_size),
-                      color: activeCateg.header_title_color,
-                      textAlign: activeCateg.header_title_align as any
-                    }}
-                    className="mb-3"
-                  >
-                    {activeCateg.title}
-                  </h2>
-
-                  {activeCateg.category_description && (
-                    <p
-                      style={{
-                        fontFamily: getFontFamily(activeCateg.header_title_font),
-                        fontSize: getTextSize('md'),
-                        color: activeCateg.header_title_color,
-                        textAlign: activeCateg.header_title_align as any,
-                        opacity: 0.8
-                      }}
-                    >
-                      {activeCateg.category_description}
-                    </p>
-                  )}
-                </div>
-              )}
 
               {activeCateg && (
                 <div className="space-y-2 mb-12">
