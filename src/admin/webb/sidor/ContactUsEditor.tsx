@@ -11,6 +11,8 @@ import { TextLines } from '../../../lib/types/landingPage';
 interface ContactUsPageData {
   id?: string;
   image_url: string | null;
+  image_url_2: string | null;
+  image_url_3: string | null;
   image_placement: string;
   title_text: string;
   title_font: string;
@@ -41,6 +43,8 @@ interface ContactUsPageData {
 export default function ContactUsEditor() {
   const [pageData, setPageData] = useState<ContactUsPageData>({
     image_url: null,
+    image_url_2: null,
+    image_url_3: null,
     image_placement: 'left',
     title_text: 'Kontakta oss',
     title_font: 'lobster',
@@ -188,12 +192,22 @@ export default function ContactUsEditor() {
           </div>
         </AdminCard>
 
-        <AdminCard title="Bild">
+        <AdminCard title="Bilder">
           <div className="space-y-4">
             <ImageUpload
-              label="Bild"
+              label="Bild 1"
               value={pageData.image_url}
               onChange={(url) => setPageData({ ...pageData, image_url: url })}
+            />
+            <ImageUpload
+              label="Bild 2 (valfritt)"
+              value={pageData.image_url_2}
+              onChange={(url) => setPageData({ ...pageData, image_url_2: url })}
+            />
+            <ImageUpload
+              label="Bild 3 (valfritt)"
+              value={pageData.image_url_3}
+              onChange={(url) => setPageData({ ...pageData, image_url_3: url })}
             />
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Bildplacering</label>
@@ -206,7 +220,7 @@ export default function ContactUsEditor() {
                 <option value="right">Höger</option>
               </select>
               <p className="text-sm text-gray-600 mt-2">
-                På desktop visas bilden i vänster eller höger kolumn. Text och formulär visas i motsatt kolumn.
+                På desktop visas bilderna vertikalt i vänster eller höger kolumn. På mobil visas endast första bilden.
               </p>
             </div>
           </div>

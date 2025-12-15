@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
-import { Send } from 'lucide-react';
+import { Send, Shield } from 'lucide-react';
 
 interface TextLines {
   lines: string[];
@@ -12,6 +12,8 @@ interface TextLines {
 
 interface ContactUsPageData {
   image_url: string | null;
+  image_url_2: string | null;
+  image_url_3: string | null;
   image_placement: string;
   title_text: string;
   title_font: string;
@@ -477,6 +479,13 @@ export function ContactUs() {
                 </>
               )}
             </button>
+
+            <div className="flex items-start gap-2 mt-4 text-xs text-gray-500">
+              <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" />
+              <p>
+                Vi delar aldrig dina uppgifter vidare och använder dem endast för att hantera ditt ärende.
+              </p>
+            </div>
           </form>
         )}
       </div>
@@ -485,24 +494,47 @@ export function ContactUs() {
 
   const borderRadius = getBorderRadius(pageData?.form_border_radius || 'medium');
 
-  const imageSection = pageData?.image_url ? (
-    <div
-      className="min-h-[280px] md:max-h-[280px] overflow-hidden shadow-lg"
-      style={{ borderRadius }}
-    >
-      <img
-        src={pageData.image_url}
-        alt="Kontakta oss"
-        className="w-full h-full object-cover"
-      />
-    </div>
+  const images = [
+    pageData?.image_url,
+    pageData?.image_url_2,
+    pageData?.image_url_3
+  ].filter(Boolean) as string[];
+
+  const imageSection = images.length > 0 ? (
+    <>
+      <div className="hidden md:flex flex-col gap-4">
+        {images.map((img, idx) => (
+          <div
+            key={idx}
+            className="overflow-hidden shadow-lg"
+            style={{ borderRadius }}
+          >
+            <img
+              src={img}
+              alt={`Kontakta oss ${idx + 1}`}
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        ))}
+      </div>
+      <div
+        className="md:hidden min-h-[280px] overflow-hidden shadow-lg"
+        style={{ borderRadius }}
+      >
+        <img
+          src={images[0]}
+          alt="Kontakta oss"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    </>
   ) : null;
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f6f2e0' }}>
       <div style={bgStyle} className="py-24 md:py-32">
         <div className="max-w-[960px] mx-auto px-4">
-          {pageData?.image_url ? (
+          {images.length > 0 ? (
             <>
               <div
                 className="hidden md:grid gap-12"
