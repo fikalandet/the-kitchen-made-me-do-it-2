@@ -14,8 +14,10 @@ interface AboutPageData {
   title_align: string;
   tagline_text: string | null;
   ingress_text: string | null;
-  hero_image: string | null;
-  hero_image_position: string;
+  hero_gallery_images?: string[];
+  hero_gallery_border_color?: string;
+  hero_gallery_style?: string;
+  hero_gallery_max_images?: number;
   container_mode: string;
 }
 
@@ -28,6 +30,15 @@ interface AboutPageRow {
   image_border: boolean;
   image_border_color: string;
   row_layout: string;
+  title_font?: string;
+  title_weight?: string;
+  title_size?: string;
+  title_color?: string;
+  title_align?: string;
+  text_font?: string;
+  text_size?: string;
+  text_color?: string;
+  text_align?: string;
 }
 
 interface SectionSettings {
@@ -97,6 +108,19 @@ export function AboutUs() {
     return fonts[font || 'default'] || fonts.default;
   };
 
+  const getTextSize = (size?: string) => {
+    const sizes: Record<string, string> = {
+      sm: '0.875rem',
+      md: '1rem',
+      lg: '1.125rem',
+      xl: '1.25rem',
+      '2xl': '1.5rem',
+      '3xl': '1.875rem',
+      '4xl': '2.25rem'
+    };
+    return sizes[size || 'md'] || sizes.md;
+  };
+
   const getTitleSize = (size?: string) => {
     const sizes: Record<string, string> = {
       sm: '1.5rem',
@@ -136,13 +160,48 @@ export function AboutUs() {
     backgroundPosition: 'center'
   };
 
+  const galleryImages = aboutPage?.hero_gallery_images || [];
+  const galleryBorderColor = aboutPage?.hero_gallery_border_color || '#a1c798';
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f6f2e0' }}>
       <div style={topBgStyle} className="py-16">
         <div className={aboutPage?.container_mode === 'full-width' ? 'w-full px-4' : 'max-w-4xl mx-auto px-4'}>
-          {aboutPage?.hero_image && aboutPage?.hero_image_position === 'above_title' && (
-            <div className="mb-8 flex justify-center">
-              <img src={aboutPage.hero_image} alt={aboutPage.title_text} className="max-w-md w-full h-auto rounded-lg shadow-lg" />
+          {galleryImages.length > 0 && (
+            <div className="mb-12 relative">
+              <div className="flex items-center justify-center gap-2 flex-wrap">
+                {galleryImages.map((img, idx) => {
+                  const offsets = [
+                    { translateY: '-10px', zIndex: 3 },
+                    { translateY: '10px', zIndex: 2 },
+                    { translateY: '0px', zIndex: 4 },
+                    { translateY: '15px', zIndex: 1 },
+                    { translateY: '-5px', zIndex: 2 }
+                  ];
+                  const offset = offsets[idx] || offsets[0];
+
+                  return (
+                    <div
+                      key={idx}
+                      className="relative"
+                      style={{
+                        transform: `translateY(${offset.translateY})`,
+                        zIndex: offset.zIndex,
+                        marginLeft: idx > 0 ? '-20px' : '0'
+                      }}
+                    >
+                      <img
+                        src={img}
+                        alt={`Gallery ${idx + 1}`}
+                        className="w-48 h-64 object-cover rounded-lg shadow-xl transition-transform hover:scale-105"
+                        style={{
+                          border: `4px solid ${galleryBorderColor}`
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 
@@ -170,18 +229,12 @@ export function AboutUs() {
               {aboutPage.ingress_text}
             </p>
           )}
-
-          {aboutPage?.hero_image && aboutPage?.hero_image_position === 'below_title' && (
-            <div className="mb-8 flex justify-center">
-              <img src={aboutPage.hero_image} alt={aboutPage.title_text} className="max-w-md w-full h-auto rounded-lg shadow-lg" />
-            </div>
-          )}
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 py-16 space-y-16">
         {rows.map((row) => {
-          const isImageLeft = row.row_order === 2;
+          const isImageLeft = row.row_layout === 'image-text';
 
           return (
             <div
@@ -211,15 +264,57 @@ export function AboutUs() {
                     )}
                   </div>
                   <div className="order-1 md:order-2">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">{row.row_title}</h2>
-                    <p className="text-lg text-gray-700 leading-relaxed">{row.row_text}</p>
+                    <h2
+                      className="mb-4"
+                      style={{
+                        fontFamily: getFontFamily(row.title_font),
+                        fontWeight: row.title_weight === 'bold' ? '700' : '400',
+                        fontSize: getTitleSize(row.title_size),
+                        color: row.title_color || '#000000',
+                        textAlign: (row.title_align as any) || 'left'
+                      }}
+                    >
+                      {row.row_title}
+                    </h2>
+                    <p
+                      className="leading-relaxed"
+                      style={{
+                        fontFamily: getFontFamily(row.text_font),
+                        fontSize: getTextSize(row.text_size),
+                        color: row.text_color || '#000000',
+                        textAlign: (row.text_align as any) || 'left'
+                      }}
+                    >
+                      {row.row_text}
+                    </p>
                   </div>
                 </>
               ) : (
                 <>
                   <div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">{row.row_title}</h2>
-                    <p className="text-lg text-gray-700 leading-relaxed">{row.row_text}</p>
+                    <h2
+                      className="mb-4"
+                      style={{
+                        fontFamily: getFontFamily(row.title_font),
+                        fontWeight: row.title_weight === 'bold' ? '700' : '400',
+                        fontSize: getTitleSize(row.title_size),
+                        color: row.title_color || '#000000',
+                        textAlign: (row.title_align as any) || 'left'
+                      }}
+                    >
+                      {row.row_title}
+                    </h2>
+                    <p
+                      className="leading-relaxed"
+                      style={{
+                        fontFamily: getFontFamily(row.text_font),
+                        fontSize: getTextSize(row.text_size),
+                        color: row.text_color || '#000000',
+                        textAlign: (row.text_align as any) || 'left'
+                      }}
+                    >
+                      {row.row_text}
+                    </p>
                   </div>
                   <div>
                     {row.row_image ? (

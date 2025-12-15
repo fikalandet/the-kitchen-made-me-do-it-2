@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminCard, AdminButton } from '../../components';
-import { ArrowLeft, Save, Eye, Plus, Trash2, ChevronUp, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Plus, Trash2, ChevronDown, X } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { ImageUpload } from '../../components/ImageUpload';
-import CollapsibleCard from '../components/CollapsibleCard';
 import ColorPicker from '../components/ColorPicker';
 
 interface AboutPageData {
@@ -20,8 +19,10 @@ interface AboutPageData {
   title_align: string;
   tagline_text: string | null;
   ingress_text: string | null;
-  hero_image: string | null;
-  hero_image_position: string;
+  hero_gallery_images?: string[];
+  hero_gallery_border_color?: string;
+  hero_gallery_style?: string;
+  hero_gallery_max_images?: number;
   container_mode: string;
 }
 
@@ -35,6 +36,15 @@ interface AboutPageRow {
   image_border: boolean;
   image_border_color: string;
   row_layout: string;
+  title_font?: string;
+  title_weight?: string;
+  title_size?: string;
+  title_color?: string;
+  title_align?: string;
+  text_font?: string;
+  text_size?: string;
+  text_color?: string;
+  text_align?: string;
 }
 
 interface SectionSettings {
@@ -69,8 +79,10 @@ export default function AboutUsEditor() {
     title_align: 'center',
     tagline_text: null,
     ingress_text: null,
-    hero_image: null,
-    hero_image_position: 'below_title',
+    hero_gallery_images: [],
+    hero_gallery_border_color: '#a1c798',
+    hero_gallery_style: 'overlap',
+    hero_gallery_max_images: 3,
     container_mode: 'contained'
   });
 
@@ -121,7 +133,7 @@ export default function AboutUsEditor() {
         supabase.from('about_page_discover_cards').select('*').order('card_order')
       ]);
 
-      if (aboutRes.data) setAboutPage(aboutRes.data);
+      if (aboutRes.data) setAboutPage({ ...aboutRes.data, hero_gallery_images: aboutRes.data.hero_gallery_images || [] });
       if (rowsRes.data) setRows(rowsRes.data);
       if (valuesSettingsRes.data) setValuesSettings(valuesSettingsRes.data);
       if (valuesCardsRes.data) setValuesCards(valuesCardsRes.data);
@@ -189,6 +201,43 @@ export default function AboutUsEditor() {
     }
   };
 
+  const addRow = () => {
+    const newOrder = rows.length + 1;
+    const newRow: AboutPageRow = {
+      row_order: newOrder,
+      row_title: '',
+      row_text: '',
+      row_image: null,
+      image_shape: 'rounded',
+      image_border: false,
+      image_border_color: '#a1c798',
+      row_layout: newOrder % 2 === 1 ? 'text-image' : 'image-text',
+      title_font: 'poppins',
+      title_weight: 'bold',
+      title_size: 'xl',
+      title_color: '#000000',
+      title_align: 'left',
+      text_font: 'poppins',
+      text_size: 'md',
+      text_color: '#000000',
+      text_align: 'left'
+    };
+    setRows([...rows, newRow]);
+  };
+
+  const deleteRow = async (rowOrder: number) => {
+    if (!confirm(`Är du säker på att du vill ta bort Rad ${rowOrder}?`)) return;
+
+    const row = rows.find(r => r.row_order === rowOrder);
+    if (row?.id) {
+      await supabase.from('about_page_rows').delete().eq('id', row.id);
+    }
+
+    const filteredRows = rows.filter(r => r.row_order !== rowOrder);
+    const reorderedRows = filteredRows.map((r, idx) => ({ ...r, row_order: idx + 1 }));
+    setRows(reorderedRows);
+  };
+
   const addValuesCard = () => {
     const newCard: HeroCard = {
       card_order: valuesCards.length + 1,
@@ -246,9 +295,25 @@ export default function AboutUsEditor() {
     setDiscoverCards(discoverCards.filter(c => c.card_order !== cardOrder).map((c, idx) => ({ ...c, card_order: idx + 1 })));
   };
 
+  const addGalleryImage = (url: string) => {
+    const currentImages = aboutPage.hero_gallery_images || [];
+    const maxImages = aboutPage.hero_gallery_max_images || 3;
+    if (currentImages.length < maxImages) {
+      setAboutPage({ ...aboutPage, hero_gallery_images: [...currentImages, url] });
+    }
+  };
+
+  const removeGalleryImage = (index: number) => {
+    const currentImages = aboutPage.hero_gallery_images || [];
+    setAboutPage({ ...aboutPage, hero_gallery_images: currentImages.filter((_, i) => i !== index) });
+  };
+
   if (loading) {
     return <div>Laddar...</div>;
   }
+
+  const galleryImages = aboutPage.hero_gallery_images || [];
+  const maxImages = aboutPage.hero_gallery_max_images || 3;
 
   return (
     <div>
@@ -309,6 +374,64 @@ export default function AboutUsEditor() {
                 onChange={(url) => setAboutPage({ ...aboutPage, background_image: url })}
               />
             )}
+
+            <div className="border-t pt-4 mt-4">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Bildgalleri (visas ovanför rubriken)</h3>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Antal bilder (3-5)</label>
+                <select
+                  value={maxImages}
+                  onChange={(e) => setAboutPage({ ...aboutPage, hero_gallery_max_images: parseInt(e.target.value) })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg mb-4"
+                >
+                  <option value="3">3 bilder</option>
+                  <option value="4">4 bilder</option>
+                  <option value="5">5 bilder</option>
+                </select>
+              </div>
+
+              <ColorPicker
+                label="Ramfärg för bilder"
+                value={aboutPage.hero_gallery_border_color || '#a1c798'}
+                onChange={(color) => setAboutPage({ ...aboutPage, hero_gallery_border_color: color })}
+              />
+
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Bilder ({galleryImages.length}/{maxImages})
+                </label>
+
+                {galleryImages.length < maxImages && (
+                  <ImageUpload
+                    label={`Lägg till bild ${galleryImages.length + 1}`}
+                    value=""
+                    onChange={(url) => addGalleryImage(url)}
+                  />
+                )}
+
+                {galleryImages.length > 0 && (
+                  <div className="mt-4 grid grid-cols-3 gap-4">
+                    {galleryImages.map((img, idx) => (
+                      <div key={idx} className="relative">
+                        <img src={img} alt={`Galleri ${idx + 1}`} className="w-full h-32 object-cover rounded-lg" />
+                        <button
+                          onClick={() => removeGalleryImage(idx)}
+                          className="absolute -top-2 -right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                        <p className="text-xs text-center mt-1 text-gray-600">Bild {idx + 1}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {galleryImages.length < 3 && (
+                  <p className="text-sm text-orange-600 mt-2">OBS: Minst 3 bilder rekommenderas för bästa resultat</p>
+                )}
+              </div>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Rubrik</label>
@@ -392,24 +515,6 @@ export default function AboutUsEditor() {
               />
             </div>
 
-            <ImageUpload
-              label="Hero-bild"
-              value={aboutPage.hero_image}
-              onChange={(url) => setAboutPage({ ...aboutPage, hero_image: url })}
-            />
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Bildplacering</label>
-              <select
-                value={aboutPage.hero_image_position}
-                onChange={(e) => setAboutPage({ ...aboutPage, hero_image_position: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-              >
-                <option value="above_title">Över rubrik</option>
-                <option value="below_title">Under rubrik</option>
-              </select>
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Container-läge</label>
               <select
@@ -424,7 +529,7 @@ export default function AboutUsEditor() {
           </div>
         </AdminCard>
 
-        <AdminCard title="2-kolumnersblock (3 rader)">
+        <AdminCard title={`2-kolumnersblock (${rows.length} rader)`}>
           <div className="space-y-4">
             {rows.map((row) => (
               <div key={row.row_order} className="border border-gray-200 rounded-lg p-4">
@@ -433,7 +538,18 @@ export default function AboutUsEditor() {
                   onClick={() => setExpandedRow(expandedRow === row.row_order ? null : row.row_order)}
                 >
                   <h3 className="font-medium text-gray-900">Rad {row.row_order}</h3>
-                  <ChevronDown className={`w-5 h-5 transition-transform ${expandedRow === row.row_order ? 'rotate-180' : ''}`} />
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteRow(row.row_order);
+                      }}
+                      className="p-1 text-red-600 hover:text-red-800"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                    <ChevronDown className={`w-5 h-5 transition-transform ${expandedRow === row.row_order ? 'rotate-180' : ''}`} />
+                  </div>
                 </div>
 
                 {expandedRow === row.row_order && (
@@ -451,6 +567,84 @@ export default function AboutUsEditor() {
                       />
                     </div>
 
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Rubrik typsnitt</label>
+                        <select
+                          value={row.title_font || 'poppins'}
+                          onChange={(e) => {
+                            const updated = rows.map(r => r.row_order === row.row_order ? { ...r, title_font: e.target.value } : r);
+                            setRows(updated);
+                          }}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        >
+                          <option value="lobster">Lobster</option>
+                          <option value="poppins">Poppins</option>
+                          <option value="roboto">Roboto</option>
+                          <option value="playfair">Playfair</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Storlek</label>
+                        <select
+                          value={row.title_size || 'xl'}
+                          onChange={(e) => {
+                            const updated = rows.map(r => r.row_order === row.row_order ? { ...r, title_size: e.target.value } : r);
+                            setRows(updated);
+                          }}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        >
+                          <option value="sm">S</option>
+                          <option value="md">M</option>
+                          <option value="lg">L</option>
+                          <option value="xl">XL</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Stil</label>
+                        <select
+                          value={row.title_weight || 'bold'}
+                          onChange={(e) => {
+                            const updated = rows.map(r => r.row_order === row.row_order ? { ...r, title_weight: e.target.value } : r);
+                            setRows(updated);
+                          }}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        >
+                          <option value="normal">Normal</option>
+                          <option value="bold">Fet</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <ColorPicker
+                        label="Rubrik färg"
+                        value={row.title_color || '#000000'}
+                        onChange={(color) => {
+                          const updated = rows.map(r => r.row_order === row.row_order ? { ...r, title_color: color } : r);
+                          setRows(updated);
+                        }}
+                      />
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Placering</label>
+                        <select
+                          value={row.title_align || 'left'}
+                          onChange={(e) => {
+                            const updated = rows.map(r => r.row_order === row.row_order ? { ...r, title_align: e.target.value } : r);
+                            setRows(updated);
+                          }}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        >
+                          <option value="left">Vänster</option>
+                          <option value="center">Centrerad</option>
+                          <option value="right">Höger</option>
+                        </select>
+                      </div>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Text</label>
                       <textarea
@@ -462,6 +656,68 @@ export default function AboutUsEditor() {
                         rows={4}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                       />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Text typsnitt</label>
+                        <select
+                          value={row.text_font || 'poppins'}
+                          onChange={(e) => {
+                            const updated = rows.map(r => r.row_order === row.row_order ? { ...r, text_font: e.target.value } : r);
+                            setRows(updated);
+                          }}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        >
+                          <option value="lobster">Lobster</option>
+                          <option value="poppins">Poppins</option>
+                          <option value="roboto">Roboto</option>
+                          <option value="playfair">Playfair</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Text storlek</label>
+                        <select
+                          value={row.text_size || 'md'}
+                          onChange={(e) => {
+                            const updated = rows.map(r => r.row_order === row.row_order ? { ...r, text_size: e.target.value } : r);
+                            setRows(updated);
+                          }}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        >
+                          <option value="sm">S</option>
+                          <option value="md">M</option>
+                          <option value="lg">L</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <ColorPicker
+                        label="Text färg"
+                        value={row.text_color || '#000000'}
+                        onChange={(color) => {
+                          const updated = rows.map(r => r.row_order === row.row_order ? { ...r, text_color: color } : r);
+                          setRows(updated);
+                        }}
+                      />
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Text placering</label>
+                        <select
+                          value={row.text_align || 'left'}
+                          onChange={(e) => {
+                            const updated = rows.map(r => r.row_order === row.row_order ? { ...r, text_align: e.target.value } : r);
+                            setRows(updated);
+                          }}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                        >
+                          <option value="left">Vänster</option>
+                          <option value="center">Centrerad</option>
+                          <option value="right">Höger</option>
+                        </select>
+                      </div>
                     </div>
 
                     <ImageUpload
@@ -519,6 +775,14 @@ export default function AboutUsEditor() {
                 )}
               </div>
             ))}
+
+            <button
+              onClick={addRow}
+              className="w-full py-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 hover:border-[#a1c798] hover:text-[#a1c798] transition-colors flex items-center justify-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Lägg till ny rad
+            </button>
           </div>
         </AdminCard>
 
